@@ -1,0 +1,34 @@
+# System-specific files
+.DS_Store
+
+# Editor/IDE
+.idea/
+*.iml
+.vscode/
+
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Environment/Configuration
+.env*
+!.env.example
+
+# Build/test outputs
+tmp/
+bin/
+_test
+*.out
+coverage.*
+*.coverprofile
+profile.cov
+
+# Go workspace file
+go.work
+go.work.sum
+
+# Dependency directories (remove the comment below to include it)
+# vendor/
