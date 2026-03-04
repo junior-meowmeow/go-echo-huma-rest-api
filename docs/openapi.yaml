@@ -1,0 +1,852 @@
+components:
+  schemas:
+    BookMetadata:
+      additionalProperties: false
+      properties:
+        author:
+          description: Author name
+          type: string
+        genre:
+          description: Book genre(s)
+          type: string
+        isbn:
+          description: ISBN of the book
+          type: string
+      required:
+        - author
+        - isbn
+        - genre
+      type: object
+    BookOutput:
+      additionalProperties: false
+      properties:
+        coverImageFileId:
+          type: string
+        createdAt:
+          format: date-time
+          type: string
+        description:
+          type: string
+        id:
+          type: string
+        metadata:
+          $ref: "#/components/schemas/BookMetadata"
+        name:
+          type: string
+      required:
+        - id
+        - name
+        - metadata
+        - createdAt
+      type: object
+    BookPageMetadata:
+      additionalProperties: false
+      properties:
+        highlight:
+          description: Highlight content
+          type: string
+        isBookmarked:
+          description: Is the page bookmarked or not
+          type: boolean
+      required:
+        - isBookmarked
+        - highlight
+      type: object
+    BookPageOutput:
+      additionalProperties: false
+      properties:
+        attachedImageFileId:
+          type: string
+        bookId:
+          type: string
+        content:
+          type: string
+        id:
+          type: string
+        metadata:
+          $ref: "#/components/schemas/BookPageMetadata"
+        pageNumber:
+          format: int64
+          type: integer
+      required:
+        - id
+        - bookId
+        - pageNumber
+        - content
+        - metadata
+      type: object
+    CreateBookInputBody:
+      additionalProperties: false
+      properties:
+        coverImageFileId:
+          description: File ID for preview image
+          type: string
+        description:
+          description: Description
+          maxLength: 500
+          type: string
+        metadata:
+          $ref: "#/components/schemas/BookMetadata"
+          description: Metadata of the book
+        name:
+          description: books name
+          examples:
+            - New Book
+          maxLength: 100
+          type: string
+      required:
+        - name
+        - metadata
+      type: object
+    CreateBookOutputBody:
+      additionalProperties: false
+      properties:
+        id:
+          description: Created Book ID
+          type: string
+      required:
+        - id
+      type: object
+    CreateBookPageInputBody:
+      additionalProperties: false
+      properties:
+        attachedImageFileId:
+          description: File ID for the attached image
+          type: string
+        bookID:
+          description: Parent Book ID
+          type: string
+        content:
+          description: Page content
+          type: string
+        metadata:
+          $ref: "#/components/schemas/BookPageMetadata"
+          description: Metadata of the book page
+        pageNumber:
+          description: Page number
+          format: int64
+          type: integer
+      required:
+        - bookID
+        - pageNumber
+        - content
+        - metadata
+      type: object
+    CreateBookPageOutputBody:
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+      required:
+        - id
+      type: object
+    DownloadFileBody:
+      additionalProperties: false
+      properties:
+        downloadUrl:
+          type: string
+        expiresAt:
+          format: date-time
+          type: string
+        filename:
+          type: string
+      required:
+        - filename
+        - downloadUrl
+        - expiresAt
+      type: object
+    ErrorDetail:
+      additionalProperties: false
+      properties:
+        location:
+          description: Where the error occurred, e.g. 'body.items[3].tags' or 'path.thing-id'
+          type: string
+        message:
+          description: Error message text
+          type: string
+        value:
+          description: The value at the given location
+      type: object
+    ErrorModel:
+      additionalProperties: false
+      properties:
+        detail:
+          description: A human-readable explanation specific to this occurrence of the problem.
+          examples:
+            - Property foo is required but is missing.
+          type: string
+        errors:
+          description: Optional list of individual error details
+          items:
+            $ref: "#/components/schemas/ErrorDetail"
+          type:
+            - array
+            - "null"
+        instance:
+          description: A URI reference that identifies the specific occurrence of the problem.
+          examples:
+            - https://example.com/error-log/abc123
+          format: uri
+          type: string
+        status:
+          description: HTTP status code
+          examples:
+            - 400
+          format: int64
+          type: integer
+        title:
+          description: A short, human-readable summary of the problem type. This value should not change between occurrences of the error.
+          examples:
+            - Bad Request
+          type: string
+        type:
+          default: about:blank
+          description: A URI reference to human-readable documentation for the error.
+          examples:
+            - https://example.com/errors/example
+          format: uri
+          type: string
+      type: object
+    FileMetadata:
+      additionalProperties: false
+      properties:
+        contentType:
+          type: string
+        createdAt:
+          format: date-time
+          type: string
+        fileid:
+          type: string
+        filename:
+          type: string
+        size:
+          format: int64
+          type: integer
+      required:
+        - fileid
+        - filename
+        - size
+        - contentType
+        - createdAt
+      type: object
+    GetBookPagesOutputBody:
+      additionalProperties: false
+      properties:
+        data:
+          items:
+            $ref: "#/components/schemas/BookPageOutput"
+          type:
+            - array
+            - "null"
+      required:
+        - data
+      type: object
+    GetBooksOutputBody:
+      additionalProperties: false
+      properties:
+        data:
+          items:
+            $ref: "#/components/schemas/BookOutput"
+          type:
+            - array
+            - "null"
+      required:
+        - data
+      type: object
+    GreetingOutputBody:
+      additionalProperties: false
+      properties:
+        message:
+          description: Greeting message
+          examples:
+            - Hello, world!
+          type: string
+      required:
+        - message
+      type: object
+    HealthBody:
+      additionalProperties: false
+      properties:
+        status:
+          description: Status of the server
+          examples:
+            - ok
+          type: string
+      required:
+        - status
+      type: object
+    ListS3FilesBody:
+      additionalProperties: false
+      properties:
+        count:
+          description: Total number of files found
+          format: int64
+          type: integer
+        files:
+          description: List of file keys found in the S3 bucket
+          items:
+            type: string
+          type:
+            - array
+            - "null"
+      required:
+        - files
+        - count
+      type: object
+    ReviewInputBody:
+      additionalProperties: false
+      properties:
+        author:
+          description: Author of the review
+          examples:
+            - User
+          maxLength: 10
+          type: string
+        message:
+          description: Review message
+          examples:
+            - Lorem Ipsum
+          maxLength: 100
+          type: string
+        rating:
+          description: Rating from 1 to 5
+          examples:
+            - 2
+          format: int64
+          maximum: 5
+          minimum: 1
+          type: integer
+      required:
+        - author
+        - rating
+      type: object
+    ReviewOutput:
+      additionalProperties: false
+      properties:
+        author:
+          type: string
+        createdAt:
+          format: date-time
+          type: string
+        id:
+          type: string
+        message:
+          type: string
+        rating:
+          format: int64
+          type: integer
+      required:
+        - id
+        - author
+        - rating
+        - createdAt
+      type: object
+info:
+  title: API Reference Documentation
+  version: 1.0.1
+openapi: 3.1.0
+paths:
+  /greeting/{name}:
+    get:
+      description: Get a greeting for a person by name.
+      operationId: get-greeting
+      parameters:
+        - description: Name to greet
+          example: world
+          in: path
+          name: name
+          required: true
+          schema:
+            description: Name to greet
+            examples:
+              - world
+            maxLength: 30
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GreetingOutputBody"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Get a greeting
+      tags:
+        - Miscellaneous
+  /health:
+    get:
+      description: Get a health check status of the server.
+      operationId: health-check
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthBody"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Get health status
+      tags:
+        - Monitoring
+  /test-s3:
+    get:
+      description: Directly lists files from the S3 bucket to verify connectivity.
+      operationId: list-s3-files
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ListS3FilesBody"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Test S3 Connection
+      tags:
+        - Miscellaneous
+  /v1/book_pages:
+    get:
+      description: List book pages in a book.
+      operationId: list-book-pages-v1
+      parameters:
+        - description: Parent Book ID
+          explode: false
+          in: query
+          name: bookId
+          required: true
+          schema:
+            description: Parent Book ID
+            type: string
+        - description: If true, returns all book pages ignoring pagination
+          explode: false
+          in: query
+          name: all
+          required: true
+          schema:
+            default: false
+            description: If true, returns all book pages ignoring pagination
+            type: boolean
+        - description: Page number
+          explode: false
+          in: query
+          name: pageNumber
+          schema:
+            default: 1
+            description: Page number
+            format: int64
+            minimum: 1
+            type: integer
+        - description: Items per page
+          explode: false
+          in: query
+          name: pageSize
+          schema:
+            default: 50
+            description: Items per page
+            format: int64
+            maximum: 500
+            minimum: 1
+            type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetBookPagesOutputBody"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: List Book Pages (V1)
+      tags:
+        - Book Pages
+    post:
+      description: Create a new book page.
+      operationId: create-book-page-v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateBookPageInputBody"
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreateBookPageOutputBody"
+          description: Created
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Create Book Page (V1)
+      tags:
+        - Book Pages
+  /v1/book_pages/offset:
+    get:
+      description: Get N book pages before and after specified page number.
+      operationId: list-book-pages-offset-v1
+      parameters:
+        - description: Book ID to query
+          explode: false
+          in: query
+          name: bookId
+          required: true
+          schema:
+            description: Book ID to query
+            type: string
+        - description: Center page to be offset from
+          explode: false
+          in: query
+          name: centerPage
+          required: true
+          schema:
+            description: Center page to be offset from
+            format: int64
+            type: integer
+        - description: Number of frames before/after center
+          explode: false
+          in: query
+          name: offset
+          required: true
+          schema:
+            default: 10
+            description: Number of frames before/after center
+            format: int64
+            type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetBookPagesOutputBody"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: List Book Pages (Offset) (V1)
+      tags:
+        - Book Pages
+  /v1/book_pages/range:
+    get:
+      description: Get book pages within start/end page number.
+      operationId: list-book-pages-range-v1
+      parameters:
+        - description: Parent Book ID
+          explode: false
+          in: query
+          name: bookId
+          required: true
+          schema:
+            description: Parent Book ID
+            type: string
+        - description: Start page number
+          explode: false
+          in: query
+          name: startPage
+          required: true
+          schema:
+            description: Start page number
+            format: int64
+            type: integer
+        - description: End page number
+          explode: false
+          in: query
+          name: endPage
+          required: true
+          schema:
+            description: End page number
+            format: int64
+            type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetBookPagesOutputBody"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: List Book Pages (Time Range) (V1)
+      tags:
+        - Book Pages
+  /v1/book_pages/{id}:
+    get:
+      description: Get a book page by ID.
+      operationId: get-book-page-by-id-v1
+      parameters:
+        - description: Entry ID
+          in: path
+          name: id
+          required: true
+          schema:
+            description: Entry ID
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BookPageOutput"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Get Book Page (V1)
+      tags:
+        - Book Pages
+  /v1/books:
+    get:
+      description: Get a list of books.
+      operationId: list-books-v1
+      parameters:
+        - description: If true, returns all books ignoring pagination
+          explode: false
+          in: query
+          name: all
+          required: true
+          schema:
+            default: false
+            description: If true, returns all books ignoring pagination
+            type: boolean
+        - description: Page number
+          explode: false
+          in: query
+          name: pageNumber
+          schema:
+            default: 1
+            description: Page number
+            format: int64
+            minimum: 1
+            type: integer
+        - description: Items per page
+          explode: false
+          in: query
+          name: pageSize
+          schema:
+            default: 20
+            description: Items per page
+            format: int64
+            maximum: 100
+            minimum: 1
+            type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetBooksOutputBody"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: List Books (V1)
+      tags:
+        - Books
+    post:
+      description: Create a new book.
+      operationId: create-book-v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateBookInputBody"
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreateBookOutputBody"
+          description: Created
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Create Book (V1)
+      tags:
+        - Books
+  /v1/books/{id}:
+    get:
+      description: Get a book by ID.
+      operationId: get-book-by-id-v1
+      parameters:
+        - description: Book ID
+          in: path
+          name: id
+          required: true
+          schema:
+            description: Book ID
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BookOutput"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Get Book (V1)
+      tags:
+        - Books
+  /v1/files/download/{id}:
+    get:
+      description: Get a file from object storage.
+      operationId: get-s3-file-v1
+      parameters:
+        - description: file id
+          example: "123"
+          explode: false
+          in: query
+          name: id
+          schema:
+            description: file id
+            examples:
+              - "123"
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DownloadFileBody"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Get file from object storage (V1)
+      tags:
+        - Files
+  /v1/files/upload:
+    post:
+      description: Upload a file to object storage.
+      operationId: upload-s3-file-v1
+      requestBody:
+        content:
+          multipart/form-data:
+            encoding:
+              file:
+                contentType: application/octet-stream
+              objectBaseKey:
+                contentType: text/plain
+            schema:
+              properties:
+                file:
+                  contentEncoding: binary
+                  contentMediaType: application/octet-stream
+                  description: The file content to upload
+                  format: binary
+                  type: string
+                objectBaseKey:
+                  description: Base object key in object storage
+                  type: string
+              required:
+                - file
+              type: object
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FileMetadata"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Upload file to object storage (V1)
+      tags:
+        - Files
+  /v1/reviews:
+    get:
+      description: Get all reviews from database.
+      operationId: get-reviews-v1
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: "#/components/schemas/ReviewOutput"
+                type:
+                  - array
+                  - "null"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Get all reviews (V1)
+      tags:
+        - Reviews
+    post:
+      description: Post a new review to database.
+      operationId: post-review-v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReviewInputBody"
+        required: true
+      responses:
+        "201":
+          description: Created
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Post new review (V1)
+      tags:
+        - Reviews
+servers:
+  - description: Base Server
+    url: ""
