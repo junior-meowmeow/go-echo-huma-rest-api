@@ -1,4 +1,4 @@
-package mongo_repository_test
+package mongo_repositories_test
 
 import (
 	"context"
@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/entities"
-	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/repository/mongo_repository"
+	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/repositories/mongo_repositories"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -16,7 +16,7 @@ func TestMongoReviewsRepository(t *testing.T) {
 	db := setupMongoDatabase(t)
 	ctx := context.Background()
 
-	repo := mongo_repository.NewMongoReviewsRepository(db)
+	repo := mongo_repositories.NewMongoReviewsRepository(db)
 
 	t.Run("Create and Get Single Review", func(t *testing.T) {
 		cleanCollection(t, repo.Collection)

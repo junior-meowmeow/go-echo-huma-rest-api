@@ -1,12 +1,12 @@
 package handlers
 
-import "github.com/junior-meowmeow/go-echo-huma-rest-api/internal/repository"
+import "github.com/junior-meowmeow/go-echo-huma-rest-api/internal/repositories"
 
 type Handler struct {
-	*repository.Repositories
+	*repositories.Repositories
 }
 
-func NewHandler(repos *repository.Repositories) *Handler {
+func NewHandler(repos *repositories.Repositories) *Handler {
 	return &Handler{
 		Repositories: repos,
 	}

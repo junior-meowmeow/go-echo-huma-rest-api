@@ -11,7 +11,7 @@ import (
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/config"
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/db"
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/handlers"
-	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/repository"
+	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/repositories"
 
 	"github.com/danielgtaylor/huma/v2/humacli"
 )
@@ -40,7 +40,7 @@ func main() {
 	// Initialize Repositories
 	mongoDB := mongoClient.Database(cfg.DBName)
 
-	repositories := repository.NewRepositories(mongoDB, s3Client, cfg.S3Bucket)
+	repositories := repositories.NewRepositories(mongoDB, s3Client, cfg.S3Bucket)
 
 	// Initialize Handler
 	h := handlers.NewHandler(repositories)

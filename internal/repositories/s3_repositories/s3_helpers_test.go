@@ -1,4 +1,4 @@
-package s3_repository_test
+package s3_repositories_test
 
 import (
 	"context"

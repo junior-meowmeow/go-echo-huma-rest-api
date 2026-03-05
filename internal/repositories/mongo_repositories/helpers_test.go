@@ -1,4 +1,4 @@
-package mongo_repository_test
+package mongo_repositories_test
 
 import (
 	"context"
