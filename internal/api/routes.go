@@ -18,7 +18,7 @@ func RegisterRoutes(api huma.API, h *handlers.Handler) {
 		Description:   "Get a health check status of the server.",
 		Tags:          []string{"Monitoring"},
 		DefaultStatus: 200,
-	}, h.GetHealthStatus)
+	}, h.Health.GetHealthStatus)
 
 	// GET /greeting/{name}
 	huma.Register(api, huma.Operation{
@@ -28,7 +28,7 @@ func RegisterRoutes(api huma.API, h *handlers.Handler) {
 		Summary:     "Get a greeting",
 		Description: "Get a greeting for a person by name.",
 		Tags:        []string{"Miscellaneous"},
-	}, h.GetGreeting)
+	}, h.Greeting.GetGreeting)
 
 	// GET /test-s3
 	huma.Register(api, huma.Operation{
@@ -38,5 +38,5 @@ func RegisterRoutes(api huma.API, h *handlers.Handler) {
 		Summary:     "Test S3 Connection",
 		Description: "Directly lists files from the S3 bucket to verify connectivity.",
 		Tags:        []string{"Miscellaneous"},
-	}, h.ListS3Files)
+	}, h.Files.ListS3Files)
 }

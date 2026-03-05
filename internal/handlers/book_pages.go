@@ -7,16 +7,37 @@ import (
 
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/entities"
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/models"
+	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/repositories/mongo_repositories"
 
 	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
-func (h *Handler) CreateBookPage(ctx context.Context, input *models.CreateBookPageInput) (*models.CreateBookPageOutput, error) {
+type BookPagesHandler interface {
+	CreateBookPage(ctx context.Context, input *models.CreateBookPageInput) (*models.CreateBookPageOutput, error)
+	GetBookPages(ctx context.Context, input *models.GetBookPagesInput) (*models.GetBookPagesOutput, error)
+	GetBookPagesByRange(ctx context.Context, input *models.GetBookPagesRangeInput) (*models.GetBookPagesOutput, error)
+	GetBookPagesByOffset(ctx context.Context, input *models.GetBookPagesOffsetInput) (*models.GetBookPagesOutput, error)
+	GetBookPageByID(ctx context.Context, input *models.GetBookPageByIDInput) (*models.GetBookPageByIDOutput, error)
+}
+
+type bookPagesHandler struct {
+	BooksRepository     mongo_repositories.BooksRepository
+	BookPagesRepository mongo_repositories.BookPagesRepository
+}
+
+func NewBookPagesHandler(booksRepo mongo_repositories.BooksRepository, bookPagesRepo mongo_repositories.BookPagesRepository) *bookPagesHandler {
+	return &bookPagesHandler{
+		BooksRepository:     booksRepo,
+		BookPagesRepository: bookPagesRepo,
+	}
+}
+
+func (h *bookPagesHandler) CreateBookPage(ctx context.Context, input *models.CreateBookPageInput) (*models.CreateBookPageOutput, error) {
 	bookOID, err := bson.ObjectIDFromHex(input.Body.BookID)
 	if err != nil {
 		return nil, fmt.Errorf("invalid book ID format: %w", err)
 	}
-	_, err = h.Books.GetBookByID(ctx, input.Body.BookID)
+	_, err = h.BooksRepository.GetBookByID(ctx, input.Body.BookID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch book info: %w", err)
 	}
@@ -37,7 +58,7 @@ func (h *Handler) CreateBookPage(ctx context.Context, input *models.CreateBookPa
 		ModifiedAt:          currentTime,
 	}
 
-	id, err := h.BookPages.CreateBookPage(ctx, record)
+	id, err := h.BookPagesRepository.CreateBookPage(ctx, record)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create book page: %w", err)
 	}
@@ -51,14 +72,14 @@ func (h *Handler) CreateBookPage(ctx context.Context, input *models.CreateBookPa
 	return resp, nil
 }
 
-func (h *Handler) GetBookPages(ctx context.Context, input *models.GetBookPagesInput) (*models.GetBookPagesOutput, error) {
+func (h *bookPagesHandler) GetBookPages(ctx context.Context, input *models.GetBookPagesInput) (*models.GetBookPagesOutput, error) {
 	var records []entities.BookPage
 	var err error
 
 	if input.GetAll {
-		records, err = h.BookPages.GetBookPagesByBookID(ctx, input.BookID)
+		records, err = h.BookPagesRepository.GetBookPagesByBookID(ctx, input.BookID)
 	} else {
-		records, err = h.BookPages.GetBookpagesByBookIDWithPagination(ctx, input.BookID, input.PageSize, input.PageNumber)
+		records, err = h.BookPagesRepository.GetBookpagesByBookIDWithPagination(ctx, input.BookID, input.PageSize, input.PageNumber)
 	}
 
 	if err != nil {
@@ -76,8 +97,8 @@ func (h *Handler) GetBookPages(ctx context.Context, input *models.GetBookPagesIn
 	return resp, nil
 }
 
-func (h *Handler) GetBookPagesByRange(ctx context.Context, input *models.GetBookPagesRangeInput) (*models.GetBookPagesOutput, error) {
-	records, err := h.BookPages.GetBookpagesByPageRange(ctx, input.BookID, input.StartPage, input.EndPage)
+func (h *bookPagesHandler) GetBookPagesByRange(ctx context.Context, input *models.GetBookPagesRangeInput) (*models.GetBookPagesOutput, error) {
+	records, err := h.BookPagesRepository.GetBookpagesByPageRange(ctx, input.BookID, input.StartPage, input.EndPage)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch book pages by range: %w", err)
 	}
@@ -93,8 +114,8 @@ func (h *Handler) GetBookPagesByRange(ctx context.Context, input *models.GetBook
 	return resp, nil
 }
 
-func (h *Handler) GetBookPagesByOffset(ctx context.Context, input *models.GetBookPagesOffsetInput) (*models.GetBookPagesOutput, error) {
-	records, err := h.BookPages.GetBookpagesAroundPageNumber(ctx, input.BookID, input.CenterPage, input.Offset)
+func (h *bookPagesHandler) GetBookPagesByOffset(ctx context.Context, input *models.GetBookPagesOffsetInput) (*models.GetBookPagesOutput, error) {
+	records, err := h.BookPagesRepository.GetBookpagesAroundPageNumber(ctx, input.BookID, input.CenterPage, input.Offset)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch book pages by offset: %w", err)
 	}
@@ -110,8 +131,8 @@ func (h *Handler) GetBookPagesByOffset(ctx context.Context, input *models.GetBoo
 	return resp, nil
 }
 
-func (h *Handler) GetBookPageByID(ctx context.Context, input *models.GetBookPageByIDInput) (*models.GetBookPageByIDOutput, error) {
-	record, err := h.BookPages.GetBookPageByID(ctx, input.ID)
+func (h *bookPagesHandler) GetBookPageByID(ctx context.Context, input *models.GetBookPageByIDInput) (*models.GetBookPageByIDOutput, error) {
+	record, err := h.BookPagesRepository.GetBookPageByID(ctx, input.ID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch book page: %w", err)
 	}

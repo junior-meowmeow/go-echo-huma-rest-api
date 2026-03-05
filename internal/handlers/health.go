@@ -6,7 +6,18 @@ import (
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/models"
 )
 
-func (h *Handler) GetHealthStatus(ctx context.Context, _ *struct{}) (*models.HealthOutput, error) {
+type HealthHandler interface {
+	GetHealthStatus(ctx context.Context, _ *struct{}) (*models.HealthOutput, error)
+}
+
+type healthHandler struct {
+}
+
+func NewHealthHandler() *healthHandler {
+	return &healthHandler{}
+}
+
+func (h *healthHandler) GetHealthStatus(ctx context.Context, _ *struct{}) (*models.HealthOutput, error) {
 	resp := &models.HealthOutput{
 		Body: models.HealthBody{
 			Status: "ok",

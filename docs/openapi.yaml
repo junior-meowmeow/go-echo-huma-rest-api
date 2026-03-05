@@ -343,7 +343,7 @@ components:
       type: object
 info:
   title: API Reference Documentation
-  version: 1.0.1
+  version: 1.0.0
 openapi: 3.1.0
 paths:
   /greeting/{name}:

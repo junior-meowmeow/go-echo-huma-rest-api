@@ -7,7 +7,18 @@ import (
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/models"
 )
 
-func (h *Handler) GetGreeting(ctx context.Context, input *models.GreetingInput) (*models.GreetingOutput, error) {
+type GreetingHandler interface {
+	GetGreeting(ctx context.Context, input *models.GreetingInput) (*models.GreetingOutput, error)
+}
+
+type greetingHandler struct {
+}
+
+func NewGreetingHandler() *greetingHandler {
+	return &greetingHandler{}
+}
+
+func (h *greetingHandler) GetGreeting(ctx context.Context, input *models.GreetingInput) (*models.GreetingOutput, error) {
 	resp := &models.GreetingOutput{
 		Body: models.GreetingOutputBody{
 			Message: fmt.Sprintf("Hello, %s!", input.Name),

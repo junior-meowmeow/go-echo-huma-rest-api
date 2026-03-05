@@ -7,9 +7,26 @@ import (
 
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/entities"
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/models"
+	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/repositories/mongo_repositories"
 )
 
-func (h *Handler) CreateBook(ctx context.Context, input *models.CreateBookInput) (*models.CreateBookOutput, error) {
+type BooksHandler interface {
+	CreateBook(ctx context.Context, input *models.CreateBookInput) (*models.CreateBookOutput, error)
+	GetBooks(ctx context.Context, input *models.GetBooksInput) (*models.GetBooksOutput, error)
+	GetBookByID(ctx context.Context, input *models.GetBookByIDInput) (*models.GetBookByIDOutput, error)
+}
+
+type booksHandler struct {
+	BooksRepository mongo_repositories.BooksRepository
+}
+
+func NewBooksHandler(booksRepo mongo_repositories.BooksRepository) *booksHandler {
+	return &booksHandler{
+		BooksRepository: booksRepo,
+	}
+}
+
+func (h *booksHandler) CreateBook(ctx context.Context, input *models.CreateBookInput) (*models.CreateBookOutput, error) {
 	currentTime := time.Now()
 
 	record := &entities.Book{
@@ -25,7 +42,7 @@ func (h *Handler) CreateBook(ctx context.Context, input *models.CreateBookInput)
 		ModifiedAt:       currentTime,
 	}
 
-	id, err := h.Books.CreateBook(ctx, record)
+	id, err := h.BooksRepository.CreateBook(ctx, record)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create book: %w", err)
 	}
@@ -40,14 +57,14 @@ func (h *Handler) CreateBook(ctx context.Context, input *models.CreateBookInput)
 
 }
 
-func (h *Handler) GetBooks(ctx context.Context, input *models.GetBooksInput) (*models.GetBooksOutput, error) {
+func (h *booksHandler) GetBooks(ctx context.Context, input *models.GetBooksInput) (*models.GetBooksOutput, error) {
 	var records []entities.Book
 	var err error
 
 	if input.GetAll {
-		records, err = h.Books.GetAllBooks(ctx)
+		records, err = h.BooksRepository.GetAllBooks(ctx)
 	} else {
-		records, err = h.Books.GetBooksWithPagination(ctx, input.PageSize, input.PageNumber)
+		records, err = h.BooksRepository.GetBooksWithPagination(ctx, input.PageSize, input.PageNumber)
 	}
 
 	if err != nil {
@@ -79,8 +96,8 @@ func (h *Handler) GetBooks(ctx context.Context, input *models.GetBooksInput) (*m
 	return resp, nil
 }
 
-func (h *Handler) GetBookByID(ctx context.Context, input *models.GetBookByIDInput) (*models.GetBookByIDOutput, error) {
-	record, err := h.Books.GetBookByID(ctx, input.ID)
+func (h *booksHandler) GetBookByID(ctx context.Context, input *models.GetBookByIDInput) (*models.GetBookByIDOutput, error) {
+	record, err := h.BooksRepository.GetBookByID(ctx, input.ID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch book: %w", err)
 	}

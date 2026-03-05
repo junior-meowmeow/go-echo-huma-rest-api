@@ -8,11 +8,31 @@ import (
 
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/entities"
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/models"
+	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/repositories/mongo_repositories"
+	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/repositories/s3_repositories"
 
 	"github.com/google/uuid"
 )
 
-func (h *Handler) UploadFile(ctx context.Context, input *models.UploadFileInput) (*models.UploadFileOutput, error) {
+type FilesHandler interface {
+	UploadFile(ctx context.Context, input *models.UploadFileInput) (*models.UploadFileOutput, error)
+	GetFileDownloadLink(ctx context.Context, input *models.GetFileDownloadLinkInput) (*models.GetFileDownloadLinkOutput, error)
+	ListS3Files(ctx context.Context, input *struct{}) (*models.ListS3FilesOutput, error)
+}
+
+type filesHandler struct {
+	FileMetadataRepository mongo_repositories.FileMetadataRepository
+	ObjectStorage          s3_repositories.ObjectStorage
+}
+
+func NewFilesHandler(fileMetadataRepo mongo_repositories.FileMetadataRepository, objectStorage s3_repositories.ObjectStorage) *filesHandler {
+	return &filesHandler{
+		FileMetadataRepository: fileMetadataRepo,
+		ObjectStorage:          objectStorage,
+	}
+}
+
+func (h *filesHandler) UploadFile(ctx context.Context, input *models.UploadFileInput) (*models.UploadFileOutput, error) {
 	formData := input.RawBody.Data()
 	uploadedFile := formData.File
 	ext := filepath.Ext(uploadedFile.Filename)
@@ -54,7 +74,7 @@ func (h *Handler) UploadFile(ctx context.Context, input *models.UploadFileInput)
 		ModifiedAt:  currentTime,
 	}
 
-	id, err := h.FileMetadata.SaveFileMetadata(ctx, record)
+	id, err := h.FileMetadataRepository.SaveFileMetadata(ctx, record)
 	if err != nil {
 		return nil, fmt.Errorf("failed to save metadata: %w", err)
 	}
@@ -72,8 +92,8 @@ func (h *Handler) UploadFile(ctx context.Context, input *models.UploadFileInput)
 	return resp, nil
 }
 
-func (h *Handler) GetFileDownloadLink(ctx context.Context, input *models.GetFileDownloadLinkInput) (*models.GetFileDownloadLinkOutput, error) {
-	record, err := h.FileMetadata.GetFileMetadataByID(ctx, input.FileID)
+func (h *filesHandler) GetFileDownloadLink(ctx context.Context, input *models.GetFileDownloadLinkInput) (*models.GetFileDownloadLinkOutput, error) {
+	record, err := h.FileMetadataRepository.GetFileMetadataByID(ctx, input.FileID)
 	if err != nil {
 		return nil, fmt.Errorf("file not found: %w", err)
 	}
@@ -97,7 +117,7 @@ func (h *Handler) GetFileDownloadLink(ctx context.Context, input *models.GetFile
 	return resp, nil
 }
 
-func (h *Handler) ListS3Files(ctx context.Context, _ *struct{}) (*models.ListS3FilesOutput, error) {
+func (h *filesHandler) ListS3Files(ctx context.Context, _ *struct{}) (*models.ListS3FilesOutput, error) {
 	fileKeys, err := h.ObjectStorage.ListFiles(ctx, 20)
 	if err != nil {
 		return nil, fmt.Errorf("failed to list S3 files: %w", err)

@@ -37,7 +37,7 @@ func RegisterDocumentations(router *echo.Echo) {
 }
 
 func CreateHumaConfig() huma.Config {
-	humaConfig := huma.DefaultConfig("API Reference Documentation", "1.0.1")
+	humaConfig := huma.DefaultConfig("API Reference Documentation", "1.0.0")
 	humaConfig.DocsPath = ""
 	humaConfig.OpenAPI.Servers = []*huma.Server{
 		{

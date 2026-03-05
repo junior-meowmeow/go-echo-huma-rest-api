@@ -29,7 +29,7 @@ func RegisterRoutes(api huma.API, h *handlers.Handler) {
 		Description:   "Post a new review to database.",
 		Tags:          []string{"Reviews"},
 		DefaultStatus: http.StatusCreated,
-	}, h.PostReview)
+	}, h.Reviews.PostReview)
 
 	// GET /reviews
 	huma.Register(api, huma.Operation{
@@ -39,7 +39,7 @@ func RegisterRoutes(api huma.API, h *handlers.Handler) {
 		Summary:     "Get all reviews",
 		Description: "Get all reviews from database.",
 		Tags:        []string{"Reviews"},
-	}, h.GetReviews)
+	}, h.Reviews.GetReviews)
 
 	// POST /files/upload
 	huma.Register(api, huma.Operation{
@@ -49,7 +49,7 @@ func RegisterRoutes(api huma.API, h *handlers.Handler) {
 		Summary:     "Upload file to object storage",
 		Description: "Upload a file to object storage.",
 		Tags:        []string{"Files"},
-	}, h.UploadFile)
+	}, h.Files.UploadFile)
 
 	// GET /files/download/{id}
 	huma.Register(api, huma.Operation{
@@ -59,7 +59,7 @@ func RegisterRoutes(api huma.API, h *handlers.Handler) {
 		Summary:     "Get file from object storage",
 		Description: "Get a file from object storage.",
 		Tags:        []string{"Files"},
-	}, h.GetFileDownloadLink)
+	}, h.Files.GetFileDownloadLink)
 
 	// POST /books
 	huma.Register(api, huma.Operation{
@@ -70,7 +70,7 @@ func RegisterRoutes(api huma.API, h *handlers.Handler) {
 		Description:   "Create a new book.",
 		Tags:          []string{"Books"},
 		DefaultStatus: http.StatusCreated,
-	}, h.CreateBook)
+	}, h.Books.CreateBook)
 
 	// GET /books
 	huma.Register(api, huma.Operation{
@@ -80,7 +80,7 @@ func RegisterRoutes(api huma.API, h *handlers.Handler) {
 		Summary:     "List Books",
 		Description: "Get a list of books.",
 		Tags:        []string{"Books"},
-	}, h.GetBooks)
+	}, h.Books.GetBooks)
 
 	// GET /books/{id}
 	huma.Register(api, huma.Operation{
@@ -90,7 +90,7 @@ func RegisterRoutes(api huma.API, h *handlers.Handler) {
 		Summary:     "Get Book",
 		Description: "Get a book by ID.",
 		Tags:        []string{"Books"},
-	}, h.GetBookByID)
+	}, h.Books.GetBookByID)
 
 	// POST /book_pages
 	huma.Register(api, huma.Operation{
@@ -101,7 +101,7 @@ func RegisterRoutes(api huma.API, h *handlers.Handler) {
 		Description:   "Create a new book page.",
 		Tags:          []string{"Book Pages"},
 		DefaultStatus: http.StatusCreated,
-	}, h.CreateBookPage)
+	}, h.BookPages.CreateBookPage)
 
 	// GET /book_pages
 	huma.Register(api, huma.Operation{
@@ -111,7 +111,7 @@ func RegisterRoutes(api huma.API, h *handlers.Handler) {
 		Summary:     "List Book Pages",
 		Description: "List book pages in a book.",
 		Tags:        []string{"Book Pages"},
-	}, h.GetBookPages)
+	}, h.BookPages.GetBookPages)
 
 	// GET /book_pages/range
 	huma.Register(api, huma.Operation{
@@ -121,7 +121,7 @@ func RegisterRoutes(api huma.API, h *handlers.Handler) {
 		Summary:     "List Book Pages (Time Range)",
 		Description: "Get book pages within start/end page number.",
 		Tags:        []string{"Book Pages"},
-	}, h.GetBookPagesByRange)
+	}, h.BookPages.GetBookPagesByRange)
 
 	// GET /book_pages/offset
 	huma.Register(api, huma.Operation{
@@ -131,7 +131,7 @@ func RegisterRoutes(api huma.API, h *handlers.Handler) {
 		Summary:     "List Book Pages (Offset)",
 		Description: "Get N book pages before and after specified page number.",
 		Tags:        []string{"Book Pages"},
-	}, h.GetBookPagesByOffset)
+	}, h.BookPages.GetBookPagesByOffset)
 
 	// GET /book_pages/{id}
 	huma.Register(api, huma.Operation{
@@ -141,5 +141,5 @@ func RegisterRoutes(api huma.API, h *handlers.Handler) {
 		Summary:     "Get Book Page",
 		Description: "Get a book page by ID.",
 		Tags:        []string{"Book Pages"},
-	}, h.GetBookPageByID)
+	}, h.BookPages.GetBookPageByID)
 }
