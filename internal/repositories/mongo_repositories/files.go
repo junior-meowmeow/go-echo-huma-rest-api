@@ -15,17 +15,17 @@ type FileMetadataRepository interface {
 	GetFileMetadataByID(ctx context.Context, fileID string) (*entities.FileMetadata, error)
 }
 
-type MongoFilesRepository struct {
+type fileMetadataRepository struct {
 	Collection *mongo.Collection
 }
 
-func NewMongoFilesRepository(db *mongo.Database) *MongoFilesRepository {
-	return &MongoFilesRepository{
+func NewFileMetadataRepository(db *mongo.Database) *fileMetadataRepository {
+	return &fileMetadataRepository{
 		Collection: db.Collection("file_metadata"),
 	}
 }
 
-func (r *MongoFilesRepository) SaveFileMetadata(ctx context.Context, record *entities.FileMetadata) (string, error) {
+func (r *fileMetadataRepository) SaveFileMetadata(ctx context.Context, record *entities.FileMetadata) (string, error) {
 	res, err := r.Collection.InsertOne(ctx, record)
 	if err != nil {
 		return "", err
@@ -34,7 +34,7 @@ func (r *MongoFilesRepository) SaveFileMetadata(ctx context.Context, record *ent
 	return res.InsertedID.(bson.ObjectID).Hex(), nil
 }
 
-func (r *MongoFilesRepository) GetFileMetadataByID(ctx context.Context, fileID string) (*entities.FileMetadata, error) {
+func (r *fileMetadataRepository) GetFileMetadataByID(ctx context.Context, fileID string) (*entities.FileMetadata, error) {
 	oid, err := bson.ObjectIDFromHex(fileID)
 	if err != nil {
 		return nil, fmt.Errorf("invalid ID format")

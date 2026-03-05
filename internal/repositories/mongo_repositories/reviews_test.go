@@ -16,7 +16,7 @@ func TestMongoReviewsRepository(t *testing.T) {
 	db := setupMongoDatabase(t)
 	ctx := context.Background()
 
-	repo := mongo_repositories.NewMongoReviewsRepository(db)
+	repo := mongo_repositories.NewReviewsRepository(db)
 
 	t.Run("Create and Get Single Review", func(t *testing.T) {
 		cleanCollection(t, repo.Collection)

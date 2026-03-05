@@ -16,7 +16,7 @@ func TestMongoFilesRepository(t *testing.T) {
 	db := setupMongoDatabase(t)
 	ctx := context.Background()
 
-	repo := mongo_repositories.NewMongoFilesRepository(db)
+	repo := mongo_repositories.NewFileMetadataRepository(db)
 
 	t.Run("Save and Get File Metadata", func(t *testing.T) {
 		cleanCollection(t, repo.Collection)

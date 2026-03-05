@@ -15,22 +15,22 @@ type ReviewsRepository interface {
 	GetReviews(ctx context.Context, limit int64) ([]entities.Review, error)
 }
 
-type MongoReviewsRepository struct {
+type reviewsRepository struct {
 	Collection *mongo.Collection
 }
 
-func NewMongoReviewsRepository(db *mongo.Database) *MongoReviewsRepository {
-	return &MongoReviewsRepository{
+func NewReviewsRepository(db *mongo.Database) *reviewsRepository {
+	return &reviewsRepository{
 		Collection: db.Collection("reviews"),
 	}
 }
 
-func (r *MongoReviewsRepository) CreateReview(ctx context.Context, record *entities.Review) error {
+func (r *reviewsRepository) CreateReview(ctx context.Context, record *entities.Review) error {
 	_, err := r.Collection.InsertOne(ctx, record)
 	return err
 }
 
-func (r *MongoReviewsRepository) GetReviews(ctx context.Context, limit int64) ([]entities.Review, error) {
+func (r *reviewsRepository) GetReviews(ctx context.Context, limit int64) ([]entities.Review, error) {
 	opts := options.Find().
 		SetLimit(limit).
 		SetSort(bson.D{{Key: "createdAt", Value: -1}})

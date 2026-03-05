@@ -19,22 +19,22 @@ type ObjectStorage interface {
 	ListFiles(ctx context.Context, maxKeys int) ([]string, error)
 }
 
-type S3Repository struct {
+type s3Repository struct {
 	Client        *s3.Client
 	PresignClient *s3.PresignClient
 	BucketName    string
 }
 
-func NewS3Repository(client *s3.Client, bucketName string) *S3Repository {
+func NewS3Repository(client *s3.Client, bucketName string) *s3Repository {
 	presignClient := s3.NewPresignClient(client)
-	return &S3Repository{
+	return &s3Repository{
 		Client:        client,
 		PresignClient: presignClient,
 		BucketName:    bucketName,
 	}
 }
 
-func (r *S3Repository) UploadFile(ctx context.Context, key string, file multipart.File, size int64, contentType string) error {
+func (r *s3Repository) UploadFile(ctx context.Context, key string, file multipart.File, size int64, contentType string) error {
 	_, err := r.Client.PutObject(ctx, &s3.PutObjectInput{
 		Bucket:        aws.String(r.BucketName),
 		Key:           aws.String(key),
@@ -45,7 +45,7 @@ func (r *S3Repository) UploadFile(ctx context.Context, key string, file multipar
 	return err
 }
 
-func (r *S3Repository) GetPresignedDownloadURL(ctx context.Context, key string, filename string, duration time.Duration) (string, error) {
+func (r *s3Repository) GetPresignedDownloadURL(ctx context.Context, key string, filename string, duration time.Duration) (string, error) {
 	req, err := r.PresignClient.PresignGetObject(ctx, &s3.GetObjectInput{
 		Bucket:                     aws.String(r.BucketName),
 		Key:                        aws.String(key),
@@ -59,7 +59,7 @@ func (r *S3Repository) GetPresignedDownloadURL(ctx context.Context, key string, 
 	return req.URL, nil
 }
 
-func (r *S3Repository) CheckFileExists(ctx context.Context, key string) (bool, error) {
+func (r *s3Repository) CheckFileExists(ctx context.Context, key string) (bool, error) {
 	_, err := r.Client.HeadObject(ctx, &s3.HeadObjectInput{
 		Bucket: aws.String(r.BucketName),
 		Key:    aws.String(key),
@@ -80,7 +80,7 @@ func (r *S3Repository) CheckFileExists(ctx context.Context, key string) (bool, e
 	return true, nil
 }
 
-func (r *S3Repository) ListFiles(ctx context.Context, maxKeys int) ([]string, error) {
+func (r *s3Repository) ListFiles(ctx context.Context, maxKeys int) ([]string, error) {
 	output, err := r.Client.ListObjectsV2(ctx, &s3.ListObjectsV2Input{
 		Bucket:  aws.String(r.BucketName),
 		MaxKeys: aws.Int32(int32(maxKeys)),

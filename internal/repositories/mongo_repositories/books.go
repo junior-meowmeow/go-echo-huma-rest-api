@@ -18,17 +18,17 @@ type BooksRepository interface {
 	GetBooksWithPagination(ctx context.Context, pageSize int64, pageNumber int64) ([]entities.Book, error)
 }
 
-type MongoBooksRepository struct {
+type booksRepository struct {
 	Collection *mongo.Collection
 }
 
-func NewMongoBooksRepository(db *mongo.Database) *MongoBooksRepository {
-	return &MongoBooksRepository{
+func NewBooksRepository(db *mongo.Database) *booksRepository {
+	return &booksRepository{
 		Collection: db.Collection("books"),
 	}
 }
 
-func (r *MongoBooksRepository) CreateBook(ctx context.Context, record *entities.Book) (string, error) {
+func (r *booksRepository) CreateBook(ctx context.Context, record *entities.Book) (string, error) {
 	res, err := r.Collection.InsertOne(ctx, record)
 	if err != nil {
 		return "", err
@@ -36,7 +36,7 @@ func (r *MongoBooksRepository) CreateBook(ctx context.Context, record *entities.
 	return res.InsertedID.(bson.ObjectID).Hex(), nil
 }
 
-func (r *MongoBooksRepository) GetBookByID(ctx context.Context, id string) (*entities.Book, error) {
+func (r *booksRepository) GetBookByID(ctx context.Context, id string) (*entities.Book, error) {
 	oid, err := bson.ObjectIDFromHex(id)
 	if err != nil {
 		return nil, fmt.Errorf("invalid book ID format")
@@ -54,7 +54,7 @@ func (r *MongoBooksRepository) GetBookByID(ctx context.Context, id string) (*ent
 	return &result, nil
 }
 
-func (r *MongoBooksRepository) GetAllBooks(ctx context.Context) ([]entities.Book, error) {
+func (r *booksRepository) GetAllBooks(ctx context.Context) ([]entities.Book, error) {
 	opts := options.Find().
 		SetSort(bson.D{{Key: "createdAt", Value: -1}})
 
@@ -71,7 +71,7 @@ func (r *MongoBooksRepository) GetAllBooks(ctx context.Context) ([]entities.Book
 	return results, nil
 }
 
-func (r *MongoBooksRepository) GetBooksWithPagination(ctx context.Context, pageSize int64, pageNumber int64) ([]entities.Book, error) {
+func (r *booksRepository) GetBooksWithPagination(ctx context.Context, pageSize int64, pageNumber int64) ([]entities.Book, error) {
 	skip := max((pageNumber-1)*pageSize, 0)
 
 	opts := options.Find().

@@ -18,10 +18,10 @@ type Repositories struct {
 
 func NewRepositories(mongoDB *mongo.Database, s3Client *s3.Client, bucketName string) *Repositories {
 	return &Repositories{
-		Reviews:       mongo_repositories.NewMongoReviewsRepository(mongoDB),
-		FileMetadata:  mongo_repositories.NewMongoFilesRepository(mongoDB),
-		Books:         mongo_repositories.NewMongoBooksRepository(mongoDB),
-		BookPages:     mongo_repositories.NewMongoBookPagesRepository(mongoDB),
+		Reviews:       mongo_repositories.NewReviewsRepository(mongoDB),
+		FileMetadata:  mongo_repositories.NewFileMetadataRepository(mongoDB),
+		Books:         mongo_repositories.NewBooksRepository(mongoDB),
+		BookPages:     mongo_repositories.NewBookPagesRepository(mongoDB),
 		ObjectStorage: s3_repositories.NewS3Repository(s3Client, bucketName),
 	}
 }

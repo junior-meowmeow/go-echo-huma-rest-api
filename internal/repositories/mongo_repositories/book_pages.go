@@ -20,17 +20,17 @@ type BookPagesRepository interface {
 	GetBookpagesAroundPageNumber(ctx context.Context, bookID string, centerPage int64, offset int64) ([]entities.BookPage, error)
 }
 
-type MongoBookPagesRepository struct {
+type bookPagesRepository struct {
 	Collection *mongo.Collection
 }
 
-func NewMongoBookPagesRepository(db *mongo.Database) *MongoBookPagesRepository {
-	return &MongoBookPagesRepository{
+func NewBookPagesRepository(db *mongo.Database) *bookPagesRepository {
+	return &bookPagesRepository{
 		Collection: db.Collection("book_pages"),
 	}
 }
 
-func (r *MongoBookPagesRepository) CreateBookPage(ctx context.Context, record *entities.BookPage) (string, error) {
+func (r *bookPagesRepository) CreateBookPage(ctx context.Context, record *entities.BookPage) (string, error) {
 	res, err := r.Collection.InsertOne(ctx, record)
 	if err != nil {
 		return "", err
@@ -38,7 +38,7 @@ func (r *MongoBookPagesRepository) CreateBookPage(ctx context.Context, record *e
 	return res.InsertedID.(bson.ObjectID).Hex(), nil
 }
 
-func (r *MongoBookPagesRepository) GetBookPageByID(ctx context.Context, id string) (*entities.BookPage, error) {
+func (r *bookPagesRepository) GetBookPageByID(ctx context.Context, id string) (*entities.BookPage, error) {
 	oid, err := bson.ObjectIDFromHex(id)
 	if err != nil {
 		return nil, fmt.Errorf("invalid book page ID format")
@@ -55,7 +55,7 @@ func (r *MongoBookPagesRepository) GetBookPageByID(ctx context.Context, id strin
 	return &result, nil
 }
 
-func (r *MongoBookPagesRepository) GetBookPagesByBookID(ctx context.Context, bookID string) ([]entities.BookPage, error) {
+func (r *bookPagesRepository) GetBookPagesByBookID(ctx context.Context, bookID string) ([]entities.BookPage, error) {
 	b_oid, err := bson.ObjectIDFromHex(bookID)
 	if err != nil {
 		return nil, fmt.Errorf("invalid book page ID format")
@@ -79,7 +79,7 @@ func (r *MongoBookPagesRepository) GetBookPagesByBookID(ctx context.Context, boo
 	return results, nil
 }
 
-func (r *MongoBookPagesRepository) GetBookpagesByBookIDWithPagination(ctx context.Context, bookID string, pageSize int64, pageNumber int64) ([]entities.BookPage, error) {
+func (r *bookPagesRepository) GetBookpagesByBookIDWithPagination(ctx context.Context, bookID string, pageSize int64, pageNumber int64) ([]entities.BookPage, error) {
 	b_oid, err := bson.ObjectIDFromHex(bookID)
 	if err != nil {
 		return nil, fmt.Errorf("invalid book page ID format")
@@ -106,7 +106,7 @@ func (r *MongoBookPagesRepository) GetBookpagesByBookIDWithPagination(ctx contex
 	return results, nil
 }
 
-func (r *MongoBookPagesRepository) GetBookpagesByPageRange(ctx context.Context, bookID string, startPage int64, endPage int64) ([]entities.BookPage, error) {
+func (r *bookPagesRepository) GetBookpagesByPageRange(ctx context.Context, bookID string, startPage int64, endPage int64) ([]entities.BookPage, error) {
 	b_oid, err := bson.ObjectIDFromHex(bookID)
 	if err != nil {
 		return nil, fmt.Errorf("invalid book page ID format")
@@ -135,7 +135,7 @@ func (r *MongoBookPagesRepository) GetBookpagesByPageRange(ctx context.Context, 
 	return results, nil
 }
 
-func (r *MongoBookPagesRepository) GetBookpagesAroundPageNumber(ctx context.Context, bookID string, centerPage int64, offset int64) ([]entities.BookPage, error) {
+func (r *bookPagesRepository) GetBookpagesAroundPageNumber(ctx context.Context, bookID string, centerPage int64, offset int64) ([]entities.BookPage, error) {
 	e_oid, err := bson.ObjectIDFromHex(bookID)
 	if err != nil {
 		return nil, fmt.Errorf("invalid book ID format")
