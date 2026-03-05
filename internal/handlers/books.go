@@ -5,17 +5,17 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/entities"
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/models"
-	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/repository"
 )
 
 func (h *Handler) CreateBook(ctx context.Context, input *models.CreateBookInput) (*models.CreateBookOutput, error) {
 	currentTime := time.Now()
 
-	record := &repository.BookRecord{
+	record := &entities.Book{
 		Name:        input.Body.Name,
 		Description: input.Body.Description,
-		Metadata: repository.BookMetadata{
+		Metadata: entities.BookMetadata{
 			Author: input.Body.Metadata.Author,
 			ISBN:   input.Body.Metadata.ISBN,
 			Genre:  input.Body.Metadata.Genre,
@@ -41,7 +41,7 @@ func (h *Handler) CreateBook(ctx context.Context, input *models.CreateBookInput)
 }
 
 func (h *Handler) GetBooks(ctx context.Context, input *models.GetBooksInput) (*models.GetBooksOutput, error) {
-	var records []repository.BookRecord
+	var records []entities.Book
 	var err error
 
 	if input.GetAll {

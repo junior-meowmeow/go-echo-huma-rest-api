@@ -1,4 +1,4 @@
-package repository_test
+package s3_repository_test
 
 import (
 	"context"
@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/repository"
+	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/repository/s3_repository"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
@@ -24,7 +24,7 @@ func TestS3Repository(t *testing.T) {
 	})
 	require.NoError(t, err)
 
-	repo := repository.NewS3Repository(s3Client, bucketName)
+	repo := s3_repository.NewS3Repository(s3Client, bucketName)
 
 	t.Run("UploadFile", func(t *testing.T) {
 		tmpFile, err := os.CreateTemp("", "test-file-*.txt")

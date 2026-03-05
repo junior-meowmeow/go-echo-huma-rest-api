@@ -1,11 +1,12 @@
-package repository_test
+package mongo_repository_test
 
 import (
 	"context"
 	"testing"
 	"time"
 
-	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/repository"
+	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/entities"
+	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/repository/mongo_repository"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -15,13 +16,13 @@ func TestMongoReviewsRepository(t *testing.T) {
 	db := setupMongoDatabase(t)
 	ctx := context.Background()
 
-	repo := repository.NewMongoReviewsRepository(db)
+	repo := mongo_repository.NewMongoReviewsRepository(db)
 
 	t.Run("Create and Get Single Review", func(t *testing.T) {
 		cleanCollection(t, repo.Collection)
 
 		mockTime := time.Date(2025, 10, 25, 12, 0, 0, 0, time.UTC)
-		inputRecord := &repository.ReviewRecord{
+		inputRecord := &entities.Review{
 			Author:    "John Doe",
 			Rating:    5,
 			Message:   "Great service!",
@@ -53,17 +54,17 @@ func TestMongoReviewsRepository(t *testing.T) {
 		mockTime1 := time.Date(2025, 10, 25, 11, 0, 0, 0, time.UTC)
 		mockTime2 := time.Date(2025, 10, 25, 12, 0, 0, 0, time.UTC)
 		mockTime3 := time.Date(2025, 10, 25, 13, 0, 0, 0, time.UTC)
-		r1 := &repository.ReviewRecord{
+		r1 := &entities.Review{
 			Author:    "Oldest",
 			Rating:    1,
 			CreatedAt: mockTime1,
 		}
-		r2 := &repository.ReviewRecord{
+		r2 := &entities.Review{
 			Author:    "Middle",
 			Rating:    3,
 			CreatedAt: mockTime2,
 		}
-		r3 := &repository.ReviewRecord{
+		r3 := &entities.Review{
 			Author:    "Newest",
 			Rating:    5,
 			CreatedAt: mockTime3,

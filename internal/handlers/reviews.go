@@ -5,12 +5,12 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/entities"
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/models"
-	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/repository"
 )
 
 func (h *Handler) PostReview(ctx context.Context, input *models.ReviewInput) (*struct{}, error) {
-	record := &repository.ReviewRecord{
+	record := &entities.Review{
 		Author:    input.Body.Author,
 		Rating:    input.Body.Rating,
 		Message:   input.Body.Message,

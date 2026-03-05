@@ -6,8 +6,8 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/entities"
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/models"
-	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/repository"
 
 	"github.com/google/uuid"
 )
@@ -45,7 +45,7 @@ func (h *Handler) UploadFile(ctx context.Context, input *models.UploadFileInput)
 
 	currentTime := time.Now()
 
-	record := &repository.FileRecord{
+	record := &entities.FileMetadata{
 		Filename:    uploadedFile.Filename,
 		Size:        uploadedFile.Size,
 		ContentType: uploadedFile.ContentType,

@@ -8,7 +8,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/repository"
+	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/repository/mongo_repository"
 
 	"github.com/stretchr/testify/suite"
 	"go.mongodb.org/mongo-driver/v2/bson"
@@ -23,7 +23,7 @@ func TestReviewsSuite(t *testing.T) {
 }
 
 func (s *ReviewsSuite) SetupTest() {
-	if repo, ok := s.Repos.Reviews.(*repository.MongoReviewsRepository); ok {
+	if repo, ok := s.Repos.Reviews.(*mongo_repository.MongoReviewsRepository); ok {
 		cleanCollection(s.T(), repo.Collection)
 	} else {
 		s.Fail("ReviewsRepository is not a MongoReviewsRepository, cannot clean collection")

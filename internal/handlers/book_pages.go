@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/entities"
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/models"
-	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/repository"
 
 	"go.mongodb.org/mongo-driver/v2/bson"
 )
@@ -24,11 +24,11 @@ func (h *Handler) CreateBookPage(ctx context.Context, input *models.CreateBookPa
 	currentTime := time.Now()
 
 	metadata := input.Body.Metadata
-	record := &repository.BookPageRecord{
+	record := &entities.BookPage{
 		BookID:     bookOID,
 		PageNumber: input.Body.PageNumber,
 		Content:    input.Body.Content,
-		Metadata: repository.BookPageMetadata{
+		Metadata: entities.BookPageMetadata{
 			IsBookmarked: metadata.IsBookmarked,
 			Highlight:    metadata.Highlight,
 		},
@@ -52,7 +52,7 @@ func (h *Handler) CreateBookPage(ctx context.Context, input *models.CreateBookPa
 }
 
 func (h *Handler) GetBookPages(ctx context.Context, input *models.GetBookPagesInput) (*models.GetBookPagesOutput, error) {
-	var records []repository.BookPageRecord
+	var records []entities.BookPage
 	var err error
 
 	if input.GetAll {
@@ -125,7 +125,7 @@ func (h *Handler) GetBookPageByID(ctx context.Context, input *models.GetBookPage
 	return resp, nil
 }
 
-func convertBookPages(records []repository.BookPageRecord) []models.BookPageOutput {
+func convertBookPages(records []entities.BookPage) []models.BookPageOutput {
 	results := make([]models.BookPageOutput, len(records))
 	for i, r := range records {
 		results[i] = convertBookPage(r)
@@ -133,7 +133,7 @@ func convertBookPages(records []repository.BookPageRecord) []models.BookPageOutp
 	return results
 }
 
-func convertBookPage(record repository.BookPageRecord) models.BookPageOutput {
+func convertBookPage(record entities.BookPage) models.BookPageOutput {
 	metadata := record.Metadata
 
 	return models.BookPageOutput{

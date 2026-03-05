@@ -1,11 +1,12 @@
-package repository_test
+package mongo_repository_test
 
 import (
 	"context"
 	"testing"
 	"time"
 
-	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/repository"
+	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/entities"
+	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/repository/mongo_repository"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -15,13 +16,13 @@ func TestMongoFilesRepository(t *testing.T) {
 	db := setupMongoDatabase(t)
 	ctx := context.Background()
 
-	repo := repository.NewMongoFilesRepository(db)
+	repo := mongo_repository.NewMongoFilesRepository(db)
 
 	t.Run("Save and Get File Metadata", func(t *testing.T) {
 		cleanCollection(t, repo.Collection)
 
 		mockTime := time.Date(2025, 10, 25, 12, 0, 0, 0, time.UTC)
-		inputRecord := &repository.FileRecord{
+		inputRecord := &entities.FileMetadata{
 			Filename:    "test_image.png",
 			Size:        1024,
 			ContentType: "image/png",

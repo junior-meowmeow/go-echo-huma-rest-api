@@ -26,11 +26,7 @@ func (s *IntegrationTestSuite) SetupSuite() {
 	s.MongoDB = setupMongoDatabase(s.T())
 	s.S3Client = setupS3Client(s.T())
 
-	s.Repos = &repository.Repositories{
-		Reviews:       repository.NewMongoReviewsRepository(s.MongoDB),
-		Files:         repository.NewMongoFilesRepository(s.MongoDB),
-		ObjectStorage: repository.NewS3Repository(s.S3Client, "test-bucket"),
-	}
+	s.Repos = repository.NewRepositories(s.MongoDB, s.S3Client, "test-bucket")
 
 	h := handlers.NewHandler(s.Repos)
 	s.Router = api.NewRouter(h)

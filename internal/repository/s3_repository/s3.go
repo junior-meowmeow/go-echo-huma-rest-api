@@ -1,4 +1,4 @@
-package repository
+package s3_repository
 
 import (
 	"context"

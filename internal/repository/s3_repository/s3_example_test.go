@@ -1,4 +1,4 @@
-package repository_test
+package s3_repository_test
 
 import (
 	"bytes"
