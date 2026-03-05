@@ -10,7 +10,7 @@ import (
 
 type Repositories struct {
 	Reviews       mongo_repositories.ReviewsRepository
-	Files         mongo_repositories.FileMetadataRepository
+	FileMetadata  mongo_repositories.FileMetadataRepository
 	Books         mongo_repositories.BooksRepository
 	BookPages     mongo_repositories.BookPagesRepository
 	ObjectStorage s3_repositories.ObjectStorage
@@ -19,7 +19,7 @@ type Repositories struct {
 func NewRepositories(mongoDB *mongo.Database, s3Client *s3.Client, bucketName string) *Repositories {
 	return &Repositories{
 		Reviews:       mongo_repositories.NewMongoReviewsRepository(mongoDB),
-		Files:         mongo_repositories.NewMongoFilesRepository(mongoDB),
+		FileMetadata:  mongo_repositories.NewMongoFilesRepository(mongoDB),
 		Books:         mongo_repositories.NewMongoBooksRepository(mongoDB),
 		BookPages:     mongo_repositories.NewMongoBookPagesRepository(mongoDB),
 		ObjectStorage: s3_repositories.NewS3Repository(s3Client, bucketName),

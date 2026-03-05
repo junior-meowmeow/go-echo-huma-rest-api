@@ -54,7 +54,7 @@ func (h *Handler) UploadFile(ctx context.Context, input *models.UploadFileInput)
 		ModifiedAt:  currentTime,
 	}
 
-	id, err := h.Files.SaveFileMetadata(ctx, record)
+	id, err := h.FileMetadata.SaveFileMetadata(ctx, record)
 	if err != nil {
 		return nil, fmt.Errorf("failed to save metadata: %w", err)
 	}
@@ -73,7 +73,7 @@ func (h *Handler) UploadFile(ctx context.Context, input *models.UploadFileInput)
 }
 
 func (h *Handler) GetFileDownloadLink(ctx context.Context, input *models.GetFileDownloadLinkInput) (*models.GetFileDownloadLinkOutput, error) {
-	record, err := h.Files.GetFileMetadataByID(ctx, input.FileID)
+	record, err := h.FileMetadata.GetFileMetadataByID(ctx, input.FileID)
 	if err != nil {
 		return nil, fmt.Errorf("file not found: %w", err)
 	}
