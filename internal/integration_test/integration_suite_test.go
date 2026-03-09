@@ -18,16 +18,16 @@ type IntegrationTestSuite struct {
 	MongoDB  *mongo.Database
 	S3Client *s3.Client
 
-	Repos  *repositories.Repositories
-	Router http.Handler
+	Repositories *repositories.Repositories
+	Router       http.Handler
 }
 
 func (s *IntegrationTestSuite) SetupSuite() {
 	s.MongoDB = setupMongoDatabase(s.T())
 	s.S3Client = setupS3Client(s.T())
 
-	s.Repos = repositories.NewRepositories(s.MongoDB, s.S3Client, "test-bucket")
+	s.Repositories = repositories.NewRepositories(s.MongoDB, s.S3Client, "test-bucket")
 
-	h := handlers.NewHandler(s.Repos)
-	s.Router = api.NewRouter(h, "")
+	handlers := handlers.NewHandlers(s.Repositories)
+	s.Router = api.NewRouter(handlers, "")
 }

@@ -8,7 +8,7 @@ import (
 	"github.com/danielgtaylor/huma/v2"
 )
 
-func RegisterRoutes(api huma.API, h *handlers.Handler) {
+func RegisterRoutes(api huma.API, h *handlers.Handlers) {
 	// GET /health
 	huma.Register(api, huma.Operation{
 		OperationID:   "health-check",

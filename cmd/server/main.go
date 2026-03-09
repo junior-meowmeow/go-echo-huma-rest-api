@@ -41,14 +41,14 @@ func main() {
 
 	repositories := repositories.NewRepositories(mongoDB, s3Client, cfg.S3Bucket)
 
-	// Initialize Handler
-	h := handlers.NewHandler(repositories)
+	// Initialize Handlers
+	handlers := handlers.NewHandlers(repositories)
 
 	// Create a CLI app which takes a port option.
 	cli := humacli.New(func(hooks humacli.Hooks, options *Options) {
 
 		// Create a new router and register APIs (from internal/api)
-		router := api.NewRouter(h, cfg.APIBasePath)
+		router := api.NewRouter(handlers, cfg.APIBasePath)
 
 		port := cfg.Port
 		if options.Port != 8888 { // CLI flag overrides env

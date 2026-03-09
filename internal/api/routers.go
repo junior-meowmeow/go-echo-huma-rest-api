@@ -12,7 +12,7 @@ import (
 	_ "github.com/danielgtaylor/huma/v2/formats/cbor"
 )
 
-func NewRouter(h *handlers.Handler, apiBasePath string) *echo.Echo {
+func NewRouter(handlers *handlers.Handlers, apiBasePath string) *echo.Echo {
 	router := echo.New()
 	router.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins: []string{"*"},
@@ -23,8 +23,8 @@ func NewRouter(h *handlers.Handler, apiBasePath string) *echo.Echo {
 	humaConfig := CreateHumaConfig(apiBasePath)
 	api := humaecho.New(router, humaConfig)
 
-	RegisterRoutes(api, h)
-	v1.RegisterGroup(api, h)
+	RegisterRoutes(api, handlers)
+	v1.RegisterGroup(api, handlers)
 
 	return router
 }

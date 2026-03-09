@@ -8,7 +8,7 @@ import (
 	"github.com/danielgtaylor/huma/v2"
 )
 
-func RegisterGroup(api huma.API, h *handlers.Handler) {
+func RegisterGroup(api huma.API, h *handlers.Handlers) {
 	v1 := huma.NewGroup(api, "/v1")
 
 	v1.UseSimpleModifier(func(op *huma.Operation) {
@@ -19,7 +19,7 @@ func RegisterGroup(api huma.API, h *handlers.Handler) {
 	RegisterRoutes(v1, h)
 }
 
-func RegisterRoutes(api huma.API, h *handlers.Handler) {
+func RegisterRoutes(api huma.API, h *handlers.Handlers) {
 	// POST /reviews
 	huma.Register(api, huma.Operation{
 		OperationID:   "post-review",

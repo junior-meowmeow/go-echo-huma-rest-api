@@ -15,11 +15,11 @@ import (
 )
 
 func main() {
-	// Initialize Handler without Repositories
-	h := handlers.NewHandler(&repositories.Repositories{})
+	// Initialize Handlers without Repositories
+	handlers := handlers.NewHandlers(&repositories.Repositories{})
 
 	// Initialize Router
-	router := api.NewRouter(h, "")
+	router := api.NewRouter(handlers, "")
 
 	// Request API Documentations and Write them to docs/
 	requestAndWriteDocs(router)
