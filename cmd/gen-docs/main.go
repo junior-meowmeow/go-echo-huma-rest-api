@@ -18,7 +18,7 @@ func main() {
 	// Initialize Handlers without Repositories
 	handlers := handlers.NewHandlers(&repositories.Repositories{})
 
-	// Initialize Router
+	// Initialize Router and Register APIs
 	router := api.NewRouter(handlers, "")
 
 	// Request API Documentations and Write them to docs/

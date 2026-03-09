@@ -7,11 +7,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/api"
+	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/app"
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/config"
-	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/db"
-	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/handlers"
-	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/repositories"
 
 	"github.com/danielgtaylor/huma/v2/humacli"
 )
@@ -21,58 +18,41 @@ type Options struct {
 }
 
 func main() {
-	// Load config from environment variables
+	// Load configurations
 	cfg := config.NewConfig()
 
-	// Initialize DB Clients
-	mongoClient, err := db.NewMongoDBClient(cfg.MongoUser, cfg.MongoPass, cfg.MongoHost, cfg.MongoPort)
-	if err != nil {
-		log.Fatalf("Failed to connect to MongoDB: %v", err)
-	}
-	defer db.DisconnectMongoDB(mongoClient)
-
-	s3Client, err := db.NewS3Client(cfg.S3Endpoint)
-	if err != nil {
-		log.Fatalf("Failed to connect to S3: %v", err)
-	}
-
-	// Initialize Repositories
-	mongoDB := mongoClient.Database(cfg.DBName)
-
-	repositories := repositories.NewRepositories(mongoDB, s3Client, cfg.S3Bucket)
-
-	// Initialize Handlers
-	handlers := handlers.NewHandlers(repositories)
-
-	// Create a CLI app which takes a port option.
+	// Create a CLI app which takes options
 	cli := humacli.New(func(hooks humacli.Hooks, options *Options) {
 
-		// Create a new router and register APIs (from internal/api)
-		router := api.NewRouter(handlers, cfg.APIBasePath)
-
-		port := cfg.Port
-		if options.Port != 8888 { // CLI flag overrides env
-			port = options.Port
+		// Options overrides configurations
+		if options.Port != 8888 {
+			cfg.Port = options.Port
 		}
 
-		// Create a HTTP server.
+		// Initialize Application
+		application, err := app.NewApplication(context.Background(), cfg)
+		if err != nil {
+			log.Fatalf("Failed to initialize application: %v", err)
+		}
+
+		// Create a HTTP server
 		server := http.Server{
-			Addr:    fmt.Sprintf(":%d", port),
-			Handler: router,
+			Addr:    fmt.Sprintf(":%d", cfg.Port),
+			Handler: application.Router,
 		}
 
 		hooks.OnStart(func() {
-			log.Printf("Starting server on port %d...\n", port)
-			log.Printf("API documentation is hosted at http://localhost:%d%s/docs\n", port, cfg.APIBasePath)
+			log.Printf("Starting server on port %d...\n", cfg.Port)
+			log.Printf("API documentation is hosted at http://localhost:%d%s/docs\n", cfg.Port, cfg.APIBasePath)
 			server.ListenAndServe()
 		})
 
-		// Tell the CLI how to stop your server.
 		hooks.OnStop(func() {
-			// Give the server 5 seconds to gracefully shut down, then give up.
 			ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 			defer cancel()
 			server.Shutdown(ctx)
+			application.GracefulShutdown(ctx)
+			log.Println("Server exited gracefully.")
 		})
 	})
 
