@@ -22,8 +22,7 @@ type Options struct {
 
 func main() {
 	// Load config from environment variables
-	config.Load()
-	cfg := config.CurrentConfig
+	cfg := config.NewConfig()
 
 	// Initialize DB Clients
 	mongoClient, err := db.NewMongoDBClient(cfg.MongoUser, cfg.MongoPass, cfg.MongoHost, cfg.MongoPort)
@@ -49,7 +48,7 @@ func main() {
 	cli := humacli.New(func(hooks humacli.Hooks, options *Options) {
 
 		// Create a new router and register APIs (from internal/api)
-		router := api.NewRouter(h)
+		router := api.NewRouter(h, cfg.APIBasePath)
 
 		port := cfg.Port
 		if options.Port != 8888 { // CLI flag overrides env

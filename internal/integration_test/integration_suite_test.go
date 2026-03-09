@@ -29,5 +29,5 @@ func (s *IntegrationTestSuite) SetupSuite() {
 	s.Repos = repositories.NewRepositories(s.MongoDB, s.S3Client, "test-bucket")
 
 	h := handlers.NewHandler(s.Repos)
-	s.Router = api.NewRouter(h)
+	s.Router = api.NewRouter(h, "")
 }

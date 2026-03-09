@@ -2,7 +2,6 @@ package api
 
 import (
 	v1 "github.com/junior-meowmeow/go-echo-huma-rest-api/internal/api/v1"
-	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/config"
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/handlers"
 
 	"github.com/danielgtaylor/huma/v2"
@@ -13,15 +12,15 @@ import (
 	_ "github.com/danielgtaylor/huma/v2/formats/cbor"
 )
 
-func NewRouter(h *handlers.Handler) *echo.Echo {
+func NewRouter(h *handlers.Handler, apiBasePath string) *echo.Echo {
 	router := echo.New()
 	router.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins: []string{"*"},
 		AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
 	}))
-	RegisterDocumentations(router)
+	RegisterDocumentations(router, apiBasePath)
 
-	humaConfig := CreateHumaConfig()
+	humaConfig := CreateHumaConfig(apiBasePath)
 	api := humaecho.New(router, humaConfig)
 
 	RegisterRoutes(api, h)
@@ -30,18 +29,18 @@ func NewRouter(h *handlers.Handler) *echo.Echo {
 	return router
 }
 
-func RegisterDocumentations(router *echo.Echo) {
-	router.GET("/docs", StoplightElements)
-	router.GET("/docs/scalar", ScalarDocs)
-	router.GET("/docs/swagger", SwaggerUI)
+func RegisterDocumentations(router *echo.Echo, apiBasePath string) {
+	router.GET("/docs", StoplightElements(apiBasePath))
+	router.GET("/docs/scalar", ScalarDocs(apiBasePath))
+	router.GET("/docs/swagger", SwaggerUI(apiBasePath))
 }
 
-func CreateHumaConfig() huma.Config {
+func CreateHumaConfig(apiBasePath string) huma.Config {
 	humaConfig := huma.DefaultConfig("API Reference Documentation", "1.0.0")
 	humaConfig.DocsPath = ""
 	humaConfig.OpenAPI.Servers = []*huma.Server{
 		{
-			URL:         config.CurrentConfig.APIBasePath,
+			URL:         apiBasePath,
 			Description: "Base Server",
 		},
 	}

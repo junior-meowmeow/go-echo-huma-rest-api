@@ -22,10 +22,8 @@ type Config struct {
 	S3Bucket    string
 }
 
-var CurrentConfig Config
-
 // Load environment variables and returns a Config. (Simple version)
-func Load() {
+func NewConfig() Config {
 	err := godotenv.Load()
 	if err != nil {
 		log.Println("Error loading .env file")
@@ -37,7 +35,7 @@ func Load() {
 		log.Fatalf("invalid PORT: %v", err)
 	}
 
-	CurrentConfig = Config{
+	return Config{
 		Port:        port,
 		APIBasePath: getEnv("API_BASE_PATH", ""),
 		MongoHost:   getEnv("MONGO_HOST", "mongo"),

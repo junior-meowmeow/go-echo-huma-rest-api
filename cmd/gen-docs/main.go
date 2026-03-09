@@ -19,7 +19,7 @@ func main() {
 	h := handlers.NewHandler(&repositories.Repositories{})
 
 	// Initialize Router
-	router := api.NewRouter(h)
+	router := api.NewRouter(h, "")
 
 	// Request API Documentations and Write them to docs/
 	requestAndWriteDocs(router)
