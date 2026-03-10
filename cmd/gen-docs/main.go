@@ -15,7 +15,7 @@ import (
 )
 
 func main() {
-	// Initialize Handlers without Use Cases
+	// Initialize REST API Handlers without Use Cases
 	handlers := handlers.NewHandlers(&usecases.UseCases{})
 
 	// Initialize Router and Register APIs

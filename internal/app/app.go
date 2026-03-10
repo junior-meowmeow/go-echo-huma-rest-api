@@ -41,7 +41,7 @@ func NewApplication(ctx context.Context, cfg config.Config) (*Application, error
 	// Initialize Use Cases
 	usecases := usecases.NewUseCases(repositories)
 
-	// Initialize Handlers
+	// Initialize REST API Handlers
 	handlers := handlers.NewHandlers(usecases)
 
 	// Initialize Router and Register APIs

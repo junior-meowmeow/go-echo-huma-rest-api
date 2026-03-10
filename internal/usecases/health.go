@@ -18,5 +18,6 @@ func NewHealthUseCase() *healthUseCase {
 func (u *healthUseCase) GetHealthStatus(ctx context.Context) (string, error) {
 	// Only check server for now
 	// It is possible to add external service checks later e.g., ping database, etc.
+
 	return "ok", nil
 }

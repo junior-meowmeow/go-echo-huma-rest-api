@@ -39,13 +39,13 @@ func (h *filesHandler) UploadFile(ctx context.Context, input *models.UploadFileI
 		return nil, err
 	}
 
-	resp := &models.UploadFileOutput{
+	resp := models.UploadFileOutput{
 		Body: models.FileMetadata{
 			FileID: id,
 		},
 	}
 
-	return resp, nil
+	return &resp, nil
 }
 
 func (h *filesHandler) GetFileDownloadLink(ctx context.Context, input *models.GetFileDownloadLinkInput) (*models.GetFileDownloadLinkOutput, error) {
@@ -54,7 +54,7 @@ func (h *filesHandler) GetFileDownloadLink(ctx context.Context, input *models.Ge
 		return nil, err
 	}
 
-	resp := &models.GetFileDownloadLinkOutput{
+	resp := models.GetFileDownloadLinkOutput{
 		Body: models.DownloadFileBody{
 			Filename:    filename,
 			DownloadURL: url,
@@ -62,7 +62,7 @@ func (h *filesHandler) GetFileDownloadLink(ctx context.Context, input *models.Ge
 		},
 	}
 
-	return resp, nil
+	return &resp, nil
 }
 
 func (h *filesHandler) ListS3Files(ctx context.Context, _ *struct{}) (*models.ListS3FilesOutput, error) {
@@ -71,12 +71,12 @@ func (h *filesHandler) ListS3Files(ctx context.Context, _ *struct{}) (*models.Li
 		return nil, err
 	}
 
-	resp := &models.ListS3FilesOutput{
+	resp := models.ListS3FilesOutput{
 		Body: models.ListS3FilesBody{
 			Files: fileKeys,
 			Count: len(fileKeys),
 		},
 	}
 
-	return resp, nil
+	return &resp, nil
 }

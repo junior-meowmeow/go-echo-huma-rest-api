@@ -33,7 +33,7 @@ func NewBookPagesUseCase(booksRepo mongo_repositories.BooksRepository, bookPages
 func (u *bookPagesUseCase) CreateBookPage(ctx context.Context, bookPage *entities.BookPage) (string, error) {
 	_, err := u.BooksRepository.GetBookByID(ctx, bookPage.BookID.Hex())
 	if err != nil {
-		return "", fmt.Errorf("failed to fetch book info: %w", err)
+		return "", fmt.Errorf("failed to fetch book: %w", err)
 	}
 
 	currentTime := time.Now()

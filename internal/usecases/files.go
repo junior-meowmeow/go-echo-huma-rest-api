@@ -73,7 +73,7 @@ func (u *filesUseCase) UploadFile(ctx context.Context, fileStream io.Reader, fil
 
 	id, err := u.FileMetadataRepository.SaveFileMetadata(ctx, record)
 	if err != nil {
-		return "", fmt.Errorf("failed to save metadata: %w", err)
+		return "", fmt.Errorf("failed to save file metadata: %w", err)
 	}
 
 	return id, nil
@@ -90,7 +90,7 @@ func (u *filesUseCase) GetFileDownloadLink(ctx context.Context, fileID string) (
 
 	url, err := u.ObjectStorage.GetPresignedDownloadURL(ctx, record.S3Key, record.Filename, duration)
 	if err != nil {
-		return "", time.Time{}, "", fmt.Errorf("failed to sign url: %w", err)
+		return "", time.Time{}, "", fmt.Errorf("failed to presign url: %w", err)
 	}
 
 	return url, expirationTime, record.Filename, nil
