@@ -14,11 +14,7 @@ type UploadFileInput struct {
 }
 
 type FileMetadata struct {
-	FileID      string    `json:"fileid"`
-	Filename    string    `json:"filename"`
-	Size        int64     `json:"size"`
-	ContentType string    `json:"contentType"`
-	CreatedAt   time.Time `json:"createdAt"`
+	FileID string `json:"fileid" doc:"File ID"`
 }
 
 type UploadFileOutput struct {

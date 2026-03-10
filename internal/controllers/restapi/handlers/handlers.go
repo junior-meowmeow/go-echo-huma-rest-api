@@ -1,6 +1,8 @@
 package handlers
 
-import "github.com/junior-meowmeow/go-echo-huma-rest-api/internal/repositories"
+import (
+	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/usecases"
+)
 
 type Handlers struct {
 	Greeting  GreetingHandler
@@ -11,13 +13,13 @@ type Handlers struct {
 	Health    HealthHandler
 }
 
-func NewHandlers(repositories *repositories.Repositories) *Handlers {
+func NewHandlers(usecases *usecases.UseCases) *Handlers {
 	return &Handlers{
-		Greeting:  NewGreetingHandler(),
-		Reviews:   NewReviewsHandler(repositories.Reviews),
-		Files:     NewFilesHandler(repositories.FileMetadata, repositories.ObjectStorage),
-		Books:     NewBooksHandler(repositories.Books),
-		BookPages: NewBookPagesHandler(repositories.Books, repositories.BookPages),
-		Health:    NewHealthHandler(),
+		Greeting:  NewGreetingHandler(usecases.Greeting),
+		Reviews:   NewReviewsHandler(usecases.Reviews),
+		Files:     NewFilesHandler(usecases.Files),
+		Books:     NewBooksHandler(usecases.Books),
+		BookPages: NewBookPagesHandler(usecases.BookPages),
+		Health:    NewHealthHandler(usecases.Health),
 	}
 }

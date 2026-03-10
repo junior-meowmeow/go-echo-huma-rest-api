@@ -3,11 +3,10 @@ package handlers
 import (
 	"context"
 	"fmt"
-	"time"
 
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/controllers/restapi/models"
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/entities"
-	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/repositories/mongo_repositories"
+	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/usecases"
 
 	"go.mongodb.org/mongo-driver/v2/bson"
 )
@@ -21,14 +20,12 @@ type BookPagesHandler interface {
 }
 
 type bookPagesHandler struct {
-	BooksRepository     mongo_repositories.BooksRepository
-	BookPagesRepository mongo_repositories.BookPagesRepository
+	BookPagesUseCase usecases.BookPagesUseCase
 }
 
-func NewBookPagesHandler(booksRepo mongo_repositories.BooksRepository, bookPagesRepo mongo_repositories.BookPagesRepository) *bookPagesHandler {
+func NewBookPagesHandler(bookPagesUseCase usecases.BookPagesUseCase) *bookPagesHandler {
 	return &bookPagesHandler{
-		BooksRepository:     booksRepo,
-		BookPagesRepository: bookPagesRepo,
+		BookPagesUseCase: bookPagesUseCase,
 	}
 }
 
@@ -37,15 +34,9 @@ func (h *bookPagesHandler) CreateBookPage(ctx context.Context, input *models.Cre
 	if err != nil {
 		return nil, fmt.Errorf("invalid book ID format: %w", err)
 	}
-	_, err = h.BooksRepository.GetBookByID(ctx, input.Body.BookID)
-	if err != nil {
-		return nil, fmt.Errorf("failed to fetch book info: %w", err)
-	}
-
-	currentTime := time.Now()
 
 	metadata := input.Body.Metadata
-	record := &entities.BookPage{
+	bookPage := &entities.BookPage{
 		BookID:     bookOID,
 		PageNumber: input.Body.PageNumber,
 		Content:    input.Body.Content,
@@ -54,118 +45,114 @@ func (h *bookPagesHandler) CreateBookPage(ctx context.Context, input *models.Cre
 			Highlight:    metadata.Highlight,
 		},
 		AttachedImageFileID: input.Body.AttachedImageFileID,
-		CreatedAt:           currentTime,
-		ModifiedAt:          currentTime,
 	}
 
-	id, err := h.BookPagesRepository.CreateBookPage(ctx, record)
+	id, err := h.BookPagesUseCase.CreateBookPage(ctx, bookPage)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create book page: %w", err)
+		return nil, err
 	}
 
-	resp := &models.CreateBookPageOutput{
+	resp := models.CreateBookPageOutput{
 		Body: models.CreateBookPageOutputBody{
 			ID: id,
 		},
 	}
 
-	return resp, nil
+	return &resp, nil
 }
 
 func (h *bookPagesHandler) GetBookPages(ctx context.Context, input *models.GetBookPagesInput) (*models.GetBookPagesOutput, error) {
-	var records []entities.BookPage
+	var bookPages []entities.BookPage
 	var err error
 
 	if input.GetAll {
-		records, err = h.BookPagesRepository.GetBookPagesByBookID(ctx, input.BookID)
+		bookPages, err = h.BookPagesUseCase.GetAllBookPages(ctx, input.BookID)
 	} else {
-		records, err = h.BookPagesRepository.GetBookpagesByBookIDWithPagination(ctx, input.BookID, input.PageSize, input.PageNumber)
+		bookPages, err = h.BookPagesUseCase.GetBookPagesWithPagination(ctx, input.BookID, input.PageSize, input.PageNumber)
 	}
 
 	if err != nil {
-		return nil, fmt.Errorf("failed to fetch book pages: %w", err)
+		return nil, err
 	}
 
-	results := convertBookPages(records)
+	bookPagesOutput := convertBookPages(bookPages)
 
-	resp := &models.GetBookPagesOutput{
+	resp := models.GetBookPagesOutput{
 		Body: models.GetBookPagesOutputBody{
-			Data: results,
+			Data: bookPagesOutput,
 		},
 	}
 
-	return resp, nil
+	return &resp, nil
 }
 
 func (h *bookPagesHandler) GetBookPagesByRange(ctx context.Context, input *models.GetBookPagesRangeInput) (*models.GetBookPagesOutput, error) {
-	records, err := h.BookPagesRepository.GetBookpagesByPageRange(ctx, input.BookID, input.StartPage, input.EndPage)
+	bookPages, err := h.BookPagesUseCase.GetBookPagesByRange(ctx, input.BookID, input.StartPage, input.EndPage)
 	if err != nil {
-		return nil, fmt.Errorf("failed to fetch book pages by range: %w", err)
+		return nil, err
 	}
 
-	results := convertBookPages(records)
+	bookPageOutputs := convertBookPages(bookPages)
 
-	resp := &models.GetBookPagesOutput{
+	resp := models.GetBookPagesOutput{
 		Body: models.GetBookPagesOutputBody{
-			Data: results,
+			Data: bookPageOutputs,
 		},
 	}
 
-	return resp, nil
+	return &resp, nil
 }
 
 func (h *bookPagesHandler) GetBookPagesByOffset(ctx context.Context, input *models.GetBookPagesOffsetInput) (*models.GetBookPagesOutput, error) {
-	records, err := h.BookPagesRepository.GetBookpagesAroundPageNumber(ctx, input.BookID, input.CenterPage, input.Offset)
+	bookPages, err := h.BookPagesUseCase.GetBookPagesByOffset(ctx, input.BookID, input.CenterPage, input.Offset)
 	if err != nil {
-		return nil, fmt.Errorf("failed to fetch book pages by offset: %w", err)
+		return nil, err
 	}
 
-	results := convertBookPages(records)
+	bookPageOutputs := convertBookPages(bookPages)
 
-	resp := &models.GetBookPagesOutput{
+	resp := models.GetBookPagesOutput{
 		Body: models.GetBookPagesOutputBody{
-			Data: results,
+			Data: bookPageOutputs,
 		},
 	}
 
-	return resp, nil
+	return &resp, nil
 }
 
 func (h *bookPagesHandler) GetBookPageByID(ctx context.Context, input *models.GetBookPageByIDInput) (*models.GetBookPageByIDOutput, error) {
-	record, err := h.BookPagesRepository.GetBookPageByID(ctx, input.ID)
+	bookPage, err := h.BookPagesUseCase.GetBookPageByID(ctx, input.ID)
 	if err != nil {
-		return nil, fmt.Errorf("failed to fetch book page: %w", err)
+		return nil, err
 	}
 
-	output := convertBookPage(*record)
+	bookPageOutput := convertBookPage(bookPage)
 
-	resp := &models.GetBookPageByIDOutput{
-		Body: output,
+	resp := models.GetBookPageByIDOutput{
+		Body: bookPageOutput,
 	}
 
-	return resp, nil
+	return &resp, nil
 }
 
-func convertBookPages(records []entities.BookPage) []models.BookPageOutput {
-	results := make([]models.BookPageOutput, len(records))
-	for i, r := range records {
-		results[i] = convertBookPage(r)
+func convertBookPages(bookPages []entities.BookPage) []models.BookPageOutput {
+	bookPageOutputs := make([]models.BookPageOutput, len(bookPages))
+	for i, r := range bookPages {
+		bookPageOutputs[i] = convertBookPage(r)
 	}
-	return results
+	return bookPageOutputs
 }
 
-func convertBookPage(record entities.BookPage) models.BookPageOutput {
-	metadata := record.Metadata
-
+func convertBookPage(bookPage entities.BookPage) models.BookPageOutput {
 	return models.BookPageOutput{
-		ID:         record.ID.Hex(),
-		BookID:     record.BookID.Hex(),
-		PageNumber: record.PageNumber,
-		Content:    record.Content,
+		ID:         bookPage.ID.Hex(),
+		BookID:     bookPage.BookID.Hex(),
+		PageNumber: bookPage.PageNumber,
+		Content:    bookPage.Content,
 		Metadata: models.BookPageMetadata{
-			IsBookmarked: metadata.IsBookmarked,
-			Highlight:    metadata.Highlight,
+			IsBookmarked: bookPage.Metadata.IsBookmarked,
+			Highlight:    bookPage.Metadata.Highlight,
 		},
-		AttachedImageFileID: record.AttachedImageFileID,
+		AttachedImageFileID: bookPage.AttachedImageFileID,
 	}
 }

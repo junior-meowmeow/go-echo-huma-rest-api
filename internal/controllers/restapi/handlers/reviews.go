@@ -3,11 +3,10 @@ package handlers
 import (
 	"context"
 	"fmt"
-	"time"
 
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/controllers/restapi/models"
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/entities"
-	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/repositories/mongo_repositories"
+	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/usecases"
 )
 
 type ReviewsHandler interface {
@@ -16,24 +15,23 @@ type ReviewsHandler interface {
 }
 
 type reviewsHandler struct {
-	ReviewsRepository mongo_repositories.ReviewsRepository
+	ReviewsUseCase usecases.ReviewsUseCase
 }
 
-func NewReviewsHandler(reviewsRepo mongo_repositories.ReviewsRepository) *reviewsHandler {
+func NewReviewsHandler(reviewsUseCase usecases.ReviewsUseCase) *reviewsHandler {
 	return &reviewsHandler{
-		ReviewsRepository: reviewsRepo,
+		ReviewsUseCase: reviewsUseCase,
 	}
 }
 
 func (h *reviewsHandler) PostReview(ctx context.Context, input *models.ReviewInput) (*struct{}, error) {
-	record := &entities.Review{
-		Author:    input.Body.Author,
-		Rating:    input.Body.Rating,
-		Message:   input.Body.Message,
-		CreatedAt: time.Now(),
+	review := &entities.Review{
+		Author:  input.Body.Author,
+		Rating:  input.Body.Rating,
+		Message: input.Body.Message,
 	}
 
-	if err := h.ReviewsRepository.CreateReview(ctx, record); err != nil {
+	if err := h.ReviewsUseCase.PostReview(ctx, review); err != nil {
 		return nil, err
 	}
 
@@ -41,26 +39,34 @@ func (h *reviewsHandler) PostReview(ctx context.Context, input *models.ReviewInp
 }
 
 func (h *reviewsHandler) GetReviews(ctx context.Context, _ *struct{}) (*models.GetReviewsOutput, error) {
-	records, err := h.ReviewsRepository.GetReviews(ctx, 100)
+	reviews, err := h.ReviewsUseCase.GetReviews(ctx, 100)
 	if err != nil {
 		return nil, err
 	}
 
-	results := make([]models.ReviewOutput, len(records))
+	reviewOutputs := convertReviews(reviews)
 
-	for i, r := range records {
-		results[i] = models.ReviewOutput{
-			ID:        fmt.Sprint(r.ID),
-			Author:    r.Author,
-			Rating:    r.Rating,
-			Message:   r.Message,
-			CreatedAt: r.CreatedAt,
-		}
+	resp := models.GetReviewsOutput{
+		Body: reviewOutputs,
 	}
 
-	resp := &models.GetReviewsOutput{
-		Body: results,
-	}
+	return &resp, nil
+}
 
-	return resp, nil
+func convertReviews(reviews []entities.Review) []models.ReviewOutput {
+	reviewOutputs := make([]models.ReviewOutput, len(reviews))
+	for i, r := range reviews {
+		reviewOutputs[i] = convertReview(r)
+	}
+	return reviewOutputs
+}
+
+func convertReview(review entities.Review) models.ReviewOutput {
+	return models.ReviewOutput{
+		ID:        fmt.Sprint(review.ID),
+		Author:    review.Author,
+		Rating:    review.Rating,
+		Message:   review.Message,
+		CreatedAt: review.CreatedAt,
+	}
 }

@@ -2,16 +2,9 @@ package handlers
 
 import (
 	"context"
-	"fmt"
-	"path/filepath"
-	"time"
 
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/controllers/restapi/models"
-	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/entities"
-	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/repositories/mongo_repositories"
-	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/repositories/s3_repositories"
-
-	"github.com/google/uuid"
+	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/usecases"
 )
 
 type FilesHandler interface {
@@ -21,71 +14,34 @@ type FilesHandler interface {
 }
 
 type filesHandler struct {
-	FileMetadataRepository mongo_repositories.FileMetadataRepository
-	ObjectStorage          s3_repositories.ObjectStorage
+	FilesUseCase usecases.FilesUseCase
 }
 
-func NewFilesHandler(fileMetadataRepo mongo_repositories.FileMetadataRepository, objectStorage s3_repositories.ObjectStorage) *filesHandler {
+func NewFilesHandler(filesUseCase usecases.FilesUseCase) *filesHandler {
 	return &filesHandler{
-		FileMetadataRepository: fileMetadataRepo,
-		ObjectStorage:          objectStorage,
+		FilesUseCase: filesUseCase,
 	}
 }
 
 func (h *filesHandler) UploadFile(ctx context.Context, input *models.UploadFileInput) (*models.UploadFileOutput, error) {
 	formData := input.RawBody.Data()
 	uploadedFile := formData.File
-	ext := filepath.Ext(uploadedFile.Filename)
 
-	var objectKey string
-
-	// Generate Unique Key
-	maxRetries := 5
-	for i := range maxRetries {
-		objectKey = fmt.Sprintf("%s%s%s", formData.ObjectBaseKey, uuid.New().String(), ext)
-
-		exists, err := h.ObjectStorage.CheckFileExists(ctx, objectKey)
-		if err != nil {
-			return nil, fmt.Errorf("failed to check file existence in S3: %w", err)
-		}
-
-		if !exists {
-			break
-		}
-
-		if i == maxRetries-1 {
-			return nil, fmt.Errorf("failed to generate unique S3 key after %d attempts", maxRetries)
-		}
-	}
-
-	err := h.ObjectStorage.UploadFile(ctx, objectKey, uploadedFile, uploadedFile.Size, uploadedFile.ContentType)
+	id, err := h.FilesUseCase.UploadFile(
+		ctx,
+		uploadedFile,
+		uploadedFile.Filename,
+		uploadedFile.Size,
+		uploadedFile.ContentType,
+		formData.ObjectBaseKey,
+	)
 	if err != nil {
-		return nil, fmt.Errorf("failed to upload to S3: %w", err)
-	}
-
-	currentTime := time.Now()
-
-	record := &entities.FileMetadata{
-		Filename:    uploadedFile.Filename,
-		Size:        uploadedFile.Size,
-		ContentType: uploadedFile.ContentType,
-		S3Key:       objectKey,
-		CreatedAt:   currentTime,
-		ModifiedAt:  currentTime,
-	}
-
-	id, err := h.FileMetadataRepository.SaveFileMetadata(ctx, record)
-	if err != nil {
-		return nil, fmt.Errorf("failed to save metadata: %w", err)
+		return nil, err
 	}
 
 	resp := &models.UploadFileOutput{
 		Body: models.FileMetadata{
-			FileID:      id,
-			Filename:    uploadedFile.Filename,
-			Size:        uploadedFile.Size,
-			ContentType: uploadedFile.ContentType,
-			CreatedAt:   record.CreatedAt,
+			FileID: id,
 		},
 	}
 
@@ -93,24 +49,16 @@ func (h *filesHandler) UploadFile(ctx context.Context, input *models.UploadFileI
 }
 
 func (h *filesHandler) GetFileDownloadLink(ctx context.Context, input *models.GetFileDownloadLinkInput) (*models.GetFileDownloadLinkOutput, error) {
-	record, err := h.FileMetadataRepository.GetFileMetadataByID(ctx, input.FileID)
+	url, expiresAt, filename, err := h.FilesUseCase.GetFileDownloadLink(ctx, input.FileID)
 	if err != nil {
-		return nil, fmt.Errorf("file not found: %w", err)
-	}
-
-	duration := 15 * time.Minute
-	expirationTime := time.Now().Add(duration)
-
-	url, err := h.ObjectStorage.GetPresignedDownloadURL(ctx, record.S3Key, record.Filename, duration)
-	if err != nil {
-		return nil, fmt.Errorf("failed to sign url: %w", err)
+		return nil, err
 	}
 
 	resp := &models.GetFileDownloadLinkOutput{
 		Body: models.DownloadFileBody{
-			Filename:    record.Filename,
+			Filename:    filename,
 			DownloadURL: url,
-			ExpiresAt:   expirationTime,
+			ExpiresAt:   expiresAt,
 		},
 	}
 
@@ -118,9 +66,9 @@ func (h *filesHandler) GetFileDownloadLink(ctx context.Context, input *models.Ge
 }
 
 func (h *filesHandler) ListS3Files(ctx context.Context, _ *struct{}) (*models.ListS3FilesOutput, error) {
-	fileKeys, err := h.ObjectStorage.ListFiles(ctx, 20)
+	fileKeys, err := h.FilesUseCase.ListS3Files(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("failed to list S3 files: %w", err)
+		return nil, err
 	}
 
 	resp := &models.ListS3FilesOutput{

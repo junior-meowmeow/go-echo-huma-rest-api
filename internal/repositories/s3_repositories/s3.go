@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"mime/multipart"
+	"io"
 	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -13,7 +13,7 @@ import (
 )
 
 type ObjectStorage interface {
-	UploadFile(ctx context.Context, key string, file multipart.File, size int64, contentType string) error
+	UploadFile(ctx context.Context, key string, file io.Reader, size int64, contentType string) error
 	GetPresignedDownloadURL(ctx context.Context, key string, filename string, duration time.Duration) (string, error)
 	CheckFileExists(ctx context.Context, key string) (bool, error)
 	ListFiles(ctx context.Context, maxKeys int) ([]string, error)
@@ -34,7 +34,7 @@ func NewS3Repository(client *s3.Client, bucketName string) *s3Repository {
 	}
 }
 
-func (r *s3Repository) UploadFile(ctx context.Context, key string, file multipart.File, size int64, contentType string) error {
+func (r *s3Repository) UploadFile(ctx context.Context, key string, file io.Reader, size int64, contentType string) error {
 	_, err := r.Client.PutObject(ctx, &s3.PutObjectInput{
 		Bucket:        aws.String(r.BucketName),
 		Key:           aws.String(key),

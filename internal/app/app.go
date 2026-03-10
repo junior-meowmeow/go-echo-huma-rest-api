@@ -8,6 +8,7 @@ import (
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/controllers/restapi/api"
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/controllers/restapi/handlers"
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/repositories"
+	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/usecases"
 
 	"github.com/labstack/echo/v4"
 	"go.mongodb.org/mongo-driver/v2/mongo"
@@ -37,8 +38,11 @@ func NewApplication(ctx context.Context, cfg config.Config) (*Application, error
 	// Initialize Repositories
 	repositories := repositories.NewRepositories(mongoDB, s3Client, cfg.S3Bucket)
 
+	// Initialize Use Cases
+	usecases := usecases.NewUseCases(repositories)
+
 	// Initialize Handlers
-	handlers := handlers.NewHandlers(repositories)
+	handlers := handlers.NewHandlers(usecases)
 
 	// Initialize Router and Register APIs
 	router := api.NewRouter(handlers, cfg.APIBasePath)

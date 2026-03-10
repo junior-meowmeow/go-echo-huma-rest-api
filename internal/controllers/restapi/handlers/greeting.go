@@ -2,9 +2,9 @@ package handlers
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/controllers/restapi/models"
+	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/usecases"
 )
 
 type GreetingHandler interface {
@@ -12,18 +12,26 @@ type GreetingHandler interface {
 }
 
 type greetingHandler struct {
+	GreetingUseCase usecases.GreetingUseCase
 }
 
-func NewGreetingHandler() *greetingHandler {
-	return &greetingHandler{}
+func NewGreetingHandler(greetingUseCase usecases.GreetingUseCase) *greetingHandler {
+	return &greetingHandler{
+		GreetingUseCase: greetingUseCase,
+	}
 }
 
 func (h *greetingHandler) GetGreeting(ctx context.Context, input *models.GreetingInput) (*models.GreetingOutput, error) {
-	resp := &models.GreetingOutput{
+	message, err := h.GreetingUseCase.GetGreetingMessage(ctx, input.Name)
+	if err != nil {
+		return nil, err
+	}
+
+	resp := models.GreetingOutput{
 		Body: models.GreetingOutputBody{
-			Message: fmt.Sprintf("Hello, %s!", input.Name),
+			Message: message,
 		},
 	}
 
-	return resp, nil
+	return &resp, nil
 }

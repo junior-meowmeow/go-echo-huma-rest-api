@@ -118,7 +118,7 @@ func RegisterRoutes(api huma.API, h *handlers.Handlers) {
 		OperationID: "list-book-pages-range",
 		Method:      http.MethodGet,
 		Path:        "/book_pages/range",
-		Summary:     "List Book Pages (Time Range)",
+		Summary:     "List Book Pages (Page Range)",
 		Description: "Get book pages within start/end page number.",
 		Tags:        []string{"Book Pages"},
 	}, h.BookPages.GetBookPagesByRange)

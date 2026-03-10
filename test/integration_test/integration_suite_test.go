@@ -6,6 +6,7 @@ import (
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/controllers/restapi/api"
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/controllers/restapi/handlers"
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/repositories"
+	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/usecases"
 
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/stretchr/testify/suite"
@@ -28,6 +29,7 @@ func (s *IntegrationTestSuite) SetupSuite() {
 
 	s.Repositories = repositories.NewRepositories(s.MongoDB, s.S3Client, "test-bucket")
 
-	handlers := handlers.NewHandlers(s.Repositories)
+	usecases := usecases.NewUseCases(s.Repositories)
+	handlers := handlers.NewHandlers(usecases)
 	s.Router = api.NewRouter(handlers, "")
 }

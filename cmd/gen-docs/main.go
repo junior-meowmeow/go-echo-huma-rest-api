@@ -11,12 +11,12 @@ import (
 
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/controllers/restapi/api"
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/controllers/restapi/handlers"
-	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/repositories"
+	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/usecases"
 )
 
 func main() {
-	// Initialize Handlers without Repositories
-	handlers := handlers.NewHandlers(&repositories.Repositories{})
+	// Initialize Handlers without Use Cases
+	handlers := handlers.NewHandlers(&usecases.UseCases{})
 
 	// Initialize Router and Register APIs
 	router := api.NewRouter(handlers, "")

@@ -276,30 +276,13 @@
       "FileMetadata": {
         "additionalProperties": false,
         "properties": {
-          "contentType": {
-            "type": "string"
-          },
-          "createdAt": {
-            "format": "date-time",
-            "type": "string"
-          },
           "fileid": {
+            "description": "File ID",
             "type": "string"
-          },
-          "filename": {
-            "type": "string"
-          },
-          "size": {
-            "format": "int64",
-            "type": "integer"
           }
         },
         "required": [
-          "fileid",
-          "filename",
-          "size",
-          "contentType",
-          "createdAt"
+          "fileid"
         ],
         "type": "object"
       },
@@ -821,7 +804,7 @@
             "description": "Error"
           }
         },
-        "summary": "List Book Pages (Time Range) (V1)",
+        "summary": "List Book Pages (Page Range) (V1)",
         "tags": [
           "Book Pages"
         ]

@@ -2,12 +2,10 @@ package handlers
 
 import (
 	"context"
-	"fmt"
-	"time"
 
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/controllers/restapi/models"
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/entities"
-	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/repositories/mongo_repositories"
+	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/usecases"
 )
 
 type BooksHandler interface {
@@ -17,19 +15,17 @@ type BooksHandler interface {
 }
 
 type booksHandler struct {
-	BooksRepository mongo_repositories.BooksRepository
+	BooksUseCase usecases.BooksUseCase
 }
 
-func NewBooksHandler(booksRepo mongo_repositories.BooksRepository) *booksHandler {
+func NewBooksHandler(booksUseCase usecases.BooksUseCase) *booksHandler {
 	return &booksHandler{
-		BooksRepository: booksRepo,
+		BooksUseCase: booksUseCase,
 	}
 }
 
 func (h *booksHandler) CreateBook(ctx context.Context, input *models.CreateBookInput) (*models.CreateBookOutput, error) {
-	currentTime := time.Now()
-
-	record := &entities.Book{
+	book := &entities.Book{
 		Name:        input.Body.Name,
 		Description: input.Body.Description,
 		Metadata: entities.BookMetadata{
@@ -38,84 +34,81 @@ func (h *booksHandler) CreateBook(ctx context.Context, input *models.CreateBookI
 			Genre:  input.Body.Metadata.Genre,
 		},
 		CoverImageFileID: input.Body.CoverImageFileID,
-		CreatedAt:        currentTime,
-		ModifiedAt:       currentTime,
 	}
 
-	id, err := h.BooksRepository.CreateBook(ctx, record)
+	id, err := h.BooksUseCase.CreateBook(ctx, book)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create book: %w", err)
+		return nil, err
 	}
 
-	resp := &models.CreateBookOutput{
+	resp := models.CreateBookOutput{
 		Body: models.CreateBookOutputBody{
 			ID: id,
 		},
 	}
 
-	return resp, nil
-
+	return &resp, nil
 }
 
 func (h *booksHandler) GetBooks(ctx context.Context, input *models.GetBooksInput) (*models.GetBooksOutput, error) {
-	var records []entities.Book
+	var books []entities.Book
 	var err error
 
 	if input.GetAll {
-		records, err = h.BooksRepository.GetAllBooks(ctx)
+		books, err = h.BooksUseCase.GetAllBooks(ctx)
 	} else {
-		records, err = h.BooksRepository.GetBooksWithPagination(ctx, input.PageSize, input.PageNumber)
+		books, err = h.BooksUseCase.GetBooksWithPagination(ctx, input.PageSize, input.PageNumber)
 	}
 
 	if err != nil {
-		return nil, fmt.Errorf("failed to fetch books: %w", err)
+		return nil, err
 	}
 
-	results := make([]models.BookOutput, len(records))
-	for i, r := range records {
-		results[i] = models.BookOutput{
-			ID:          r.ID.Hex(),
-			Name:        r.Name,
-			Description: r.Description,
-			Metadata: models.BookMetadata{
-				Author: r.Metadata.Author,
-				ISBN:   r.Metadata.ISBN,
-				Genre:  r.Metadata.Genre,
-			},
-			CoverImageFileID: r.CoverImageFileID,
-			CreatedAt:        r.CreatedAt,
-		}
-	}
+	bookOutputs := convertBooks(books)
 
-	resp := &models.GetBooksOutput{
+	resp := models.GetBooksOutput{
 		Body: models.GetBooksOutputBody{
-			Data: results,
+			Data: bookOutputs,
 		},
 	}
 
-	return resp, nil
+	return &resp, nil
 }
 
 func (h *booksHandler) GetBookByID(ctx context.Context, input *models.GetBookByIDInput) (*models.GetBookByIDOutput, error) {
-	record, err := h.BooksRepository.GetBookByID(ctx, input.ID)
+	book, err := h.BooksUseCase.GetBookByID(ctx, input.ID)
 	if err != nil {
-		return nil, fmt.Errorf("failed to fetch book: %w", err)
+		return nil, err
 	}
 
-	resp := &models.GetBookByIDOutput{
-		Body: models.BookOutput{
-			ID:          record.ID.Hex(),
-			Name:        record.Name,
-			Description: record.Description,
-			Metadata: models.BookMetadata{
-				Author: record.Metadata.Author,
-				ISBN:   record.Metadata.ISBN,
-				Genre:  record.Metadata.Genre,
-			},
-			CoverImageFileID: record.CoverImageFileID,
-			CreatedAt:        record.CreatedAt,
+	bookOutput := convertBook(book)
+
+	resp := models.GetBookByIDOutput{
+		Body: bookOutput,
+	}
+
+	return &resp, nil
+}
+
+func convertBooks(books []entities.Book) []models.BookOutput {
+	bookOutputs := make([]models.BookOutput, len(books))
+	for i, r := range books {
+		bookOutputs[i] = convertBook(r)
+	}
+	return bookOutputs
+}
+
+func convertBook(book entities.Book) models.BookOutput {
+	return models.BookOutput{
+		ID:          book.ID.Hex(),
+		Name:        book.Name,
+		Description: book.Description,
+		Metadata: models.BookMetadata{
+			Author: book.Metadata.Author,
+			ISBN:   book.Metadata.ISBN,
+			Genre:  book.Metadata.Genre,
 		},
+		CoverImageFileID: book.CoverImageFileID,
+		CreatedAt:        book.CreatedAt,
 	}
-
-	return resp, nil
 }

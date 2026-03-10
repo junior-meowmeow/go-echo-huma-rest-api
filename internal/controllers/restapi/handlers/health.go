@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/controllers/restapi/models"
+	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/usecases"
 )
 
 type HealthHandler interface {
@@ -11,18 +12,26 @@ type HealthHandler interface {
 }
 
 type healthHandler struct {
+	HealthUseCase usecases.HealthUseCase
 }
 
-func NewHealthHandler() *healthHandler {
-	return &healthHandler{}
+func NewHealthHandler(healthUseCase usecases.HealthUseCase) *healthHandler {
+	return &healthHandler{
+		HealthUseCase: healthUseCase,
+	}
 }
 
 func (h *healthHandler) GetHealthStatus(ctx context.Context, _ *struct{}) (*models.HealthOutput, error) {
-	resp := &models.HealthOutput{
+	status, err := h.HealthUseCase.GetHealthStatus(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	resp := models.HealthOutput{
 		Body: models.HealthBody{
-			Status: "ok",
+			Status: status,
 		},
 	}
 
-	return resp, nil
+	return &resp, nil
 }
