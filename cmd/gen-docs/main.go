@@ -9,8 +9,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/api"
-	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/handlers"
+	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/controllers/restapi/api"
+	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/controllers/restapi/handlers"
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/repositories"
 )
 

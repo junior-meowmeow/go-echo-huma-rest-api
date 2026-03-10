@@ -3,7 +3,7 @@ package v1
 import (
 	"net/http"
 
-	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/handlers"
+	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/controllers/restapi/handlers"
 
 	"github.com/danielgtaylor/huma/v2"
 )

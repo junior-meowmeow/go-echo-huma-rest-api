@@ -3,7 +3,7 @@ package handlers
 import (
 	"context"
 
-	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/models"
+	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/controllers/restapi/models"
 )
 
 type HealthHandler interface {

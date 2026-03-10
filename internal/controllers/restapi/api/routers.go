@@ -1,8 +1,8 @@
 package api
 
 import (
-	v1 "github.com/junior-meowmeow/go-echo-huma-rest-api/internal/api/v1"
-	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/handlers"
+	v1 "github.com/junior-meowmeow/go-echo-huma-rest-api/internal/controllers/restapi/api/v1"
+	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/controllers/restapi/handlers"
 
 	"github.com/danielgtaylor/huma/v2"
 	"github.com/danielgtaylor/huma/v2/adapters/humaecho"

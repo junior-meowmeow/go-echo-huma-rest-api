@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/models"
+	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/controllers/restapi/models"
 )
 
 type GreetingHandler interface {

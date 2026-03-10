@@ -3,8 +3,8 @@ package integration_test
 import (
 	"net/http"
 
-	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/api"
-	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/handlers"
+	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/controllers/restapi/api"
+	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/controllers/restapi/handlers"
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/repositories"
 
 	"github.com/aws/aws-sdk-go-v2/service/s3"

@@ -6,8 +6,8 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/controllers/restapi/models"
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/entities"
-	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/models"
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/repositories/mongo_repositories"
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/repositories/s3_repositories"
 
