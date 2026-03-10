@@ -19,7 +19,7 @@ import (
 	"go.mongodb.org/mongo-driver/v2/mongo/options"
 )
 
-func setupMongoDatabase(t *testing.T) *mongo.Database {
+func setupMongoDB(t *testing.T) *mongo.Database {
 	t.Helper()
 
 	ctx := context.Background()

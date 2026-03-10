@@ -23,7 +23,7 @@ type IntegrationTestSuite struct {
 }
 
 func (s *IntegrationTestSuite) SetupSuite() {
-	s.MongoDB = setupMongoDatabase(s.T())
+	s.MongoDB = setupMongoDB(s.T())
 	s.S3Client = setupS3Client(s.T())
 
 	s.Repositories = repositories.NewRepositories(s.MongoDB, s.S3Client, "test-bucket")
