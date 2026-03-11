@@ -41,11 +41,11 @@ func (r *reviewsRepository) GetReviews(ctx context.Context, limit int64) ([]enti
 	}
 	defer cur.Close(ctx)
 
-	results := make([]entities.Review, 0, limit)
+	reviews := make([]entities.Review, 0, limit)
 
-	if err := cur.All(ctx, &results); err != nil {
+	if err := cur.All(ctx, &reviews); err != nil {
 		return nil, err
 	}
 
-	return results, nil
+	return reviews, nil
 }

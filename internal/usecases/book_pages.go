@@ -90,5 +90,5 @@ func (u *bookPagesUseCase) GetBookPageByID(ctx context.Context, id string) (enti
 		return entities.BookPage{}, fmt.Errorf("failed to fetch book page: %w", err)
 	}
 
-	return *bookPage, nil
+	return bookPage, nil
 }

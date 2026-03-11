@@ -12,7 +12,7 @@ import (
 
 type FileMetadataRepository interface {
 	SaveFileMetadata(ctx context.Context, file *entities.FileMetadata) (string, error)
-	GetFileMetadataByID(ctx context.Context, fileID string) (*entities.FileMetadata, error)
+	GetFileMetadataByID(ctx context.Context, fileID string) (entities.FileMetadata, error)
 }
 
 type fileMetadataRepository struct {
@@ -26,24 +26,24 @@ func NewFileMetadataRepository(db *mongo.Database) *fileMetadataRepository {
 }
 
 func (r *fileMetadataRepository) SaveFileMetadata(ctx context.Context, record *entities.FileMetadata) (string, error) {
-	res, err := r.Collection.InsertOne(ctx, record)
+	result, err := r.Collection.InsertOne(ctx, record)
 	if err != nil {
 		return "", err
 	}
 
-	return res.InsertedID.(bson.ObjectID).Hex(), nil
+	return result.InsertedID.(bson.ObjectID).Hex(), nil
 }
 
-func (r *fileMetadataRepository) GetFileMetadataByID(ctx context.Context, fileID string) (*entities.FileMetadata, error) {
+func (r *fileMetadataRepository) GetFileMetadataByID(ctx context.Context, fileID string) (entities.FileMetadata, error) {
+	var fileMetadata entities.FileMetadata
 	oid, err := bson.ObjectIDFromHex(fileID)
 	if err != nil {
-		return nil, fmt.Errorf("invalid ID format")
+		return fileMetadata, fmt.Errorf("invalid ID format")
 	}
 
-	var result entities.FileMetadata
-	err = r.Collection.FindOne(ctx, bson.D{{Key: "_id", Value: oid}}).Decode(&result)
+	err = r.Collection.FindOne(ctx, bson.D{{Key: "_id", Value: oid}}).Decode(&fileMetadata)
 	if err != nil {
-		return nil, err
+		return fileMetadata, err
 	}
-	return &result, nil
+	return fileMetadata, nil
 }

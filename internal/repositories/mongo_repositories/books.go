@@ -13,7 +13,7 @@ import (
 
 type BooksRepository interface {
 	CreateBook(ctx context.Context, record *entities.Book) (string, error)
-	GetBookByID(ctx context.Context, id string) (*entities.Book, error)
+	GetBookByID(ctx context.Context, id string) (entities.Book, error)
 	GetAllBooks(ctx context.Context) ([]entities.Book, error)
 	GetBooksWithPagination(ctx context.Context, pageSize int64, pageNumber int64) ([]entities.Book, error)
 }
@@ -29,29 +29,29 @@ func NewBooksRepository(db *mongo.Database) *booksRepository {
 }
 
 func (r *booksRepository) CreateBook(ctx context.Context, record *entities.Book) (string, error) {
-	res, err := r.Collection.InsertOne(ctx, record)
+	result, err := r.Collection.InsertOne(ctx, record)
 	if err != nil {
 		return "", err
 	}
-	return res.InsertedID.(bson.ObjectID).Hex(), nil
+	return result.InsertedID.(bson.ObjectID).Hex(), nil
 }
 
-func (r *booksRepository) GetBookByID(ctx context.Context, id string) (*entities.Book, error) {
+func (r *booksRepository) GetBookByID(ctx context.Context, id string) (entities.Book, error) {
+	var book entities.Book
 	oid, err := bson.ObjectIDFromHex(id)
 	if err != nil {
-		return nil, fmt.Errorf("invalid book ID format")
+		return book, fmt.Errorf("invalid book ID format")
 	}
 
-	var result entities.Book
-	err = r.Collection.FindOne(ctx, bson.D{{Key: "_id", Value: oid}}).Decode(&result)
+	err = r.Collection.FindOne(ctx, bson.D{{Key: "_id", Value: oid}}).Decode(&book)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
-			return nil, fmt.Errorf("book not found")
+			return book, fmt.Errorf("book not found")
 		}
-		return nil, err
+		return book, err
 	}
 
-	return &result, nil
+	return book, nil
 }
 
 func (r *booksRepository) GetAllBooks(ctx context.Context) ([]entities.Book, error) {
@@ -64,11 +64,11 @@ func (r *booksRepository) GetAllBooks(ctx context.Context) ([]entities.Book, err
 	}
 	defer cur.Close(ctx)
 
-	results := make([]entities.Book, 0)
-	if err := cur.All(ctx, &results); err != nil {
+	books := make([]entities.Book, 0)
+	if err := cur.All(ctx, &books); err != nil {
 		return nil, err
 	}
-	return results, nil
+	return books, nil
 }
 
 func (r *booksRepository) GetBooksWithPagination(ctx context.Context, pageSize int64, pageNumber int64) ([]entities.Book, error) {
@@ -85,9 +85,9 @@ func (r *booksRepository) GetBooksWithPagination(ctx context.Context, pageSize i
 	}
 	defer cur.Close(ctx)
 
-	results := make([]entities.Book, 0, pageSize)
-	if err := cur.All(ctx, &results); err != nil {
+	books := make([]entities.Book, 0, pageSize)
+	if err := cur.All(ctx, &books); err != nil {
 		return nil, err
 	}
-	return results, nil
+	return books, nil
 }

@@ -63,5 +63,5 @@ func (u *booksUseCase) GetBookByID(ctx context.Context, id string) (entities.Boo
 		return entities.Book{}, fmt.Errorf("failed to fetch book: %w", err)
 	}
 
-	return *book, nil
+	return book, nil
 }

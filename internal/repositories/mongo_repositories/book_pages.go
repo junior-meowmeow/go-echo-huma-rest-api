@@ -13,7 +13,7 @@ import (
 
 type BookPagesRepository interface {
 	CreateBookPage(ctx context.Context, record *entities.BookPage) (string, error)
-	GetBookPageByID(ctx context.Context, id string) (*entities.BookPage, error)
+	GetBookPageByID(ctx context.Context, id string) (entities.BookPage, error)
 	GetBookPagesByBookID(ctx context.Context, bookID string) ([]entities.BookPage, error)
 	GetBookpagesByBookIDWithPagination(ctx context.Context, bookID string, pageSize int64, pageNumber int64) ([]entities.BookPage, error)
 	GetBookpagesByPageRange(ctx context.Context, bookID string, startPage int64, endPage int64) ([]entities.BookPage, error)
@@ -31,28 +31,28 @@ func NewBookPagesRepository(db *mongo.Database) *bookPagesRepository {
 }
 
 func (r *bookPagesRepository) CreateBookPage(ctx context.Context, record *entities.BookPage) (string, error) {
-	res, err := r.Collection.InsertOne(ctx, record)
+	result, err := r.Collection.InsertOne(ctx, record)
 	if err != nil {
 		return "", err
 	}
-	return res.InsertedID.(bson.ObjectID).Hex(), nil
+	return result.InsertedID.(bson.ObjectID).Hex(), nil
 }
 
-func (r *bookPagesRepository) GetBookPageByID(ctx context.Context, id string) (*entities.BookPage, error) {
+func (r *bookPagesRepository) GetBookPageByID(ctx context.Context, id string) (entities.BookPage, error) {
+	var bookPage entities.BookPage
 	oid, err := bson.ObjectIDFromHex(id)
 	if err != nil {
-		return nil, fmt.Errorf("invalid book page ID format")
+		return bookPage, fmt.Errorf("invalid book page ID format")
 	}
 
-	var result entities.BookPage
-	err = r.Collection.FindOne(ctx, bson.D{{Key: "_id", Value: oid}}).Decode(&result)
+	err = r.Collection.FindOne(ctx, bson.D{{Key: "_id", Value: oid}}).Decode(&bookPage)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
-			return nil, fmt.Errorf("book page not found")
+			return bookPage, fmt.Errorf("book page not found")
 		}
-		return nil, err
+		return bookPage, err
 	}
-	return &result, nil
+	return bookPage, nil
 }
 
 func (r *bookPagesRepository) GetBookPagesByBookID(ctx context.Context, bookID string) ([]entities.BookPage, error) {
@@ -72,11 +72,11 @@ func (r *bookPagesRepository) GetBookPagesByBookID(ctx context.Context, bookID s
 	}
 	defer cur.Close(ctx)
 
-	results := make([]entities.BookPage, 0)
-	if err := cur.All(ctx, &results); err != nil {
+	bookPages := make([]entities.BookPage, 0)
+	if err := cur.All(ctx, &bookPages); err != nil {
 		return nil, err
 	}
-	return results, nil
+	return bookPages, nil
 }
 
 func (r *bookPagesRepository) GetBookpagesByBookIDWithPagination(ctx context.Context, bookID string, pageSize int64, pageNumber int64) ([]entities.BookPage, error) {
@@ -99,11 +99,11 @@ func (r *bookPagesRepository) GetBookpagesByBookIDWithPagination(ctx context.Con
 	}
 	defer cur.Close(ctx)
 
-	results := make([]entities.BookPage, 0, pageSize)
-	if err := cur.All(ctx, &results); err != nil {
+	bookPages := make([]entities.BookPage, 0, pageSize)
+	if err := cur.All(ctx, &bookPages); err != nil {
 		return nil, err
 	}
-	return results, nil
+	return bookPages, nil
 }
 
 func (r *bookPagesRepository) GetBookpagesByPageRange(ctx context.Context, bookID string, startPage int64, endPage int64) ([]entities.BookPage, error) {
@@ -128,11 +128,11 @@ func (r *bookPagesRepository) GetBookpagesByPageRange(ctx context.Context, bookI
 	}
 	defer cur.Close(ctx)
 
-	results := make([]entities.BookPage, 0)
-	if err := cur.All(ctx, &results); err != nil {
+	bookPages := make([]entities.BookPage, 0)
+	if err := cur.All(ctx, &bookPages); err != nil {
 		return nil, err
 	}
-	return results, nil
+	return bookPages, nil
 }
 
 func (r *bookPagesRepository) GetBookpagesAroundPageNumber(ctx context.Context, bookID string, centerPage int64, offset int64) ([]entities.BookPage, error) {
@@ -180,11 +180,11 @@ func (r *bookPagesRepository) GetBookpagesAroundPageNumber(ctx context.Context, 
 	}
 
 	// Merge and Sort Data
-	result := make([]entities.BookPage, 0, len(past)+len(future))
+	bookPages := make([]entities.BookPage, 0, len(past)+len(future))
 	for i := len(past) - 1; i >= 0; i-- {
-		result = append(result, past[i])
+		bookPages = append(bookPages, past[i])
 	}
-	result = append(result, future...)
+	bookPages = append(bookPages, future...)
 
-	return result, nil
+	return bookPages, nil
 }
