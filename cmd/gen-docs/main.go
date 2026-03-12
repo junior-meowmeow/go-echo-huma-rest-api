@@ -9,14 +9,14 @@ import (
 	"os"
 	"strings"
 
-	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/controllers/restapi/api"
-	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/controllers/restapi/handlers"
-	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/usecases"
+	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/controller/restapi/api"
+	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/controller/restapi/handler"
+	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/usecase"
 )
 
 func main() {
 	// Initialize REST API Handlers without Use Cases
-	handlers := handlers.NewHandlers(&usecases.UseCases{})
+	handlers := handler.NewHandlers(&usecase.UseCases{})
 
 	// Initialize Router and Register APIs
 	router := api.NewRouter(handlers, "")
