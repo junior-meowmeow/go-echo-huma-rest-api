@@ -2,8 +2,10 @@ package mongo_repositories
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/entities"
+	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/repositories/mongo_repositories/documents"
 
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
@@ -25,9 +27,18 @@ func NewReviewsRepository(db *mongo.Database) *reviewsRepository {
 	}
 }
 
-func (r *reviewsRepository) CreateReview(ctx context.Context, record *entities.Review) error {
-	_, err := r.Collection.InsertOne(ctx, record)
-	return err
+func (r *reviewsRepository) CreateReview(ctx context.Context, review *entities.Review) error {
+	document, err := documents.NewReviewDocument(review)
+	if err != nil {
+		return fmt.Errorf("failed to convert review to document: %w", err)
+	}
+
+	_, err = r.Collection.InsertOne(ctx, document)
+	if err != nil {
+		return fmt.Errorf("failed to insert review document: %w", err)
+	}
+
+	return nil
 }
 
 func (r *reviewsRepository) GetReviews(ctx context.Context, limit int64) ([]entities.Review, error) {
@@ -35,16 +46,20 @@ func (r *reviewsRepository) GetReviews(ctx context.Context, limit int64) ([]enti
 		SetLimit(limit).
 		SetSort(bson.D{{Key: "createdAt", Value: -1}})
 
-	cur, err := r.Collection.Find(ctx, bson.D{}, opts)
+	cursor, err := r.Collection.Find(ctx, bson.D{}, opts)
 	if err != nil {
 		return nil, err
 	}
-	defer cur.Close(ctx)
+	defer cursor.Close(ctx)
 
-	reviews := make([]entities.Review, 0, limit)
+	var documentsList []documents.ReviewDocument
+	if err := cursor.All(ctx, &documentsList); err != nil {
+		return nil, fmt.Errorf("failed to decode review documents: %w", err)
+	}
 
-	if err := cur.All(ctx, &reviews); err != nil {
-		return nil, err
+	reviews := make([]entities.Review, len(documentsList))
+	for i, document := range documentsList {
+		reviews[i] = document.ToEntity()
 	}
 
 	return reviews, nil

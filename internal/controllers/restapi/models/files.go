@@ -22,7 +22,7 @@ type UploadFileOutput struct {
 }
 
 type GetFileDownloadLinkInput struct {
-	FileID string `query:"id" example:"123" doc:"file id"`
+	FileID string `query:"id" pattern:"^[a-fA-F0-9]{24}$" example:"123" doc:"file id"`
 }
 
 type DownloadFileBody struct {

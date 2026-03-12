@@ -31,7 +31,7 @@ func TestMongoFilesRepository(t *testing.T) {
 		}
 
 		// Test SaveFileMetadata
-		id, err := repo.SaveFileMetadata(ctx, inputRecord)
+		id, err := repo.CreateFileMetadata(ctx, inputRecord)
 		require.NoError(t, err, "SaveFileMetadata should succeed")
 		require.NotEmpty(t, id, "Returned ID should not be empty")
 

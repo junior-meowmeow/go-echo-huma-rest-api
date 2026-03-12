@@ -2,24 +2,22 @@ package entities
 
 import (
 	"time"
-
-	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
 type BookMetadata struct {
-	Author string `bson:"author"`
-	ISBN   string `bson:"isbn"`
-	Genre  string `bson:"genre"`
+	Author string
+	ISBN   string
+	Genre  string
 }
 
 type Book struct {
-	ID bson.ObjectID `bson:"_id,omitempty"`
+	ID string
 
-	Name             string       `bson:"name"`
-	Description      string       `bson:"description"`
-	Metadata         BookMetadata `bson:"metadata"`
-	CoverImageFileID string       `bson:"coverImageFileID"`
+	Name             string
+	Description      string
+	Metadata         BookMetadata
+	CoverImageFileID string
 
-	CreatedAt  time.Time `bson:"createdAt"`
-	ModifiedAt time.Time `bson:"modifiedAt"`
+	CreatedAt  time.Time
+	ModifiedAt time.Time
 }

@@ -100,7 +100,7 @@ func convertBooks(books []entities.Book) []models.BookOutput {
 
 func convertBook(book entities.Book) models.BookOutput {
 	return models.BookOutput{
-		ID:          book.ID.Hex(),
+		ID:          book.ID,
 		Name:        book.Name,
 		Description: book.Description,
 		Metadata: models.BookMetadata{

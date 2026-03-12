@@ -158,6 +158,7 @@
           },
           "bookID": {
             "description": "Parent Book ID",
+            "pattern": "^[a-fA-F0-9]{24}$",
             "type": "string"
           },
           "content": {
@@ -592,6 +593,7 @@
             "required": true,
             "schema": {
               "description": "Parent Book ID",
+              "pattern": "^[a-fA-F0-9]{24}$",
               "type": "string"
             }
           },
@@ -716,6 +718,7 @@
             "required": true,
             "schema": {
               "description": "Book ID to query",
+              "pattern": "^[a-fA-F0-9]{24}$",
               "type": "string"
             }
           },
@@ -786,6 +789,7 @@
             "required": true,
             "schema": {
               "description": "Parent Book ID",
+              "pattern": "^[a-fA-F0-9]{24}$",
               "type": "string"
             }
           },
@@ -854,6 +858,7 @@
             "required": true,
             "schema": {
               "description": "Entry ID",
+              "pattern": "^[a-fA-F0-9]{24}$",
               "type": "string"
             }
           }
@@ -1011,6 +1016,7 @@
             "required": true,
             "schema": {
               "description": "Book ID",
+              "pattern": "^[a-fA-F0-9]{24}$",
               "type": "string"
             }
           }
@@ -1059,6 +1065,7 @@
               "examples": [
                 "123"
               ],
+              "pattern": "^[a-fA-F0-9]{24}$",
               "type": "string"
             }
           }

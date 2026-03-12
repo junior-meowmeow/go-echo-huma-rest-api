@@ -31,7 +31,7 @@ func NewBookPagesUseCase(booksRepo mongo_repositories.BooksRepository, bookPages
 }
 
 func (u *bookPagesUseCase) CreateBookPage(ctx context.Context, bookPage *entities.BookPage) (string, error) {
-	_, err := u.BooksRepository.GetBookByID(ctx, bookPage.BookID.Hex())
+	_, err := u.BooksRepository.GetBookByID(ctx, bookPage.BookID)
 	if err != nil {
 		return "", fmt.Errorf("failed to fetch book: %w", err)
 	}

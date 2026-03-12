@@ -115,6 +115,7 @@ components:
           type: string
         bookID:
           description: Parent Book ID
+          pattern: ^[a-fA-F0-9]{24}$
           type: string
         content:
           description: Page content
@@ -417,6 +418,7 @@ paths:
           required: true
           schema:
             description: Parent Book ID
+            pattern: ^[a-fA-F0-9]{24}$
             type: string
         - description: If true, returns all book pages ignoring pagination
           explode: false
@@ -501,6 +503,7 @@ paths:
           required: true
           schema:
             description: Book ID to query
+            pattern: ^[a-fA-F0-9]{24}$
             type: string
         - description: Center page to be offset from
           explode: false
@@ -549,6 +552,7 @@ paths:
           required: true
           schema:
             description: Parent Book ID
+            pattern: ^[a-fA-F0-9]{24}$
             type: string
         - description: Start page number
           explode: false
@@ -595,6 +599,7 @@ paths:
           required: true
           schema:
             description: Entry ID
+            pattern: ^[a-fA-F0-9]{24}$
             type: string
       responses:
         "200":
@@ -699,6 +704,7 @@ paths:
           required: true
           schema:
             description: Book ID
+            pattern: ^[a-fA-F0-9]{24}$
             type: string
       responses:
         "200":
@@ -730,6 +736,7 @@ paths:
             description: file id
             examples:
               - "123"
+            pattern: ^[a-fA-F0-9]{24}$
             type: string
       responses:
         "200":

@@ -7,7 +7,7 @@ type BookPageMetadata struct {
 
 type CreateBookPageInput struct {
 	Body struct {
-		BookID              string           `json:"bookID" doc:"Parent Book ID"`
+		BookID              string           `json:"bookID" pattern:"^[a-fA-F0-9]{24}$" doc:"Parent Book ID"`
 		PageNumber          int64            `json:"pageNumber" doc:"Page number"`
 		Content             string           `json:"content" doc:"Page content"`
 		Metadata            BookPageMetadata `json:"metadata" doc:"Metadata of the book page"`
@@ -33,7 +33,7 @@ type BookPageOutput struct {
 }
 
 type GetBookPagesInput struct {
-	BookID     string `query:"bookId" required:"true" doc:"Parent Book ID"`
+	BookID     string `query:"bookId" pattern:"^[a-fA-F0-9]{24}$" required:"true" doc:"Parent Book ID"`
 	GetAll     bool   `query:"all" required:"true" default:"false" doc:"If true, returns all book pages ignoring pagination"`
 	PageNumber int64  `query:"pageNumber" default:"1" minimum:"1" doc:"Page number"`
 	PageSize   int64  `query:"pageSize" default:"50" minimum:"1" maximum:"500" doc:"Items per page"`
@@ -48,19 +48,19 @@ type GetBookPagesOutput struct {
 }
 
 type GetBookPagesRangeInput struct {
-	BookID    string `query:"bookId" required:"true" doc:"Parent Book ID"`
+	BookID    string `query:"bookId" pattern:"^[a-fA-F0-9]{24}$" required:"true" doc:"Parent Book ID"`
 	StartPage int64  `query:"startPage" required:"true" doc:"Start page number"`
 	EndPage   int64  `query:"endPage" required:"true" doc:"End page number"`
 }
 
 type GetBookPagesOffsetInput struct {
-	BookID     string `query:"bookId" required:"true" doc:"Book ID to query"`
+	BookID     string `query:"bookId" pattern:"^[a-fA-F0-9]{24}$" required:"true" doc:"Book ID to query"`
 	CenterPage int64  `query:"centerPage" required:"true" doc:"Center page to be offset from"`
 	Offset     int64  `query:"offset" required:"true" default:"10" doc:"Number of frames before/after center"`
 }
 
 type GetBookPageByIDInput struct {
-	ID string `path:"id" doc:"Entry ID"`
+	ID string `path:"id" pattern:"^[a-fA-F0-9]{24}$" doc:"Entry ID"`
 }
 
 type GetBookPageByIDOutput struct {

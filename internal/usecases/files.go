@@ -71,7 +71,7 @@ func (u *filesUseCase) UploadFile(ctx context.Context, fileStream io.Reader, fil
 		ModifiedAt:  currentTime,
 	}
 
-	id, err := u.FileMetadataRepository.SaveFileMetadata(ctx, record)
+	id, err := u.FileMetadataRepository.CreateFileMetadata(ctx, record)
 	if err != nil {
 		return "", fmt.Errorf("failed to save file metadata: %w", err)
 	}

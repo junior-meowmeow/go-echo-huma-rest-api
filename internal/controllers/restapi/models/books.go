@@ -49,7 +49,7 @@ type GetBooksOutput struct {
 }
 
 type GetBookByIDInput struct {
-	ID string `path:"id" required:"true" doc:"Book ID"`
+	ID string `path:"id" pattern:"^[a-fA-F0-9]{24}$" required:"true" doc:"Book ID"`
 }
 
 type GetBookByIDOutput struct {

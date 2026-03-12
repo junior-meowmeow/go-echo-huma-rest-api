@@ -2,13 +2,10 @@ package handlers
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/controllers/restapi/models"
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/entities"
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/usecases"
-
-	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
 type BookPagesHandler interface {
@@ -30,14 +27,9 @@ func NewBookPagesHandler(bookPagesUseCase usecases.BookPagesUseCase) *bookPagesH
 }
 
 func (h *bookPagesHandler) CreateBookPage(ctx context.Context, input *models.CreateBookPageInput) (*models.CreateBookPageOutput, error) {
-	bookOID, err := bson.ObjectIDFromHex(input.Body.BookID)
-	if err != nil {
-		return nil, fmt.Errorf("invalid book ID format: %w", err)
-	}
-
 	metadata := input.Body.Metadata
 	bookPage := &entities.BookPage{
-		BookID:     bookOID,
+		BookID:     input.Body.BookID,
 		PageNumber: input.Body.PageNumber,
 		Content:    input.Body.Content,
 		Metadata: entities.BookPageMetadata{
@@ -145,8 +137,8 @@ func convertBookPages(bookPages []entities.BookPage) []models.BookPageOutput {
 
 func convertBookPage(bookPage entities.BookPage) models.BookPageOutput {
 	return models.BookPageOutput{
-		ID:         bookPage.ID.Hex(),
-		BookID:     bookPage.BookID.Hex(),
+		ID:         bookPage.ID,
+		BookID:     bookPage.BookID,
 		PageNumber: bookPage.PageNumber,
 		Content:    bookPage.Content,
 		Metadata: models.BookPageMetadata{
