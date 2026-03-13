@@ -25,10 +25,10 @@ func RegisterBookRoutes(api huma.API, h *handler.Handlers) {
 	}, h.Book.CreateBook)
 
 	huma.Register(api, huma.Operation{
-		OperationID: "list-books",
+		OperationID: "get-books",
 		Method:      http.MethodGet,
 		Path:        "/",
-		Summary:     "List Books",
+		Summary:     "Get Books",
 		Description: "Get a list of books.",
 		Tags:        []string{"Books"},
 	}, h.Book.GetBooks)

@@ -15,14 +15,14 @@ func RegisterReviewGroup(api huma.API, h *handler.Handlers) {
 
 func RegisterReviewRoutes(api huma.API, h *handler.Handlers) {
 	huma.Register(api, huma.Operation{
-		OperationID:   "post-review",
+		OperationID:   "create-review",
 		Method:        http.MethodPost,
 		Path:          "/",
 		Summary:       "Post new review",
 		Description:   "Post a new review to database.",
 		Tags:          []string{"Reviews"},
 		DefaultStatus: http.StatusCreated,
-	}, h.Review.PostReview)
+	}, h.Review.CreateReview)
 
 	huma.Register(api, huma.Operation{
 		OperationID: "get-reviews",

@@ -8,7 +8,7 @@ import (
 )
 
 type HealthHandler interface {
-	GetHealthStatus(ctx context.Context, _ *struct{}) (*schema.HealthOutput, error)
+	GetHealthStatus(ctx context.Context, request *schema.GetHealthStatusRequest) (*schema.GetHealthStatusResponse, error)
 }
 
 type healthHandler struct {
@@ -21,17 +21,14 @@ func NewHealthHandler(healthUseCase usecase.HealthUseCase) *healthHandler {
 	}
 }
 
-func (h *healthHandler) GetHealthStatus(ctx context.Context, _ *struct{}) (*schema.HealthOutput, error) {
+func (h *healthHandler) GetHealthStatus(ctx context.Context, _ *schema.GetHealthStatusRequest) (*schema.GetHealthStatusResponse, error) {
 	status, err := h.HealthUseCase.GetHealthStatus(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	resp := schema.HealthOutput{
-		Body: schema.HealthBody{
-			Status: status,
-		},
-	}
+	resp := schema.GetHealthStatusResponse{}
+	resp.Body.Status = status
 
 	return &resp, nil
 }

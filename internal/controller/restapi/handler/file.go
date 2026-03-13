@@ -8,9 +8,9 @@ import (
 )
 
 type FileHandler interface {
-	UploadFile(ctx context.Context, input *schema.UploadFileInput) (*schema.UploadFileOutput, error)
-	GetFileDownloadLink(ctx context.Context, input *schema.GetFileDownloadLinkInput) (*schema.GetFileDownloadLinkOutput, error)
-	ListS3Files(ctx context.Context, input *struct{}) (*schema.ListS3FilesOutput, error)
+	UploadFile(ctx context.Context, request *schema.UploadFileRequest) (*schema.UploadFileResponse, error)
+	GetFileDownloadLink(ctx context.Context, request *schema.GetFileDownloadLinkRequest) (*schema.GetFileDownloadLinkResponse, error)
+	GetS3FileList(ctx context.Context, request *schema.GetS3FileListRequest) (*schema.GetS3FileListResponse, error)
 }
 
 type fileHandler struct {
@@ -23,7 +23,7 @@ func NewFileHandler(fileUseCase usecase.FileUseCase) *fileHandler {
 	}
 }
 
-func (h *fileHandler) UploadFile(ctx context.Context, input *schema.UploadFileInput) (*schema.UploadFileOutput, error) {
+func (h *fileHandler) UploadFile(ctx context.Context, input *schema.UploadFileRequest) (*schema.UploadFileResponse, error) {
 	formData := input.RawBody.Data()
 	uploadedFile := formData.File
 
@@ -39,24 +39,21 @@ func (h *fileHandler) UploadFile(ctx context.Context, input *schema.UploadFileIn
 		return nil, err
 	}
 
-	resp := schema.UploadFileOutput{
-		Body: schema.FileRecord{
-			FileID: id,
-		},
-	}
+	resp := schema.UploadFileResponse{}
+	resp.Body.ID = id
 
 	return &resp, nil
 }
 
-func (h *fileHandler) GetFileDownloadLink(ctx context.Context, input *schema.GetFileDownloadLinkInput) (*schema.GetFileDownloadLinkOutput, error) {
-	url, expiresAt, filename, err := h.FileUseCase.GetFileDownloadLink(ctx, input.FileID)
+func (h *fileHandler) GetFileDownloadLink(ctx context.Context, request *schema.GetFileDownloadLinkRequest) (*schema.GetFileDownloadLinkResponse, error) {
+	url, expiresAt, fileName, err := h.FileUseCase.GetFileDownloadLink(ctx, request.ID)
 	if err != nil {
 		return nil, err
 	}
 
-	resp := schema.GetFileDownloadLinkOutput{
-		Body: schema.DownloadFileBody{
-			Filename:    filename,
+	resp := schema.GetFileDownloadLinkResponse{
+		Body: schema.FileDownloadInfo{
+			FileName:    fileName,
 			DownloadURL: url,
 			ExpiresAt:   expiresAt,
 		},
@@ -65,18 +62,15 @@ func (h *fileHandler) GetFileDownloadLink(ctx context.Context, input *schema.Get
 	return &resp, nil
 }
 
-func (h *fileHandler) ListS3Files(ctx context.Context, _ *struct{}) (*schema.ListS3FilesOutput, error) {
-	fileKeys, err := h.FileUseCase.ListS3Files(ctx)
+func (h *fileHandler) GetS3FileList(ctx context.Context, _ *schema.GetS3FileListRequest) (*schema.GetS3FileListResponse, error) {
+	fileKeys, err := h.FileUseCase.GetS3FileList(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	resp := schema.ListS3FilesOutput{
-		Body: schema.ListS3FilesBody{
-			Files: fileKeys,
-			Count: len(fileKeys),
-		},
-	}
+	resp := schema.GetS3FileListResponse{}
+	resp.Body.Files = fileKeys
+	resp.Body.Count = len(fileKeys)
 
 	return &resp, nil
 }

@@ -1,6 +1,51 @@
 {
   "components": {
     "schemas": {
+      "Book": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "example": "https://example.com/schemas/Book.json",
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "coverImageFileId": {
+            "description": "File ID of the cover image",
+            "type": "string"
+          },
+          "createdAt": {
+            "description": "Timestamp when the book was created",
+            "format": "date-time",
+            "type": "string"
+          },
+          "description": {
+            "description": "Book description",
+            "type": "string"
+          },
+          "id": {
+            "description": "Book ID",
+            "type": "string"
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/BookMetadata",
+            "description": "Metadata of the book"
+          },
+          "name": {
+            "description": "Book name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "description",
+          "metadata",
+          "createdAt"
+        ],
+        "type": "object"
+      },
       "BookMetadata": {
         "additionalProperties": false,
         "properties": {
@@ -24,34 +69,48 @@
         ],
         "type": "object"
       },
-      "BookOutput": {
+      "BookPage": {
         "additionalProperties": false,
         "properties": {
-          "coverImageFileId": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "example": "https://example.com/schemas/BookPage.json",
+            "format": "uri",
+            "readOnly": true,
             "type": "string"
           },
-          "createdAt": {
-            "format": "date-time",
+          "attachedImageFileId": {
+            "description": "File ID of the attached image",
             "type": "string"
           },
-          "description": {
+          "bookId": {
+            "description": "Parent Book ID",
+            "type": "string"
+          },
+          "content": {
+            "description": "Text content of the page",
             "type": "string"
           },
           "id": {
+            "description": "Book Page ID",
             "type": "string"
           },
           "metadata": {
-            "$ref": "#/components/schemas/BookMetadata"
+            "$ref": "#/components/schemas/BookPageMetadata",
+            "description": "Metadata of the book page"
           },
-          "name": {
-            "type": "string"
+          "pageNumber": {
+            "description": "Page number within the book",
+            "format": "int64",
+            "type": "integer"
           }
         },
         "required": [
           "id",
-          "name",
-          "metadata",
-          "createdAt"
+          "bookId",
+          "pageNumber",
+          "content",
+          "metadata"
         ],
         "type": "object"
       },
@@ -73,85 +132,18 @@
         ],
         "type": "object"
       },
-      "BookPageOutput": {
+      "CreateBookPageRequestBody": {
         "additionalProperties": false,
         "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "example": "https://example.com/schemas/CreateBookPageRequestBody.json",
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
           "attachedImageFileId": {
-            "type": "string"
-          },
-          "bookId": {
-            "type": "string"
-          },
-          "content": {
-            "type": "string"
-          },
-          "id": {
-            "type": "string"
-          },
-          "metadata": {
-            "$ref": "#/components/schemas/BookPageMetadata"
-          },
-          "pageNumber": {
-            "format": "int64",
-            "type": "integer"
-          }
-        },
-        "required": [
-          "id",
-          "bookId",
-          "pageNumber",
-          "content",
-          "metadata"
-        ],
-        "type": "object"
-      },
-      "CreateBookInputBody": {
-        "additionalProperties": false,
-        "properties": {
-          "coverImageFileId": {
-            "description": "File ID for preview image",
-            "type": "string"
-          },
-          "description": {
-            "description": "Description",
-            "maxLength": 500,
-            "type": "string"
-          },
-          "metadata": {
-            "$ref": "#/components/schemas/BookMetadata",
-            "description": "Metadata of the book"
-          },
-          "name": {
-            "description": "books name",
-            "example": "New Book",
-            "maxLength": 100,
-            "type": "string"
-          }
-        },
-        "required": [
-          "name",
-          "metadata"
-        ],
-        "type": "object"
-      },
-      "CreateBookOutputBody": {
-        "additionalProperties": false,
-        "properties": {
-          "id": {
-            "description": "Created Book ID",
-            "type": "string"
-          }
-        },
-        "required": [
-          "id"
-        ],
-        "type": "object"
-      },
-      "CreateBookPageInputBody": {
-        "additionalProperties": false,
-        "properties": {
-          "attachedImageFileId": {
-            "description": "File ID for the attached image",
+            "description": "File ID of the attached image",
             "type": "string"
           },
           "bookID": {
@@ -160,7 +152,7 @@
             "type": "string"
           },
           "content": {
-            "description": "Page content",
+            "description": "Text content of the page",
             "type": "string"
           },
           "metadata": {
@@ -168,7 +160,7 @@
             "description": "Metadata of the book page"
           },
           "pageNumber": {
-            "description": "Page number",
+            "description": "Page number within the book",
             "format": "int64",
             "type": "integer"
           }
@@ -181,9 +173,16 @@
         ],
         "type": "object"
       },
-      "CreateBookPageOutputBody": {
+      "CreateBookPageResponseBody": {
         "additionalProperties": false,
         "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "example": "https://example.com/schemas/CreateBookPageResponseBody.json",
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
           "id": {
             "type": "string"
           }
@@ -193,24 +192,96 @@
         ],
         "type": "object"
       },
-      "DownloadFileBody": {
+      "CreateBookRequestBody": {
         "additionalProperties": false,
         "properties": {
-          "downloadUrl": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "example": "https://example.com/schemas/CreateBookRequestBody.json",
+            "format": "uri",
+            "readOnly": true,
             "type": "string"
           },
-          "expiresAt": {
-            "format": "date-time",
+          "coverImageFileId": {
+            "description": "File ID of the book cover image",
             "type": "string"
           },
-          "filename": {
+          "description": {
+            "description": "Book description",
+            "maxLength": 500,
+            "type": "string"
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/BookMetadata",
+            "description": "Metadata of the book"
+          },
+          "name": {
+            "description": "Book name",
+            "example": "New Book",
+            "maxLength": 100,
             "type": "string"
           }
         },
         "required": [
-          "filename",
-          "downloadUrl",
-          "expiresAt"
+          "name",
+          "metadata"
+        ],
+        "type": "object"
+      },
+      "CreateBookResponseBody": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "example": "https://example.com/schemas/CreateBookResponseBody.json",
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "id": {
+            "description": "Created Book ID",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      },
+      "CreateReviewRequestBody": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "example": "https://example.com/schemas/CreateReviewRequestBody.json",
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "author": {
+            "description": "Name of the review author",
+            "example": "User",
+            "maxLength": 10,
+            "type": "string"
+          },
+          "message": {
+            "description": "Review message",
+            "example": "Lorem Ipsum",
+            "maxLength": 100,
+            "type": "string"
+          },
+          "rating": {
+            "description": "Rating from 1 to 5",
+            "example": 2,
+            "format": "int64",
+            "maximum": 5,
+            "minimum": 1,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "author",
+          "rating"
         ],
         "type": "object"
       },
@@ -234,6 +305,13 @@
       "ErrorModel": {
         "additionalProperties": false,
         "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "example": "https://example.com/schemas/ErrorModel.json",
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
           "detail": {
             "description": "A human-readable explanation specific to this occurrence of the problem.",
             "example": "Property foo is required but is missing.",
@@ -274,25 +352,51 @@
         },
         "type": "object"
       },
-      "FileMetadata": {
+      "FileDownloadInfo": {
         "additionalProperties": false,
         "properties": {
-          "fileid": {
-            "description": "File ID",
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "example": "https://example.com/schemas/FileDownloadInfo.json",
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "downloadUrl": {
+            "description": "Temporary download URL",
+            "type": "string"
+          },
+          "expiresAt": {
+            "description": "Timestamp when the download URL expires",
+            "format": "date-time",
+            "type": "string"
+          },
+          "fileName": {
+            "description": "File name",
             "type": "string"
           }
         },
         "required": [
-          "fileid"
+          "fileName",
+          "downloadUrl",
+          "expiresAt"
         ],
         "type": "object"
       },
-      "GetBookPagesOutputBody": {
+      "GetBookPagesResponseBody": {
         "additionalProperties": false,
         "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "example": "https://example.com/schemas/GetBookPagesResponseBody.json",
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
           "data": {
+            "description": "List of book pages",
             "items": {
-              "$ref": "#/components/schemas/BookPageOutput"
+              "$ref": "#/components/schemas/BookPage"
             },
             "nullable": true,
             "type": "array"
@@ -303,12 +407,19 @@
         ],
         "type": "object"
       },
-      "GetBooksOutputBody": {
+      "GetBooksResponseBody": {
         "additionalProperties": false,
         "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "example": "https://example.com/schemas/GetBooksResponseBody.json",
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
           "data": {
             "items": {
-              "$ref": "#/components/schemas/BookOutput"
+              "$ref": "#/components/schemas/Book"
             },
             "nullable": true,
             "type": "array"
@@ -319,23 +430,16 @@
         ],
         "type": "object"
       },
-      "GreetingOutputBody": {
+      "GetHealthStatusResponseBody": {
         "additionalProperties": false,
         "properties": {
-          "message": {
-            "description": "Greeting message",
-            "example": "Hello, world!",
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "example": "https://example.com/schemas/GetHealthStatusResponseBody.json",
+            "format": "uri",
+            "readOnly": true,
             "type": "string"
-          }
-        },
-        "required": [
-          "message"
-        ],
-        "type": "object"
-      },
-      "HealthBody": {
-        "additionalProperties": false,
-        "properties": {
+          },
           "status": {
             "description": "Status of the server",
             "example": "ok",
@@ -347,9 +451,40 @@
         ],
         "type": "object"
       },
-      "ListS3FilesBody": {
+      "GetReviewsResponseBody": {
         "additionalProperties": false,
         "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "example": "https://example.com/schemas/GetReviewsResponseBody.json",
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "data": {
+            "description": "List of reviews",
+            "items": {
+              "$ref": "#/components/schemas/Review"
+            },
+            "nullable": true,
+            "type": "array"
+          }
+        },
+        "required": [
+          "data"
+        ],
+        "type": "object"
+      },
+      "GetS3FileListResponseBody": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "example": "https://example.com/schemas/GetS3FileListResponseBody.json",
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
           "count": {
             "description": "Total number of files found",
             "format": "int64",
@@ -370,53 +505,49 @@
         ],
         "type": "object"
       },
-      "ReviewInputBody": {
+      "GreetingResponseBody": {
         "additionalProperties": false,
         "properties": {
-          "author": {
-            "description": "Author of the review",
-            "example": "User",
-            "maxLength": 10,
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "example": "https://example.com/schemas/GreetingResponseBody.json",
+            "format": "uri",
+            "readOnly": true,
             "type": "string"
           },
           "message": {
-            "description": "Review message",
-            "example": "Lorem Ipsum",
-            "maxLength": 100,
+            "description": "Greeting message",
+            "example": "Hello, world!",
             "type": "string"
-          },
-          "rating": {
-            "description": "Rating from 1 to 5",
-            "example": 2,
-            "format": "int64",
-            "maximum": 5,
-            "minimum": 1,
-            "type": "integer"
           }
         },
         "required": [
-          "author",
-          "rating"
+          "message"
         ],
         "type": "object"
       },
-      "ReviewOutput": {
+      "Review": {
         "additionalProperties": false,
         "properties": {
           "author": {
+            "description": "Name of the review author",
             "type": "string"
           },
           "createdAt": {
+            "description": "Timestamp when the review was created",
             "format": "date-time",
             "type": "string"
           },
           "id": {
+            "description": "Review ID",
             "type": "string"
           },
           "message": {
+            "description": "Review message",
             "type": "string"
           },
           "rating": {
+            "description": "Rating from 1 to 5",
             "format": "int64",
             "type": "integer"
           }
@@ -426,6 +557,26 @@
           "author",
           "rating",
           "createdAt"
+        ],
+        "type": "object"
+      },
+      "UploadFileResponseBody": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "example": "https://example.com/schemas/UploadFileResponseBody.json",
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "id": {
+            "description": "Uploaded File ID",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
         ],
         "type": "object"
       }
@@ -461,7 +612,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/GreetingOutputBody"
+                  "$ref": "#/components/schemas/GreetingResponseBody"
                 }
               }
             },
@@ -493,7 +644,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/HealthBody"
+                  "$ref": "#/components/schemas/GetHealthStatusResponseBody"
                 }
               }
             },
@@ -525,7 +676,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ListS3FilesBody"
+                  "$ref": "#/components/schemas/GetS3FileListResponseBody"
                 }
               }
             },
@@ -548,10 +699,10 @@
         ]
       }
     },
-    "/v1/book_pages": {
+    "/v1/book_pages/": {
       "get": {
-        "description": "List book pages in a book.",
-        "operationId": "list-book-pages-v1",
+        "description": "Get book pages in a book.",
+        "operationId": "get-book-pages-v1",
         "parameters": [
           {
             "description": "Parent Book ID",
@@ -566,14 +717,14 @@
             }
           },
           {
-            "description": "If true, returns all book pages ignoring pagination",
+            "description": "If true, returns all items ignoring pagination",
             "explode": false,
             "in": "query",
             "name": "all",
             "required": true,
             "schema": {
               "default": false,
-              "description": "If true, returns all book pages ignoring pagination",
+              "description": "If true, returns all items ignoring pagination",
               "type": "boolean"
             }
           },
@@ -610,7 +761,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/GetBookPagesOutputBody"
+                  "$ref": "#/components/schemas/GetBookPagesResponseBody"
                 }
               }
             },
@@ -627,7 +778,7 @@
             "description": "Error"
           }
         },
-        "summary": "List Book Pages (V1)",
+        "summary": "Get Book Pages (V1)",
         "tags": [
           "Book Pages"
         ]
@@ -639,7 +790,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/CreateBookPageInputBody"
+                "$ref": "#/components/schemas/CreateBookPageRequestBody"
               }
             }
           },
@@ -650,7 +801,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/CreateBookPageOutputBody"
+                  "$ref": "#/components/schemas/CreateBookPageResponseBody"
                 }
               }
             },
@@ -676,78 +827,7 @@
     "/v1/book_pages/offset": {
       "get": {
         "description": "Get N book pages before and after specified page number.",
-        "operationId": "list-book-pages-offset-v1",
-        "parameters": [
-          {
-            "description": "Book ID to query",
-            "explode": false,
-            "in": "query",
-            "name": "bookId",
-            "required": true,
-            "schema": {
-              "description": "Book ID to query",
-              "pattern": "^[a-fA-F0-9]{24}$",
-              "type": "string"
-            }
-          },
-          {
-            "description": "Center page to be offset from",
-            "explode": false,
-            "in": "query",
-            "name": "centerPage",
-            "required": true,
-            "schema": {
-              "description": "Center page to be offset from",
-              "format": "int64",
-              "type": "integer"
-            }
-          },
-          {
-            "description": "Number of frames before/after center",
-            "explode": false,
-            "in": "query",
-            "name": "offset",
-            "required": true,
-            "schema": {
-              "default": 10,
-              "description": "Number of frames before/after center",
-              "format": "int64",
-              "type": "integer"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetBookPagesOutputBody"
-                }
-              }
-            },
-            "description": "OK"
-          },
-          "default": {
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorModel"
-                }
-              }
-            },
-            "description": "Error"
-          }
-        },
-        "summary": "List Book Pages (Offset) (V1)",
-        "tags": [
-          "Book Pages"
-        ]
-      }
-    },
-    "/v1/book_pages/range": {
-      "get": {
-        "description": "Get book pages within start/end page number.",
-        "operationId": "list-book-pages-range-v1",
+        "operationId": "get-book-pages-offset-v1",
         "parameters": [
           {
             "description": "Parent Book ID",
@@ -762,25 +842,26 @@
             }
           },
           {
-            "description": "Start page number",
+            "description": "Center page used as the reference point",
             "explode": false,
             "in": "query",
-            "name": "startPage",
+            "name": "centerPage",
             "required": true,
             "schema": {
-              "description": "Start page number",
+              "description": "Center page used as the reference point",
               "format": "int64",
               "type": "integer"
             }
           },
           {
-            "description": "End page number",
+            "description": "Number of pages to include before and after the center page",
             "explode": false,
             "in": "query",
-            "name": "endPage",
+            "name": "offset",
             "required": true,
             "schema": {
-              "description": "End page number",
+              "default": 10,
+              "description": "Number of pages to include before and after the center page",
               "format": "int64",
               "type": "integer"
             }
@@ -791,7 +872,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/GetBookPagesOutputBody"
+                  "$ref": "#/components/schemas/GetBookPagesResponseBody"
                 }
               }
             },
@@ -808,7 +889,77 @@
             "description": "Error"
           }
         },
-        "summary": "List Book Pages (Page Range) (V1)",
+        "summary": "Get Book Pages (Offset) (V1)",
+        "tags": [
+          "Book Pages"
+        ]
+      }
+    },
+    "/v1/book_pages/range": {
+      "get": {
+        "description": "Get book pages within start/end page number.",
+        "operationId": "get-book-pages-range-v1",
+        "parameters": [
+          {
+            "description": "Parent Book ID",
+            "explode": false,
+            "in": "query",
+            "name": "bookId",
+            "required": true,
+            "schema": {
+              "description": "Parent Book ID",
+              "pattern": "^[a-fA-F0-9]{24}$",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Start page number (inclusive)",
+            "explode": false,
+            "in": "query",
+            "name": "startPage",
+            "required": true,
+            "schema": {
+              "description": "Start page number (inclusive)",
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "End page number (inclusive)",
+            "explode": false,
+            "in": "query",
+            "name": "endPage",
+            "required": true,
+            "schema": {
+              "description": "End page number (inclusive)",
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetBookPagesResponseBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get Book Pages (Page Range) (V1)",
         "tags": [
           "Book Pages"
         ]
@@ -820,12 +971,12 @@
         "operationId": "get-book-page-by-id-v1",
         "parameters": [
           {
-            "description": "Entry ID",
+            "description": "Book Page ID",
             "in": "path",
             "name": "id",
             "required": true,
             "schema": {
-              "description": "Entry ID",
+              "description": "Book Page ID",
               "pattern": "^[a-fA-F0-9]{24}$",
               "type": "string"
             }
@@ -836,7 +987,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/BookPageOutput"
+                  "$ref": "#/components/schemas/BookPage"
                 }
               }
             },
@@ -859,20 +1010,20 @@
         ]
       }
     },
-    "/v1/books": {
+    "/v1/books/": {
       "get": {
         "description": "Get a list of books.",
-        "operationId": "list-books-v1",
+        "operationId": "get-books-v1",
         "parameters": [
           {
-            "description": "If true, returns all books ignoring pagination",
+            "description": "If true, returns all items ignoring pagination",
             "explode": false,
             "in": "query",
             "name": "all",
             "required": true,
             "schema": {
               "default": false,
-              "description": "If true, returns all books ignoring pagination",
+              "description": "If true, returns all items ignoring pagination",
               "type": "boolean"
             }
           },
@@ -909,7 +1060,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/GetBooksOutputBody"
+                  "$ref": "#/components/schemas/GetBooksResponseBody"
                 }
               }
             },
@@ -926,7 +1077,7 @@
             "description": "Error"
           }
         },
-        "summary": "List Books (V1)",
+        "summary": "Get Books (V1)",
         "tags": [
           "Books"
         ]
@@ -938,7 +1089,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/CreateBookInputBody"
+                "$ref": "#/components/schemas/CreateBookRequestBody"
               }
             }
           },
@@ -949,7 +1100,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/CreateBookOutputBody"
+                  "$ref": "#/components/schemas/CreateBookResponseBody"
                 }
               }
             },
@@ -994,7 +1145,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/BookOutput"
+                  "$ref": "#/components/schemas/Book"
                 }
               }
             },
@@ -1020,17 +1171,15 @@
     "/v1/files/download/{id}": {
       "get": {
         "description": "Get a file from object storage.",
-        "operationId": "get-s3-file-v1",
+        "operationId": "get-file-download-link-v1",
         "parameters": [
           {
-            "description": "file id",
-            "example": "123",
+            "description": "File ID",
             "explode": false,
             "in": "query",
             "name": "id",
             "schema": {
-              "description": "file id",
-              "example": "123",
+              "description": "File ID",
               "pattern": "^[a-fA-F0-9]{24}$",
               "type": "string"
             }
@@ -1041,7 +1190,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/DownloadFileBody"
+                  "$ref": "#/components/schemas/FileDownloadInfo"
                 }
               }
             },
@@ -1067,7 +1216,7 @@
     "/v1/files/upload": {
       "post": {
         "description": "Upload a file to object storage.",
-        "operationId": "upload-s3-file-v1",
+        "operationId": "upload-file-v1",
         "requestBody": {
           "content": {
             "multipart/form-data": {
@@ -1084,7 +1233,7 @@
                   "file": {
                     "contentEncoding": "binary",
                     "contentMediaType": "application/octet-stream",
-                    "description": "The file content to upload",
+                    "description": "File content to upload",
                     "format": "binary",
                     "type": "string"
                   },
@@ -1106,7 +1255,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/FileMetadata"
+                  "$ref": "#/components/schemas/UploadFileResponseBody"
                 }
               }
             },
@@ -1129,7 +1278,7 @@
         ]
       }
     },
-    "/v1/reviews": {
+    "/v1/reviews/": {
       "get": {
         "description": "Get all reviews from database.",
         "operationId": "get-reviews-v1",
@@ -1138,11 +1287,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "items": {
-                    "$ref": "#/components/schemas/ReviewOutput"
-                  },
-                  "nullable": true,
-                  "type": "array"
+                  "$ref": "#/components/schemas/GetReviewsResponseBody"
                 }
               }
             },
@@ -1166,12 +1311,12 @@
       },
       "post": {
         "description": "Post a new review to database.",
-        "operationId": "post-review-v1",
+        "operationId": "create-review-v1",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/ReviewInputBody"
+                "$ref": "#/components/schemas/CreateReviewRequestBody"
               }
             }
           },

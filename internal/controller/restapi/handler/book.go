@@ -9,9 +9,9 @@ import (
 )
 
 type BookHandler interface {
-	CreateBook(ctx context.Context, input *schema.CreateBookInput) (*schema.CreateBookOutput, error)
-	GetBooks(ctx context.Context, input *schema.GetBooksInput) (*schema.GetBooksOutput, error)
-	GetBookByID(ctx context.Context, input *schema.GetBookByIDInput) (*schema.GetBookByIDOutput, error)
+	CreateBook(ctx context.Context, request *schema.CreateBookRequest) (*schema.CreateBookResponse, error)
+	GetBooks(ctx context.Context, request *schema.GetBooksRequest) (*schema.GetBooksResponse, error)
+	GetBookByID(ctx context.Context, request *schema.GetBookByIDRequest) (*schema.GetBookByIDResponse, error)
 }
 
 type bookHandler struct {
@@ -24,16 +24,16 @@ func NewBookHandler(bookUseCase usecase.BookUseCase) *bookHandler {
 	}
 }
 
-func (h *bookHandler) CreateBook(ctx context.Context, input *schema.CreateBookInput) (*schema.CreateBookOutput, error) {
+func (h *bookHandler) CreateBook(ctx context.Context, request *schema.CreateBookRequest) (*schema.CreateBookResponse, error) {
 	book := &entity.Book{
-		Name:        input.Body.Name,
-		Description: input.Body.Description,
+		Name:        request.Body.Name,
+		Description: request.Body.Description,
 		Metadata: entity.BookMetadata{
-			Author: input.Body.Metadata.Author,
-			ISBN:   input.Body.Metadata.ISBN,
-			Genre:  input.Body.Metadata.Genre,
+			Author: request.Body.Metadata.Author,
+			ISBN:   request.Body.Metadata.ISBN,
+			Genre:  request.Body.Metadata.Genre,
 		},
-		CoverImageFileID: input.Body.CoverImageFileID,
+		CoverImageFileID: request.Body.CoverImageFileID,
 	}
 
 	id, err := h.BookUseCase.CreateBook(ctx, book)
@@ -41,23 +41,20 @@ func (h *bookHandler) CreateBook(ctx context.Context, input *schema.CreateBookIn
 		return nil, err
 	}
 
-	resp := schema.CreateBookOutput{
-		Body: schema.CreateBookOutputBody{
-			ID: id,
-		},
-	}
+	resp := schema.CreateBookResponse{}
+	resp.Body.ID = id
 
 	return &resp, nil
 }
 
-func (h *bookHandler) GetBooks(ctx context.Context, input *schema.GetBooksInput) (*schema.GetBooksOutput, error) {
+func (h *bookHandler) GetBooks(ctx context.Context, request *schema.GetBooksRequest) (*schema.GetBooksResponse, error) {
 	var books []entity.Book
 	var err error
 
-	if input.GetAll {
+	if request.GetAll {
 		books, err = h.BookUseCase.GetAllBooks(ctx)
 	} else {
-		books, err = h.BookUseCase.GetBooksWithPagination(ctx, input.PageSize, input.PageNumber)
+		books, err = h.BookUseCase.GetBooksWithPagination(ctx, request.PageSize, request.PageNumber)
 	}
 
 	if err != nil {
@@ -66,40 +63,36 @@ func (h *bookHandler) GetBooks(ctx context.Context, input *schema.GetBooksInput)
 
 	bookOutputs := convertBooks(books)
 
-	resp := schema.GetBooksOutput{
-		Body: schema.GetBooksOutputBody{
-			Data: bookOutputs,
-		},
-	}
+	resp := schema.GetBooksResponse{}
+	resp.Body.Data = bookOutputs
 
 	return &resp, nil
 }
 
-func (h *bookHandler) GetBookByID(ctx context.Context, input *schema.GetBookByIDInput) (*schema.GetBookByIDOutput, error) {
-	book, err := h.BookUseCase.GetBookByID(ctx, input.ID)
+func (h *bookHandler) GetBookByID(ctx context.Context, request *schema.GetBookByIDRequest) (*schema.GetBookByIDResponse, error) {
+	book, err := h.BookUseCase.GetBookByID(ctx, request.ID)
 	if err != nil {
 		return nil, err
 	}
 
 	bookOutput := convertBook(book)
 
-	resp := schema.GetBookByIDOutput{
-		Body: bookOutput,
-	}
+	resp := schema.GetBookByIDResponse{}
+	resp.Body = bookOutput
 
 	return &resp, nil
 }
 
-func convertBooks(books []entity.Book) []schema.BookOutput {
-	bookOutputs := make([]schema.BookOutput, len(books))
+func convertBooks(books []entity.Book) []schema.Book {
+	bookOutputs := make([]schema.Book, len(books))
 	for i, r := range books {
 		bookOutputs[i] = convertBook(r)
 	}
 	return bookOutputs
 }
 
-func convertBook(book entity.Book) schema.BookOutput {
-	return schema.BookOutput{
+func convertBook(book entity.Book) schema.Book {
+	return schema.Book{
 		ID:          book.ID,
 		Name:        book.Name,
 		Description: book.Description,

@@ -16,8 +16,8 @@ import (
 
 type FileUseCase interface {
 	UploadFile(ctx context.Context, fileStream io.Reader, filename string, size int64, contentType string, baseKey string) (string, error)
-	GetFileDownloadLink(ctx context.Context, fileID string) (url string, expiresAt time.Time, filename string, err error)
-	ListS3Files(ctx context.Context) ([]string, error)
+	GetFileDownloadLink(ctx context.Context, fileID string) (url string, expiresAt time.Time, fileName string, err error)
+	GetS3FileList(ctx context.Context) ([]string, error)
 }
 
 type fileUseCase struct {
@@ -32,8 +32,8 @@ func NewFileUseCase(fileRecordRepository repository.FileRecordRepository, object
 	}
 }
 
-func (u *fileUseCase) UploadFile(ctx context.Context, fileStream io.Reader, filename string, size int64, contentType string, baseKey string) (string, error) {
-	ext := filepath.Ext(filename)
+func (u *fileUseCase) UploadFile(ctx context.Context, fileStream io.Reader, fileName string, size int64, contentType string, baseKey string) (string, error) {
+	ext := filepath.Ext(fileName)
 	var objectKey string
 
 	// Generate Unique Key
@@ -62,8 +62,8 @@ func (u *fileUseCase) UploadFile(ctx context.Context, fileStream io.Reader, file
 
 	currentTime := time.Now()
 
-	record := &entity.FileRecord{
-		FileName:    filename,
+	fileRecord := &entity.FileRecord{
+		FileName:    fileName,
 		Size:        size,
 		ContentType: contentType,
 		S3Key:       objectKey,
@@ -71,7 +71,7 @@ func (u *fileUseCase) UploadFile(ctx context.Context, fileStream io.Reader, file
 		ModifiedAt:  currentTime,
 	}
 
-	id, err := u.FileRecordRepository.CreateFileRecord(ctx, record)
+	id, err := u.FileRecordRepository.CreateFileRecord(ctx, fileRecord)
 	if err != nil {
 		return "", fmt.Errorf("failed to save file record: %w", err)
 	}
@@ -80,7 +80,7 @@ func (u *fileUseCase) UploadFile(ctx context.Context, fileStream io.Reader, file
 }
 
 func (u *fileUseCase) GetFileDownloadLink(ctx context.Context, fileID string) (string, time.Time, string, error) {
-	record, err := u.FileRecordRepository.GetFileRecordByID(ctx, fileID)
+	fileRecord, err := u.FileRecordRepository.GetFileRecordByID(ctx, fileID)
 	if err != nil {
 		return "", time.Time{}, "", fmt.Errorf("file not found: %w", err)
 	}
@@ -88,15 +88,15 @@ func (u *fileUseCase) GetFileDownloadLink(ctx context.Context, fileID string) (s
 	duration := 15 * time.Minute
 	expirationTime := time.Now().Add(duration)
 
-	url, err := u.ObjectStorage.GetPresignedDownloadURL(ctx, record.S3Key, record.FileName, duration)
+	url, err := u.ObjectStorage.GetPresignedDownloadURL(ctx, fileRecord.S3Key, fileRecord.FileName, duration)
 	if err != nil {
 		return "", time.Time{}, "", fmt.Errorf("failed to presign url: %w", err)
 	}
 
-	return url, expirationTime, record.FileName, nil
+	return url, expirationTime, fileRecord.FileName, nil
 }
 
-func (u *fileUseCase) ListS3Files(ctx context.Context) ([]string, error) {
+func (u *fileUseCase) GetS3FileList(ctx context.Context) ([]string, error) {
 	fileKeys, err := u.ObjectStorage.ListFiles(ctx, 20)
 	if err != nil {
 		return nil, fmt.Errorf("failed to list S3 files: %w", err)

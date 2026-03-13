@@ -9,11 +9,11 @@ import (
 )
 
 type BookPageHandler interface {
-	CreateBookPage(ctx context.Context, input *schema.CreateBookPageInput) (*schema.CreateBookPageOutput, error)
-	GetBookPages(ctx context.Context, input *schema.GetBookPagesInput) (*schema.GetBookPagesOutput, error)
-	GetBookPagesByRange(ctx context.Context, input *schema.GetBookPagesRangeInput) (*schema.GetBookPagesOutput, error)
-	GetBookPagesByOffset(ctx context.Context, input *schema.GetBookPagesOffsetInput) (*schema.GetBookPagesOutput, error)
-	GetBookPageByID(ctx context.Context, input *schema.GetBookPageByIDInput) (*schema.GetBookPageByIDOutput, error)
+	CreateBookPage(ctx context.Context, request *schema.CreateBookPageRequest) (*schema.CreateBookPageResponse, error)
+	GetBookPages(ctx context.Context, request *schema.GetBookPagesRequest) (*schema.GetBookPagesResponse, error)
+	GetBookPagesByRange(ctx context.Context, request *schema.GetBookPagesRangeRequest) (*schema.GetBookPagesResponse, error)
+	GetBookPagesByOffset(ctx context.Context, request *schema.GetBookPagesOffsetRequest) (*schema.GetBookPagesResponse, error)
+	GetBookPageByID(ctx context.Context, request *schema.GetBookPageByIDRequest) (*schema.GetBookPageByIDResponse, error)
 }
 
 type bookPageHandler struct {
@@ -26,17 +26,17 @@ func NewBookPageHandler(bookPageUseCase usecase.BookPageUseCase) *bookPageHandle
 	}
 }
 
-func (h *bookPageHandler) CreateBookPage(ctx context.Context, input *schema.CreateBookPageInput) (*schema.CreateBookPageOutput, error) {
-	metadata := input.Body.Metadata
+func (h *bookPageHandler) CreateBookPage(ctx context.Context, request *schema.CreateBookPageRequest) (*schema.CreateBookPageResponse, error) {
+	metadata := request.Body.Metadata
 	bookPage := &entity.BookPage{
-		BookID:     input.Body.BookID,
-		PageNumber: input.Body.PageNumber,
-		Content:    input.Body.Content,
+		BookID:     request.Body.BookID,
+		PageNumber: request.Body.PageNumber,
+		Content:    request.Body.Content,
 		Metadata: entity.BookPageMetadata{
 			IsBookmarked: metadata.IsBookmarked,
 			Highlight:    metadata.Highlight,
 		},
-		AttachedImageFileID: input.Body.AttachedImageFileID,
+		AttachedImageFileID: request.Body.AttachedImageFileID,
 	}
 
 	id, err := h.BookPageUseCase.CreateBookPage(ctx, bookPage)
@@ -44,99 +44,86 @@ func (h *bookPageHandler) CreateBookPage(ctx context.Context, input *schema.Crea
 		return nil, err
 	}
 
-	resp := schema.CreateBookPageOutput{
-		Body: schema.CreateBookPageOutputBody{
-			ID: id,
-		},
-	}
+	resp := schema.CreateBookPageResponse{}
+	resp.Body.ID = id
 
 	return &resp, nil
 }
 
-func (h *bookPageHandler) GetBookPages(ctx context.Context, input *schema.GetBookPagesInput) (*schema.GetBookPagesOutput, error) {
+func (h *bookPageHandler) GetBookPages(ctx context.Context, request *schema.GetBookPagesRequest) (*schema.GetBookPagesResponse, error) {
 	var bookPages []entity.BookPage
 	var err error
 
-	if input.GetAll {
-		bookPages, err = h.BookPageUseCase.GetAllBookPages(ctx, input.BookID)
+	if request.GetAll {
+		bookPages, err = h.BookPageUseCase.GetAllBookPages(ctx, request.BookID)
 	} else {
-		bookPages, err = h.BookPageUseCase.GetBookPagesWithPagination(ctx, input.BookID, input.PageSize, input.PageNumber)
+		bookPages, err = h.BookPageUseCase.GetBookPagesWithPagination(ctx, request.BookID, request.PageSize, request.PageNumber)
 	}
 
-	if err != nil {
-		return nil, err
-	}
-
-	bookPagesOutput := convertBookPages(bookPages)
-
-	resp := schema.GetBookPagesOutput{
-		Body: schema.GetBookPagesOutputBody{
-			Data: bookPagesOutput,
-		},
-	}
-
-	return &resp, nil
-}
-
-func (h *bookPageHandler) GetBookPagesByRange(ctx context.Context, input *schema.GetBookPagesRangeInput) (*schema.GetBookPagesOutput, error) {
-	bookPages, err := h.BookPageUseCase.GetBookPagesByRange(ctx, input.BookID, input.StartPage, input.EndPage)
 	if err != nil {
 		return nil, err
 	}
 
 	bookPageOutputs := convertBookPages(bookPages)
 
-	resp := schema.GetBookPagesOutput{
-		Body: schema.GetBookPagesOutputBody{
-			Data: bookPageOutputs,
-		},
-	}
+	resp := schema.GetBookPagesResponse{}
+	resp.Body.Data = bookPageOutputs
 
 	return &resp, nil
 }
 
-func (h *bookPageHandler) GetBookPagesByOffset(ctx context.Context, input *schema.GetBookPagesOffsetInput) (*schema.GetBookPagesOutput, error) {
-	bookPages, err := h.BookPageUseCase.GetBookPagesByOffset(ctx, input.BookID, input.CenterPage, input.Offset)
+func (h *bookPageHandler) GetBookPagesByRange(ctx context.Context, request *schema.GetBookPagesRangeRequest) (*schema.GetBookPagesResponse, error) {
+	bookPages, err := h.BookPageUseCase.GetBookPagesByRange(ctx, request.BookID, request.StartPage, request.EndPage)
 	if err != nil {
 		return nil, err
 	}
 
 	bookPageOutputs := convertBookPages(bookPages)
 
-	resp := schema.GetBookPagesOutput{
-		Body: schema.GetBookPagesOutputBody{
-			Data: bookPageOutputs,
-		},
-	}
+	resp := schema.GetBookPagesResponse{}
+	resp.Body.Data = bookPageOutputs
 
 	return &resp, nil
 }
 
-func (h *bookPageHandler) GetBookPageByID(ctx context.Context, input *schema.GetBookPageByIDInput) (*schema.GetBookPageByIDOutput, error) {
-	bookPage, err := h.BookPageUseCase.GetBookPageByID(ctx, input.ID)
+func (h *bookPageHandler) GetBookPagesByOffset(ctx context.Context, request *schema.GetBookPagesOffsetRequest) (*schema.GetBookPagesResponse, error) {
+	bookPages, err := h.BookPageUseCase.GetBookPagesByOffset(ctx, request.BookID, request.CenterPage, request.Offset)
+	if err != nil {
+		return nil, err
+	}
+
+	bookPageOutputs := convertBookPages(bookPages)
+
+	resp := schema.GetBookPagesResponse{}
+	resp.Body.Data = bookPageOutputs
+
+	return &resp, nil
+}
+
+func (h *bookPageHandler) GetBookPageByID(ctx context.Context, request *schema.GetBookPageByIDRequest) (*schema.GetBookPageByIDResponse, error) {
+	bookPage, err := h.BookPageUseCase.GetBookPageByID(ctx, request.ID)
 	if err != nil {
 		return nil, err
 	}
 
 	bookPageOutput := convertBookPage(bookPage)
 
-	resp := schema.GetBookPageByIDOutput{
-		Body: bookPageOutput,
-	}
+	resp := schema.GetBookPageByIDResponse{}
+	resp.Body = bookPageOutput
 
 	return &resp, nil
 }
 
-func convertBookPages(bookPages []entity.BookPage) []schema.BookPageOutput {
-	bookPageOutputs := make([]schema.BookPageOutput, len(bookPages))
+func convertBookPages(bookPages []entity.BookPage) []schema.BookPage {
+	bookPageOutputs := make([]schema.BookPage, len(bookPages))
 	for i, r := range bookPages {
 		bookPageOutputs[i] = convertBookPage(r)
 	}
 	return bookPageOutputs
 }
 
-func convertBookPage(bookPage entity.BookPage) schema.BookPageOutput {
-	return schema.BookPageOutput{
+func convertBookPage(bookPage entity.BookPage) schema.BookPage {
+	return schema.BookPage{
 		ID:         bookPage.ID,
 		BookID:     bookPage.BookID,
 		PageNumber: bookPage.PageNumber,

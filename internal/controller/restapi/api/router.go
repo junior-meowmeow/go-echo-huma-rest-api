@@ -45,6 +45,6 @@ func CreateHumaConfig(apiBasePath string) huma.Config {
 		},
 	}
 	// disable the $schema property
-	humaConfig.CreateHooks = nil
+	// humaConfig.CreateHooks = nil
 	return humaConfig
 }

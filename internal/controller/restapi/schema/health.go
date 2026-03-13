@@ -1,9 +1,9 @@
 package schema
 
-type HealthBody struct {
-	Status string `json:"status" example:"ok" doc:"Status of the server"`
-}
+type GetHealthStatusRequest struct{}
 
-type HealthOutput struct {
-	Body HealthBody
+type GetHealthStatusResponse struct {
+	Body struct {
+		Status string `json:"status" example:"ok" doc:"Status of the server"`
+	}
 }

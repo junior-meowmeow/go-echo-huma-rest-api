@@ -8,7 +8,7 @@ import (
 )
 
 type GreetingHandler interface {
-	GetGreeting(ctx context.Context, input *schema.GreetingInput) (*schema.GreetingOutput, error)
+	GetGreeting(ctx context.Context, request *schema.GreetingRequest) (*schema.GreetingResponse, error)
 }
 
 type greetingHandler struct {
@@ -21,17 +21,14 @@ func NewGreetingHandler(greetingUseCase usecase.GreetingUseCase) *greetingHandle
 	}
 }
 
-func (h *greetingHandler) GetGreeting(ctx context.Context, input *schema.GreetingInput) (*schema.GreetingOutput, error) {
-	message, err := h.GreetingUseCase.GetGreetingMessage(ctx, input.Name)
+func (h *greetingHandler) GetGreeting(ctx context.Context, request *schema.GreetingRequest) (*schema.GreetingResponse, error) {
+	message, err := h.GreetingUseCase.GetGreetingMessage(ctx, request.Name)
 	if err != nil {
 		return nil, err
 	}
 
-	resp := schema.GreetingOutput{
-		Body: schema.GreetingOutputBody{
-			Message: message,
-		},
-	}
+	resp := schema.GreetingResponse{}
+	resp.Body.Message = message
 
 	return &resp, nil
 }

@@ -15,7 +15,7 @@ func RegisterFileGroup(api huma.API, h *handler.Handlers) {
 
 func RegisterFileRoutes(api huma.API, h *handler.Handlers) {
 	huma.Register(api, huma.Operation{
-		OperationID: "upload-s3-file",
+		OperationID: "upload-file",
 		Method:      http.MethodPost,
 		Path:        "/upload",
 		Summary:     "Upload file to object storage",
@@ -24,7 +24,7 @@ func RegisterFileRoutes(api huma.API, h *handler.Handlers) {
 	}, h.File.UploadFile)
 
 	huma.Register(api, huma.Operation{
-		OperationID: "get-s3-file",
+		OperationID: "get-file-download-link",
 		Method:      http.MethodGet,
 		Path:        "/download/{id}",
 		Summary:     "Get file from object storage",

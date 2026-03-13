@@ -35,10 +35,10 @@ func (u *reviewUseCase) PostReview(ctx context.Context, review *entity.Review) e
 }
 
 func (u *reviewUseCase) GetReviews(ctx context.Context, limit int64) ([]entity.Review, error) {
-	records, err := u.ReviewRepository.GetReviews(ctx, limit)
+	reviews, err := u.ReviewRepository.GetReviews(ctx, limit)
 	if err != nil {
 		return nil, err
 	}
 
-	return records, nil
+	return reviews, nil
 }

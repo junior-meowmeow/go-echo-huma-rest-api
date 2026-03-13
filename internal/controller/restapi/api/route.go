@@ -9,7 +9,6 @@ import (
 )
 
 func RegisterRoutes(api huma.API, h *handler.Handlers) {
-	// GET /health
 	huma.Register(api, huma.Operation{
 		OperationID:   "health-check",
 		Method:        http.MethodGet,
@@ -20,7 +19,6 @@ func RegisterRoutes(api huma.API, h *handler.Handlers) {
 		DefaultStatus: 200,
 	}, h.Health.GetHealthStatus)
 
-	// GET /greeting/{name}
 	huma.Register(api, huma.Operation{
 		OperationID: "get-greeting",
 		Method:      http.MethodGet,
@@ -30,7 +28,6 @@ func RegisterRoutes(api huma.API, h *handler.Handlers) {
 		Tags:        []string{"Miscellaneous"},
 	}, h.Greeting.GetGreeting)
 
-	// GET /test-s3
 	huma.Register(api, huma.Operation{
 		OperationID: "list-s3-files",
 		Method:      http.MethodGet,
@@ -38,5 +35,5 @@ func RegisterRoutes(api huma.API, h *handler.Handlers) {
 		Summary:     "Test S3 Connection",
 		Description: "Directly lists files from the S3 bucket to verify connectivity.",
 		Tags:        []string{"Miscellaneous"},
-	}, h.File.ListS3Files)
+	}, h.File.GetS3FileList)
 }

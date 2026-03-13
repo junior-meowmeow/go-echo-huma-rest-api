@@ -25,28 +25,28 @@ func RegisterBookPageRoutes(api huma.API, h *handler.Handlers) {
 	}, h.BookPage.CreateBookPage)
 
 	huma.Register(api, huma.Operation{
-		OperationID: "list-book-pages",
+		OperationID: "get-book-pages",
 		Method:      http.MethodGet,
 		Path:        "/",
-		Summary:     "List Book Pages",
-		Description: "List book pages in a book.",
+		Summary:     "Get Book Pages",
+		Description: "Get book pages in a book.",
 		Tags:        []string{"Book Pages"},
 	}, h.BookPage.GetBookPages)
 
 	huma.Register(api, huma.Operation{
-		OperationID: "list-book-pages-range",
+		OperationID: "get-book-pages-range",
 		Method:      http.MethodGet,
 		Path:        "/range",
-		Summary:     "List Book Pages (Page Range)",
+		Summary:     "Get Book Pages (Page Range)",
 		Description: "Get book pages within start/end page number.",
 		Tags:        []string{"Book Pages"},
 	}, h.BookPage.GetBookPagesByRange)
 
 	huma.Register(api, huma.Operation{
-		OperationID: "list-book-pages-offset",
+		OperationID: "get-book-pages-offset",
 		Method:      http.MethodGet,
 		Path:        "/offset",
-		Summary:     "List Book Pages (Offset)",
+		Summary:     "Get Book Pages (Offset)",
 		Description: "Get N book pages before and after specified page number.",
 		Tags:        []string{"Book Pages"},
 	}, h.BookPage.GetBookPagesByOffset)
