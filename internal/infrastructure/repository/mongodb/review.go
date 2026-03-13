@@ -5,17 +5,12 @@ import (
 	"fmt"
 
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/entity"
-	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/repository/mongodb/document"
+	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/infrastructure/repository/mongodb/document"
 
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 	"go.mongodb.org/mongo-driver/v2/mongo/options"
 )
-
-type ReviewRepository interface {
-	CreateReview(ctx context.Context, review *entity.Review) error
-	GetReviews(ctx context.Context, limit int64) ([]entity.Review, error)
-}
 
 type reviewRepository struct {
 	Collection *mongo.Collection

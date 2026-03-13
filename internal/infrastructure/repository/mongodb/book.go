@@ -5,19 +5,12 @@ import (
 	"fmt"
 
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/entity"
-	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/repository/mongodb/document"
+	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/infrastructure/repository/mongodb/document"
 
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 	"go.mongodb.org/mongo-driver/v2/mongo/options"
 )
-
-type BookRepository interface {
-	CreateBook(ctx context.Context, book *entity.Book) (string, error)
-	GetBookByID(ctx context.Context, id string) (entity.Book, error)
-	GetAllBooks(ctx context.Context) ([]entity.Book, error)
-	GetBooksWithPagination(ctx context.Context, pageSize int64, pageNumber int64) ([]entity.Book, error)
-}
 
 type bookRepository struct {
 	Collection *mongo.Collection

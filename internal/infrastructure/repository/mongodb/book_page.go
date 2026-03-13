@@ -5,27 +5,18 @@ import (
 	"fmt"
 
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/entity"
-	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/repository/mongodb/document"
+	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/infrastructure/repository/mongodb/document"
 
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 	"go.mongodb.org/mongo-driver/v2/mongo/options"
 )
 
-type BookPageRepository interface {
-	CreateBookPage(ctx context.Context, bookPage *entity.BookPage) (string, error)
-	GetBookPageByID(ctx context.Context, id string) (entity.BookPage, error)
-	GetBookPagesByBookID(ctx context.Context, bookID string) ([]entity.BookPage, error)
-	GetBookpagesByBookIDWithPagination(ctx context.Context, bookID string, pageSize int64, pageNumber int64) ([]entity.BookPage, error)
-	GetBookpagesByPageRange(ctx context.Context, bookID string, startPage int64, endPage int64) ([]entity.BookPage, error)
-	GetBookpagesAroundPageNumber(ctx context.Context, bookID string, centerPage int64, offset int64) ([]entity.BookPage, error)
-}
-
 type bookPageRepository struct {
 	Collection *mongo.Collection
 }
 
-func NewBookPagesRepository(db *mongo.Database) *bookPageRepository {
+func NewBookPageRepository(db *mongo.Database) *bookPageRepository {
 	return &bookPageRepository{
 		Collection: db.Collection("book_pages"),
 	}

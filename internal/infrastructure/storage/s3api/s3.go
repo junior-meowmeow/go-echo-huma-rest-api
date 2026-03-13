@@ -1,4 +1,4 @@
-package objectstorage
+package s3api
 
 import (
 	"context"
@@ -12,29 +12,22 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/s3/types"
 )
 
-type ObjectStorage interface {
-	UploadFile(ctx context.Context, key string, file io.Reader, size int64, contentType string) error
-	GetPresignedDownloadURL(ctx context.Context, key string, filename string, duration time.Duration) (string, error)
-	CheckFileExists(ctx context.Context, key string) (bool, error)
-	ListFiles(ctx context.Context, maxKeys int) ([]string, error)
-}
-
-type s3Repository struct {
+type s3Storage struct {
 	Client        *s3.Client
 	PresignClient *s3.PresignClient
 	BucketName    string
 }
 
-func NewS3Repository(client *s3.Client, bucketName string) *s3Repository {
+func NewS3Storage(client *s3.Client, bucketName string) *s3Storage {
 	presignClient := s3.NewPresignClient(client)
-	return &s3Repository{
+	return &s3Storage{
 		Client:        client,
 		PresignClient: presignClient,
 		BucketName:    bucketName,
 	}
 }
 
-func (r *s3Repository) UploadFile(ctx context.Context, key string, file io.Reader, size int64, contentType string) error {
+func (r *s3Storage) UploadFile(ctx context.Context, key string, file io.Reader, size int64, contentType string) error {
 	_, err := r.Client.PutObject(ctx, &s3.PutObjectInput{
 		Bucket:        aws.String(r.BucketName),
 		Key:           aws.String(key),
@@ -45,7 +38,7 @@ func (r *s3Repository) UploadFile(ctx context.Context, key string, file io.Reade
 	return err
 }
 
-func (r *s3Repository) GetPresignedDownloadURL(ctx context.Context, key string, filename string, duration time.Duration) (string, error) {
+func (r *s3Storage) GetPresignedDownloadURL(ctx context.Context, key string, filename string, duration time.Duration) (string, error) {
 	req, err := r.PresignClient.PresignGetObject(ctx, &s3.GetObjectInput{
 		Bucket:                     aws.String(r.BucketName),
 		Key:                        aws.String(key),
@@ -59,7 +52,7 @@ func (r *s3Repository) GetPresignedDownloadURL(ctx context.Context, key string, 
 	return req.URL, nil
 }
 
-func (r *s3Repository) CheckFileExists(ctx context.Context, key string) (bool, error) {
+func (r *s3Storage) CheckFileExists(ctx context.Context, key string) (bool, error) {
 	_, err := r.Client.HeadObject(ctx, &s3.HeadObjectInput{
 		Bucket: aws.String(r.BucketName),
 		Key:    aws.String(key),
@@ -80,7 +73,7 @@ func (r *s3Repository) CheckFileExists(ctx context.Context, key string) (bool, e
 	return true, nil
 }
 
-func (r *s3Repository) ListFiles(ctx context.Context, maxKeys int) ([]string, error) {
+func (r *s3Storage) ListFiles(ctx context.Context, maxKeys int) ([]string, error) {
 	output, err := r.Client.ListObjectsV2(ctx, &s3.ListObjectsV2Input{
 		Bucket:  aws.String(r.BucketName),
 		MaxKeys: aws.Int32(int32(maxKeys)),

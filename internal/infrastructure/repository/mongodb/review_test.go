@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/entity"
-	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/repository/mongodb"
+	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/infrastructure/repository/mongodb"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

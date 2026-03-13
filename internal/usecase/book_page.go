@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/entity"
-	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/repository/mongodb"
+	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/infrastructure/repository"
 )
 
 type BookPageUseCase interface {
@@ -19,19 +19,19 @@ type BookPageUseCase interface {
 }
 
 type bookPageUseCase struct {
-	BooksRepository     mongodb.BookRepository
-	BookPagesRepository mongodb.BookPageRepository
+	BookRepository     repository.BookRepository
+	BookPageRepository repository.BookPageRepository
 }
 
-func NewBookPageUseCase(booksRepo mongodb.BookRepository, bookPagesRepo mongodb.BookPageRepository) *bookPageUseCase {
+func NewBookPageUseCase(bookRepository repository.BookRepository, bookPageRepository repository.BookPageRepository) *bookPageUseCase {
 	return &bookPageUseCase{
-		BooksRepository:     booksRepo,
-		BookPagesRepository: bookPagesRepo,
+		BookRepository:     bookRepository,
+		BookPageRepository: bookPageRepository,
 	}
 }
 
 func (u *bookPageUseCase) CreateBookPage(ctx context.Context, bookPage *entity.BookPage) (string, error) {
-	_, err := u.BooksRepository.GetBookByID(ctx, bookPage.BookID)
+	_, err := u.BookRepository.GetBookByID(ctx, bookPage.BookID)
 	if err != nil {
 		return "", fmt.Errorf("failed to fetch book: %w", err)
 	}
@@ -40,7 +40,7 @@ func (u *bookPageUseCase) CreateBookPage(ctx context.Context, bookPage *entity.B
 	bookPage.CreatedAt = currentTime
 	bookPage.ModifiedAt = currentTime
 
-	id, err := u.BookPagesRepository.CreateBookPage(ctx, bookPage)
+	id, err := u.BookPageRepository.CreateBookPage(ctx, bookPage)
 	if err != nil {
 		return "", fmt.Errorf("failed to create book page: %w", err)
 	}
@@ -49,7 +49,7 @@ func (u *bookPageUseCase) CreateBookPage(ctx context.Context, bookPage *entity.B
 }
 
 func (u *bookPageUseCase) GetAllBookPages(ctx context.Context, bookID string) ([]entity.BookPage, error) {
-	bookPages, err := u.BookPagesRepository.GetBookPagesByBookID(ctx, bookID)
+	bookPages, err := u.BookPageRepository.GetBookPagesByBookID(ctx, bookID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch book pages: %w", err)
 	}
@@ -58,7 +58,7 @@ func (u *bookPageUseCase) GetAllBookPages(ctx context.Context, bookID string) ([
 }
 
 func (u *bookPageUseCase) GetBookPagesWithPagination(ctx context.Context, bookID string, pageSize int64, pageNumber int64) ([]entity.BookPage, error) {
-	bookPages, err := u.BookPagesRepository.GetBookpagesByBookIDWithPagination(ctx, bookID, pageSize, pageNumber)
+	bookPages, err := u.BookPageRepository.GetBookpagesByBookIDWithPagination(ctx, bookID, pageSize, pageNumber)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch book pages: %w", err)
 	}
@@ -67,7 +67,7 @@ func (u *bookPageUseCase) GetBookPagesWithPagination(ctx context.Context, bookID
 }
 
 func (u *bookPageUseCase) GetBookPagesByRange(ctx context.Context, bookID string, startPage int64, endPage int64) ([]entity.BookPage, error) {
-	bookPages, err := u.BookPagesRepository.GetBookpagesByPageRange(ctx, bookID, startPage, endPage)
+	bookPages, err := u.BookPageRepository.GetBookpagesByPageRange(ctx, bookID, startPage, endPage)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch book pages by range: %w", err)
 	}
@@ -76,7 +76,7 @@ func (u *bookPageUseCase) GetBookPagesByRange(ctx context.Context, bookID string
 }
 
 func (u *bookPageUseCase) GetBookPagesByOffset(ctx context.Context, bookID string, centerPage int64, offset int64) ([]entity.BookPage, error) {
-	bookPages, err := u.BookPagesRepository.GetBookpagesAroundPageNumber(ctx, bookID, centerPage, offset)
+	bookPages, err := u.BookPageRepository.GetBookpagesAroundPageNumber(ctx, bookID, centerPage, offset)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch book pages by offset: %w", err)
 	}
@@ -85,7 +85,7 @@ func (u *bookPageUseCase) GetBookPagesByOffset(ctx context.Context, bookID strin
 }
 
 func (u *bookPageUseCase) GetBookPageByID(ctx context.Context, id string) (entity.BookPage, error) {
-	bookPage, err := u.BookPagesRepository.GetBookPageByID(ctx, id)
+	bookPage, err := u.BookPageRepository.GetBookPageByID(ctx, id)
 	if err != nil {
 		return entity.BookPage{}, fmt.Errorf("failed to fetch book page: %w", err)
 	}

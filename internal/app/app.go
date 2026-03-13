@@ -7,7 +7,8 @@ import (
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/config"
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/controller/restapi/api"
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/controller/restapi/handler"
-	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/repository"
+	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/infrastructure/repository"
+	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/infrastructure/storage"
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/usecase"
 
 	"github.com/labstack/echo/v4"
@@ -35,11 +36,12 @@ func NewApplication(ctx context.Context, cfg config.Config) (*Application, error
 		return nil, err
 	}
 
-	// Initialize Repositories
-	repositories := repository.NewRepositories(mongoDB, s3Client, cfg.S3Bucket)
+	// Initialize Infrastructures
+	repositories := repository.NewRepositories(mongoDB)
+	storages := storage.NewStorages(s3Client, cfg.S3Bucket)
 
 	// Initialize Use Cases
-	usecases := usecase.NewUseCases(repositories)
+	usecases := usecase.NewUseCases(repositories, storages)
 
 	// Initialize REST API Handlers
 	handlers := handler.NewHandlers(usecases)

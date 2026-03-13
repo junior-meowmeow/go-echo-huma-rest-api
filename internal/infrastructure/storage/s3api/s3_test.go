@@ -1,4 +1,4 @@
-package objectstorage_test
+package s3api_test
 
 import (
 	"context"
@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/repository/objectstorage"
+	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/infrastructure/storage/s3api"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
@@ -24,7 +24,7 @@ func TestS3Repository(t *testing.T) {
 	})
 	require.NoError(t, err)
 
-	repo := objectstorage.NewS3Repository(s3Client, bucketName)
+	repo := s3api.NewS3Storage(s3Client, bucketName)
 
 	t.Run("UploadFile", func(t *testing.T) {
 		tmpFile, err := os.CreateTemp("", "test-file-*.txt")

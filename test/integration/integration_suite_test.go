@@ -5,7 +5,8 @@ import (
 
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/controller/restapi/api"
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/controller/restapi/handler"
-	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/repository"
+	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/infrastructure/repository"
+	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/infrastructure/storage"
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/usecase"
 
 	"github.com/aws/aws-sdk-go-v2/service/s3"
@@ -20,6 +21,7 @@ type IntegrationTestSuite struct {
 	S3Client *s3.Client
 
 	Repositories *repository.Repositories
+	Storages     *storage.Storages
 	Router       http.Handler
 }
 
@@ -27,9 +29,10 @@ func (s *IntegrationTestSuite) SetupSuite() {
 	s.MongoDB = setupMongoDB(s.T())
 	s.S3Client = setupS3Client(s.T())
 
-	s.Repositories = repository.NewRepositories(s.MongoDB, s.S3Client, "test-bucket")
+	s.Repositories = repository.NewRepositories(s.MongoDB)
+	s.Storages = storage.NewStorages(s.S3Client, "test-bucket")
 
-	usecases := usecase.NewUseCases(s.Repositories)
+	usecases := usecase.NewUseCases(s.Repositories, s.Storages)
 	handlers := handler.NewHandlers(usecases)
 	s.Router = api.NewRouter(handlers, "")
 }

@@ -1,4 +1,4 @@
-package objectstorage_test
+package s3api_test
 
 import (
 	"context"

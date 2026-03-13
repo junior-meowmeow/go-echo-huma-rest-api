@@ -5,16 +5,11 @@ import (
 	"fmt"
 
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/entity"
-	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/repository/mongodb/document"
+	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/infrastructure/repository/mongodb/document"
 
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 )
-
-type FileRecordRepository interface {
-	CreateFileRecord(ctx context.Context, fileRecord *entity.FileRecord) (string, error)
-	GetFileRecordByID(ctx context.Context, fileID string) (entity.FileRecord, error)
-}
 
 type fileRecordRepository struct {
 	Collection *mongo.Collection
