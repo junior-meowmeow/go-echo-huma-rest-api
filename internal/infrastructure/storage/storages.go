@@ -6,11 +6,11 @@ import (
 )
 
 type Storages struct {
-	ObjectStorage ObjectStorage
+	FileStorage FileStorage
 }
 
 func NewStorages(s3Client *s3.Client, bucketName string) *Storages {
 	return &Storages{
-		ObjectStorage: s3api.NewS3Storage(s3Client, bucketName),
+		FileStorage: s3api.NewS3Storage(s3Client, bucketName),
 	}
 }

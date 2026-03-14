@@ -27,9 +27,9 @@ func NewS3Storage(client *s3.Client, bucketName string) *s3Storage {
 	}
 }
 
-func (r *s3Storage) UploadFile(ctx context.Context, key string, file io.Reader, size int64, contentType string) error {
-	_, err := r.Client.PutObject(ctx, &s3.PutObjectInput{
-		Bucket:        aws.String(r.BucketName),
+func (s *s3Storage) UploadFile(ctx context.Context, key string, file io.Reader, size int64, contentType string) error {
+	_, err := s.Client.PutObject(ctx, &s3.PutObjectInput{
+		Bucket:        aws.String(s.BucketName),
 		Key:           aws.String(key),
 		Body:          file,
 		ContentLength: aws.Int64(size),
@@ -38,9 +38,9 @@ func (r *s3Storage) UploadFile(ctx context.Context, key string, file io.Reader, 
 	return err
 }
 
-func (r *s3Storage) GetPresignedDownloadURL(ctx context.Context, key string, filename string, duration time.Duration) (string, error) {
-	req, err := r.PresignClient.PresignGetObject(ctx, &s3.GetObjectInput{
-		Bucket:                     aws.String(r.BucketName),
+func (s *s3Storage) GetPresignedDownloadURL(ctx context.Context, key string, filename string, duration time.Duration) (string, error) {
+	req, err := s.PresignClient.PresignGetObject(ctx, &s3.GetObjectInput{
+		Bucket:                     aws.String(s.BucketName),
 		Key:                        aws.String(key),
 		ResponseContentDisposition: aws.String(fmt.Sprintf("attachment; filename=\"%s\"", filename)),
 	}, func(opts *s3.PresignOptions) {
@@ -52,9 +52,9 @@ func (r *s3Storage) GetPresignedDownloadURL(ctx context.Context, key string, fil
 	return req.URL, nil
 }
 
-func (r *s3Storage) CheckFileExists(ctx context.Context, key string) (bool, error) {
-	_, err := r.Client.HeadObject(ctx, &s3.HeadObjectInput{
-		Bucket: aws.String(r.BucketName),
+func (s *s3Storage) CheckFileExists(ctx context.Context, key string) (bool, error) {
+	_, err := s.Client.HeadObject(ctx, &s3.HeadObjectInput{
+		Bucket: aws.String(s.BucketName),
 		Key:    aws.String(key),
 	})
 
@@ -73,9 +73,9 @@ func (r *s3Storage) CheckFileExists(ctx context.Context, key string) (bool, erro
 	return true, nil
 }
 
-func (r *s3Storage) ListFiles(ctx context.Context, maxKeys int) ([]string, error) {
-	output, err := r.Client.ListObjectsV2(ctx, &s3.ListObjectsV2Input{
-		Bucket:  aws.String(r.BucketName),
+func (s *s3Storage) ListFiles(ctx context.Context, maxKeys int) ([]string, error) {
+	output, err := s.Client.ListObjectsV2(ctx, &s3.ListObjectsV2Input{
+		Bucket:  aws.String(s.BucketName),
 		MaxKeys: aws.Int32(int32(maxKeys)),
 	})
 	if err != nil {

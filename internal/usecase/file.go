@@ -22,13 +22,13 @@ type FileUseCase interface {
 
 type fileUseCase struct {
 	FileRecordRepository repository.FileRecordRepository
-	ObjectStorage        storage.ObjectStorage
+	FileStorage          storage.FileStorage
 }
 
-func NewFileUseCase(fileRecordRepository repository.FileRecordRepository, objectStorage storage.ObjectStorage) *fileUseCase {
+func NewFileUseCase(fileRecordRepository repository.FileRecordRepository, fileStorage storage.FileStorage) *fileUseCase {
 	return &fileUseCase{
 		FileRecordRepository: fileRecordRepository,
-		ObjectStorage:        objectStorage,
+		FileStorage:          fileStorage,
 	}
 }
 
@@ -41,7 +41,7 @@ func (u *fileUseCase) UploadFile(ctx context.Context, fileStream io.Reader, file
 	for i := range maxRetries {
 		objectKey = fmt.Sprintf("%s%s%s", baseKey, uuid.New().String(), ext)
 
-		exists, err := u.ObjectStorage.CheckFileExists(ctx, objectKey)
+		exists, err := u.FileStorage.CheckFileExists(ctx, objectKey)
 		if err != nil {
 			return "", fmt.Errorf("failed to check file existence in S3: %w", err)
 		}
@@ -55,7 +55,7 @@ func (u *fileUseCase) UploadFile(ctx context.Context, fileStream io.Reader, file
 		}
 	}
 
-	err := u.ObjectStorage.UploadFile(ctx, objectKey, fileStream, size, contentType)
+	err := u.FileStorage.UploadFile(ctx, objectKey, fileStream, size, contentType)
 	if err != nil {
 		return "", fmt.Errorf("failed to upload to S3: %w", err)
 	}
@@ -88,7 +88,7 @@ func (u *fileUseCase) GetFileDownloadLink(ctx context.Context, fileID string) (s
 	duration := 15 * time.Minute
 	expirationTime := time.Now().Add(duration)
 
-	url, err := u.ObjectStorage.GetPresignedDownloadURL(ctx, fileRecord.S3Key, fileRecord.FileName, duration)
+	url, err := u.FileStorage.GetPresignedDownloadURL(ctx, fileRecord.S3Key, fileRecord.FileName, duration)
 	if err != nil {
 		return "", time.Time{}, "", fmt.Errorf("failed to presign url: %w", err)
 	}
@@ -97,7 +97,7 @@ func (u *fileUseCase) GetFileDownloadLink(ctx context.Context, fileID string) (s
 }
 
 func (u *fileUseCase) GetS3FileList(ctx context.Context) ([]string, error) {
-	fileKeys, err := u.ObjectStorage.ListFiles(ctx, 20)
+	fileKeys, err := u.FileStorage.ListFiles(ctx, 20)
 	if err != nil {
 		return nil, fmt.Errorf("failed to list S3 files: %w", err)
 	}

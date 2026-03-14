@@ -18,7 +18,7 @@ func NewUseCases(repositories *repository.Repositories, storages *storage.Storag
 	return &UseCases{
 		Greeting: NewGreetingUseCase(),
 		Review:   NewReviewUseCase(repositories.Review),
-		File:     NewFileUseCase(repositories.FileRecord, storages.ObjectStorage),
+		File:     NewFileUseCase(repositories.FileRecord, storages.FileStorage),
 		Book:     NewBookUseCase(repositories.Book),
 		BookPage: NewBookPageUseCase(repositories.Book, repositories.BookPage),
 		Health:   NewHealthUseCase(),
