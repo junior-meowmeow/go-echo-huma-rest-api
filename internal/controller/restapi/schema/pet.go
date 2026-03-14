@@ -5,7 +5,7 @@ type Pet struct {
 	Name      string      `json:"name" doc:"Pet name"`
 	Category  PetCategory `json:"category" doc:"Pet category"`
 	PhotoURLs []string    `json:"photoUrls" doc:"Pet Photo URLs"`
-	Status    string      `json:"status" doc:"Pet status (available, pending, sold)"`
+	Status    string      `json:"status" enum:"available,pending,sold" doc:"Pet status"`
 	Tags      []string    `json:"tags" doc:"Pet tags"`
 }
 
@@ -18,7 +18,7 @@ type GetAvailablePetsRequest struct{}
 
 type GetAvailablePetsResponse struct {
 	Body struct {
-		Data []Pet `json:"data"`
+		Data []Pet `json:"data" doc:"List of available pets"`
 	}
 }
 

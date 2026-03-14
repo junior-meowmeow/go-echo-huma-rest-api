@@ -5,27 +5,22 @@ import (
 )
 
 type Book struct {
-	ID               string       `json:"id" doc:"Book ID"`
-	Name             string       `json:"name" doc:"Book name"`
-	Description      string       `json:"description" doc:"Book description"`
+	ID               string       `json:"id" doc:"Book ID" readOnly:"true"`
+	Name             string       `json:"name" maxLength:"100" doc:"Book name" example:"New Book"`
+	Description      string       `json:"description" maxLength:"500" doc:"Book description"`
 	Metadata         BookMetadata `json:"metadata" doc:"Metadata of the book"`
 	CoverImageFileID string       `json:"coverImageFileId,omitempty" doc:"File ID of the cover image"`
-	CreatedAt        time.Time    `json:"createdAt" doc:"Timestamp when the book was created"`
+	CreatedAt        time.Time    `json:"createdAt" doc:"Timestamp when the book was created" readOnly:"true"`
 }
 
 type BookMetadata struct {
 	Author string `json:"author" doc:"Author name"`
 	ISBN   string `json:"isbn" doc:"ISBN of the book"`
-	Genre  string `json:"genre" doc:"Book genre(s)"`
+	Genre  string `json:"genre,omitempty" doc:"Book genre(s)"`
 }
 
 type CreateBookRequest struct {
-	Body struct {
-		Name             string       `json:"name" required:"true" maxLength:"100" doc:"Book name" example:"New Book"`
-		Description      string       `json:"description,omitempty" maxLength:"500" doc:"Book description"`
-		Metadata         BookMetadata `json:"metadata" doc:"Metadata of the book"`
-		CoverImageFileID string       `json:"coverImageFileId,omitempty" doc:"File ID of the book cover image"`
-	}
+	Body Book
 }
 
 type CreateBookResponse struct {
@@ -36,18 +31,18 @@ type CreateBookResponse struct {
 
 type GetBooksRequest struct {
 	GetAll     bool  `query:"all" required:"true" default:"false" doc:"If true, returns all items ignoring pagination"`
-	PageNumber int64 `query:"pageNumber" default:"1" minimum:"1" doc:"Page number"`
-	PageSize   int64 `query:"pageSize" default:"20" minimum:"1" maximum:"100" doc:"Items per page"`
+	PageNumber int64 `query:"pageNumber" minimum:"1" default:"1" doc:"Page number"`
+	PageSize   int64 `query:"pageSize" minimum:"1" maximum:"100" default:"20" doc:"Items per page"`
 }
 
 type GetBooksResponse struct {
 	Body struct {
-		Data []Book `json:"data"`
+		Data []Book `json:"data" doc:"List of books"`
 	}
 }
 
 type GetBookByIDRequest struct {
-	ID string `path:"id" json:"id" pattern:"^[a-fA-F0-9]{24}$" required:"true" doc:"Book ID"`
+	ID string `path:"id" required:"true" pattern:"^[a-fA-F0-9]{24}$" patternDescription:"BSON ObjectID" doc:"Book ID"`
 }
 
 type GetBookByIDResponse struct {

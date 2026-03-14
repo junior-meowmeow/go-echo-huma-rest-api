@@ -18,14 +18,17 @@
           "createdAt": {
             "description": "Timestamp when the book was created",
             "format": "date-time",
+            "readOnly": true,
             "type": "string"
           },
           "description": {
             "description": "Book description",
+            "maxLength": 500,
             "type": "string"
           },
           "id": {
             "description": "Book ID",
+            "readOnly": true,
             "type": "string"
           },
           "metadata": {
@@ -34,6 +37,8 @@
           },
           "name": {
             "description": "Book name",
+            "example": "New Book",
+            "maxLength": 100,
             "type": "string"
           }
         },
@@ -64,8 +69,7 @@
         },
         "required": [
           "author",
-          "isbn",
-          "genre"
+          "isbn"
         ],
         "type": "object"
       },
@@ -85,6 +89,8 @@
           },
           "bookId": {
             "description": "Parent Book ID",
+            "pattern": "^[a-fA-F0-9]{24}$",
+            "patternDescription": "BSON ObjectID",
             "type": "string"
           },
           "content": {
@@ -93,6 +99,7 @@
           },
           "id": {
             "description": "Book Page ID",
+            "readOnly": true,
             "type": "string"
           },
           "metadata": {
@@ -127,49 +134,7 @@
           }
         },
         "required": [
-          "isBookmarked",
-          "highlight"
-        ],
-        "type": "object"
-      },
-      "CreateBookPageRequestBody": {
-        "additionalProperties": false,
-        "properties": {
-          "$schema": {
-            "description": "A URL to the JSON Schema for this object.",
-            "example": "https://example.com/schemas/CreateBookPageRequestBody.json",
-            "format": "uri",
-            "readOnly": true,
-            "type": "string"
-          },
-          "attachedImageFileId": {
-            "description": "File ID of the attached image",
-            "type": "string"
-          },
-          "bookID": {
-            "description": "Parent Book ID",
-            "pattern": "^[a-fA-F0-9]{24}$",
-            "type": "string"
-          },
-          "content": {
-            "description": "Text content of the page",
-            "type": "string"
-          },
-          "metadata": {
-            "$ref": "#/components/schemas/BookPageMetadata",
-            "description": "Metadata of the book page"
-          },
-          "pageNumber": {
-            "description": "Page number within the book",
-            "format": "int64",
-            "type": "integer"
-          }
-        },
-        "required": [
-          "bookID",
-          "pageNumber",
-          "content",
-          "metadata"
+          "isBookmarked"
         ],
         "type": "object"
       },
@@ -184,47 +149,12 @@
             "type": "string"
           },
           "id": {
+            "description": "Created Book Page ID",
             "type": "string"
           }
         },
         "required": [
           "id"
-        ],
-        "type": "object"
-      },
-      "CreateBookRequestBody": {
-        "additionalProperties": false,
-        "properties": {
-          "$schema": {
-            "description": "A URL to the JSON Schema for this object.",
-            "example": "https://example.com/schemas/CreateBookRequestBody.json",
-            "format": "uri",
-            "readOnly": true,
-            "type": "string"
-          },
-          "coverImageFileId": {
-            "description": "File ID of the book cover image",
-            "type": "string"
-          },
-          "description": {
-            "description": "Book description",
-            "maxLength": 500,
-            "type": "string"
-          },
-          "metadata": {
-            "$ref": "#/components/schemas/BookMetadata",
-            "description": "Metadata of the book"
-          },
-          "name": {
-            "description": "Book name",
-            "example": "New Book",
-            "maxLength": 100,
-            "type": "string"
-          }
-        },
-        "required": [
-          "name",
-          "metadata"
         ],
         "type": "object"
       },
@@ -245,43 +175,6 @@
         },
         "required": [
           "id"
-        ],
-        "type": "object"
-      },
-      "CreateReviewRequestBody": {
-        "additionalProperties": false,
-        "properties": {
-          "$schema": {
-            "description": "A URL to the JSON Schema for this object.",
-            "example": "https://example.com/schemas/CreateReviewRequestBody.json",
-            "format": "uri",
-            "readOnly": true,
-            "type": "string"
-          },
-          "author": {
-            "description": "Name of the review author",
-            "example": "User",
-            "maxLength": 10,
-            "type": "string"
-          },
-          "message": {
-            "description": "Review message",
-            "example": "Lorem Ipsum",
-            "maxLength": 100,
-            "type": "string"
-          },
-          "rating": {
-            "description": "Rating from 1 to 5",
-            "example": 2,
-            "format": "int64",
-            "maximum": 5,
-            "minimum": 1,
-            "type": "integer"
-          }
-        },
-        "required": [
-          "author",
-          "rating"
         ],
         "type": "object"
       },
@@ -367,7 +260,7 @@
             "type": "string"
           },
           "expiresAt": {
-            "description": "Timestamp when the download URL expires",
+            "description": "Timestamp when download URL expires",
             "format": "date-time",
             "type": "string"
           },
@@ -394,6 +287,7 @@
             "type": "string"
           },
           "data": {
+            "description": "List of available pets",
             "items": {
               "$ref": "#/components/schemas/Pet"
             },
@@ -441,6 +335,7 @@
             "type": "string"
           },
           "data": {
+            "description": "List of books",
             "items": {
               "$ref": "#/components/schemas/Book"
             },
@@ -514,7 +409,7 @@
             "type": "integer"
           },
           "files": {
-            "description": "List of file keys found in the S3 bucket",
+            "description": "List of file keys found in file storage",
             "items": {
               "type": "string"
             },
@@ -581,7 +476,12 @@
             "type": "array"
           },
           "status": {
-            "description": "Pet status (available, pending, sold)",
+            "description": "Pet status",
+            "enum": [
+              "available",
+              "pending",
+              "sold"
+            ],
             "type": "string"
           },
           "tags": {
@@ -625,26 +525,41 @@
       "Review": {
         "additionalProperties": false,
         "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "example": "https://example.com/schemas/Review.json",
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
           "author": {
             "description": "Name of the review author",
+            "example": "User",
+            "maxLength": 10,
             "type": "string"
           },
           "createdAt": {
             "description": "Timestamp when the review was created",
             "format": "date-time",
+            "readOnly": true,
             "type": "string"
           },
           "id": {
             "description": "Review ID",
+            "readOnly": true,
             "type": "string"
           },
           "message": {
             "description": "Review message",
+            "example": "Lorem Ipsum",
+            "maxLength": 100,
             "type": "string"
           },
           "rating": {
             "description": "Rating from 1 to 5",
             "format": "int64",
+            "maximum": 5,
+            "minimum": 1,
             "type": "integer"
           }
         },
@@ -816,6 +731,7 @@
             "schema": {
               "description": "Parent Book ID",
               "pattern": "^[a-fA-F0-9]{24}$",
+              "patternDescription": "BSON ObjectID",
               "type": "string"
             }
           },
@@ -893,7 +809,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/CreateBookPageRequestBody"
+                "$ref": "#/components/schemas/BookPage"
               }
             }
           },
@@ -941,6 +857,7 @@
             "schema": {
               "description": "Parent Book ID",
               "pattern": "^[a-fA-F0-9]{24}$",
+              "patternDescription": "BSON ObjectID",
               "type": "string"
             }
           },
@@ -1012,6 +929,7 @@
             "schema": {
               "description": "Parent Book ID",
               "pattern": "^[a-fA-F0-9]{24}$",
+              "patternDescription": "BSON ObjectID",
               "type": "string"
             }
           },
@@ -1081,6 +999,7 @@
             "schema": {
               "description": "Book Page ID",
               "pattern": "^[a-fA-F0-9]{24}$",
+              "patternDescription": "BSON ObjectID",
               "type": "string"
             }
           }
@@ -1192,7 +1111,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/CreateBookRequestBody"
+                "$ref": "#/components/schemas/Book"
               }
             }
           },
@@ -1239,6 +1158,7 @@
             "schema": {
               "description": "Book ID",
               "pattern": "^[a-fA-F0-9]{24}$",
+              "patternDescription": "BSON ObjectID",
               "type": "string"
             }
           }
@@ -1273,7 +1193,7 @@
     },
     "/v1/files/download/{id}": {
       "get": {
-        "description": "Get a file from object storage.",
+        "description": "Get a file from file storage.",
         "operationId": "get-file-download-link-v1",
         "parameters": [
           {
@@ -1281,9 +1201,11 @@
             "explode": false,
             "in": "query",
             "name": "id",
+            "required": true,
             "schema": {
               "description": "File ID",
               "pattern": "^[a-fA-F0-9]{24}$",
+              "patternDescription": "BSON ObjectID",
               "type": "string"
             }
           }
@@ -1310,7 +1232,7 @@
             "description": "Error"
           }
         },
-        "summary": "Get file from object storage (V1)",
+        "summary": "Get file from file storage (V1)",
         "tags": [
           "Files"
         ]
@@ -1318,7 +1240,7 @@
     },
     "/v1/files/upload": {
       "post": {
-        "description": "Upload a file to object storage.",
+        "description": "Upload a file to file storage.",
         "operationId": "upload-file-v1",
         "requestBody": {
           "content": {
@@ -1341,7 +1263,7 @@
                     "type": "string"
                   },
                   "objectBaseKey": {
-                    "description": "Base object key in object storage",
+                    "description": "Base object key in file storage",
                     "type": "string"
                   }
                 },
@@ -1375,7 +1297,7 @@
             "description": "Error"
           }
         },
-        "summary": "Upload file to object storage (V1)",
+        "summary": "Upload file to file storage (V1)",
         "tags": [
           "Files"
         ]
@@ -1496,7 +1418,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/CreateReviewRequestBody"
+                "$ref": "#/components/schemas/Review"
               }
             }
           },

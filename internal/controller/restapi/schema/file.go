@@ -9,13 +9,13 @@ import (
 type FileDownloadInfo struct {
 	FileName    string    `json:"fileName" doc:"File name"`
 	DownloadURL string    `json:"downloadUrl" doc:"Temporary download URL"`
-	ExpiresAt   time.Time `json:"expiresAt" doc:"Timestamp when the download URL expires"`
+	ExpiresAt   time.Time `json:"expiresAt" doc:"Timestamp when download URL expires"`
 }
 
 type UploadFileRequest struct {
 	RawBody huma.MultipartFormFiles[struct {
 		File          huma.FormFile `form:"file" required:"true" doc:"File content to upload"`
-		ObjectBaseKey string        `form:"objectBaseKey" doc:"Base object key in object storage"`
+		ObjectBaseKey string        `form:"objectBaseKey" default:"" doc:"Base object key in file storage"`
 	}]
 }
 
@@ -26,7 +26,7 @@ type UploadFileResponse struct {
 }
 
 type GetFileDownloadLinkRequest struct {
-	ID string `query:"id" pattern:"^[a-fA-F0-9]{24}$" doc:"File ID"`
+	ID string `query:"id" required:"true" pattern:"^[a-fA-F0-9]{24}$" patternDescription:"BSON ObjectID" doc:"File ID"`
 }
 
 type GetFileDownloadLinkResponse struct {
@@ -37,7 +37,7 @@ type GetS3FileListRequest struct{}
 
 type GetS3FileListResponse struct {
 	Body struct {
-		Files []string `json:"files" doc:"List of file keys found in the S3 bucket"`
+		Files []string `json:"files" doc:"List of file keys found in file storage"`
 		Count int      `json:"count" doc:"Total number of files found"`
 	}
 }

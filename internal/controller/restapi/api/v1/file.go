@@ -18,8 +18,8 @@ func RegisterFileRoutes(api huma.API, h *handler.Handlers) {
 		OperationID: "upload-file",
 		Method:      http.MethodPost,
 		Path:        "/upload",
-		Summary:     "Upload file to object storage",
-		Description: "Upload a file to object storage.",
+		Summary:     "Upload file to file storage",
+		Description: "Upload a file to file storage.",
 		Tags:        []string{"Files"},
 	}, h.File.UploadFile)
 
@@ -27,8 +27,8 @@ func RegisterFileRoutes(api huma.API, h *handler.Handlers) {
 		OperationID: "get-file-download-link",
 		Method:      http.MethodGet,
 		Path:        "/download/{id}",
-		Summary:     "Get file from object storage",
-		Description: "Get a file from object storage.",
+		Summary:     "Get file from file storage",
+		Description: "Get a file from file storage.",
 		Tags:        []string{"Files"},
 	}, h.File.GetFileDownloadLink)
 }
