@@ -61,7 +61,7 @@ func (h *bookHandler) GetBooks(ctx context.Context, request *schema.GetBooksRequ
 		return nil, err
 	}
 
-	bookOutputs := convertBooks(books)
+	bookOutputs := mapEntityBooksToSchema(books)
 
 	resp := schema.GetBooksResponse{}
 	resp.Body.Data = bookOutputs
@@ -75,7 +75,7 @@ func (h *bookHandler) GetBookByID(ctx context.Context, request *schema.GetBookBy
 		return nil, err
 	}
 
-	bookOutput := convertBook(book)
+	bookOutput := mapEntityBookToSchema(book)
 
 	resp := schema.GetBookByIDResponse{}
 	resp.Body = bookOutput
@@ -83,15 +83,15 @@ func (h *bookHandler) GetBookByID(ctx context.Context, request *schema.GetBookBy
 	return &resp, nil
 }
 
-func convertBooks(books []entity.Book) []schema.Book {
+func mapEntityBooksToSchema(books []entity.Book) []schema.Book {
 	bookOutputs := make([]schema.Book, len(books))
 	for i, r := range books {
-		bookOutputs[i] = convertBook(r)
+		bookOutputs[i] = mapEntityBookToSchema(r)
 	}
 	return bookOutputs
 }
 
-func convertBook(book entity.Book) schema.Book {
+func mapEntityBookToSchema(book entity.Book) schema.Book {
 	return schema.Book{
 		ID:          book.ID,
 		Name:        book.Name,

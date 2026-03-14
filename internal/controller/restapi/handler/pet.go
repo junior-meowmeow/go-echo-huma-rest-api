@@ -30,7 +30,7 @@ func (h *petHandler) GetAvailablePets(ctx context.Context, request *schema.GetAv
 	}
 
 	resp := schema.GetAvailablePetsResponse{}
-	resp.Body.Data = convertPets(pets)
+	resp.Body.Data = mapEntityPetsToSchema(pets)
 
 	return &resp, nil
 }
@@ -42,20 +42,20 @@ func (h *petHandler) GetPetByID(ctx context.Context, request *schema.GetPetByIDR
 	}
 
 	resp := schema.GetPetByIDResponse{}
-	resp.Body = convertPet(pet)
+	resp.Body = mapEntityPetToSchema(pet)
 
 	return &resp, nil
 }
 
-func convertPets(pets []entity.Pet) []schema.Pet {
+func mapEntityPetsToSchema(pets []entity.Pet) []schema.Pet {
 	petOutputs := make([]schema.Pet, len(pets))
 	for i, p := range pets {
-		petOutputs[i] = convertPet(p)
+		petOutputs[i] = mapEntityPetToSchema(p)
 	}
 	return petOutputs
 }
 
-func convertPet(pet entity.Pet) schema.Pet {
+func mapEntityPetToSchema(pet entity.Pet) schema.Pet {
 	return schema.Pet{
 		ID:   pet.ID,
 		Name: pet.Name,

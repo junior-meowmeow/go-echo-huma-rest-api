@@ -64,7 +64,7 @@ func (h *bookPageHandler) GetBookPages(ctx context.Context, request *schema.GetB
 		return nil, err
 	}
 
-	bookPageOutputs := convertBookPages(bookPages)
+	bookPageOutputs := mapEntityBookPagesToSchema(bookPages)
 
 	resp := schema.GetBookPagesResponse{}
 	resp.Body.Data = bookPageOutputs
@@ -78,7 +78,7 @@ func (h *bookPageHandler) GetBookPagesByRange(ctx context.Context, request *sche
 		return nil, err
 	}
 
-	bookPageOutputs := convertBookPages(bookPages)
+	bookPageOutputs := mapEntityBookPagesToSchema(bookPages)
 
 	resp := schema.GetBookPagesResponse{}
 	resp.Body.Data = bookPageOutputs
@@ -92,7 +92,7 @@ func (h *bookPageHandler) GetBookPagesByOffset(ctx context.Context, request *sch
 		return nil, err
 	}
 
-	bookPageOutputs := convertBookPages(bookPages)
+	bookPageOutputs := mapEntityBookPagesToSchema(bookPages)
 
 	resp := schema.GetBookPagesResponse{}
 	resp.Body.Data = bookPageOutputs
@@ -106,7 +106,7 @@ func (h *bookPageHandler) GetBookPageByID(ctx context.Context, request *schema.G
 		return nil, err
 	}
 
-	bookPageOutput := convertBookPage(bookPage)
+	bookPageOutput := mapEntityBookPageToSchema(bookPage)
 
 	resp := schema.GetBookPageByIDResponse{}
 	resp.Body = bookPageOutput
@@ -114,15 +114,15 @@ func (h *bookPageHandler) GetBookPageByID(ctx context.Context, request *schema.G
 	return &resp, nil
 }
 
-func convertBookPages(bookPages []entity.BookPage) []schema.BookPage {
+func mapEntityBookPagesToSchema(bookPages []entity.BookPage) []schema.BookPage {
 	bookPageOutputs := make([]schema.BookPage, len(bookPages))
 	for i, r := range bookPages {
-		bookPageOutputs[i] = convertBookPage(r)
+		bookPageOutputs[i] = mapEntityBookPageToSchema(r)
 	}
 	return bookPageOutputs
 }
 
-func convertBookPage(bookPage entity.BookPage) schema.BookPage {
+func mapEntityBookPageToSchema(bookPage entity.BookPage) schema.BookPage {
 	return schema.BookPage{
 		ID:         bookPage.ID,
 		BookID:     bookPage.BookID,

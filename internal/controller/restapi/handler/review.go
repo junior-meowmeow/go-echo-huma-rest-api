@@ -43,7 +43,7 @@ func (h *reviewHandler) GetReviews(ctx context.Context, _ *schema.GetReviewsRequ
 		return nil, err
 	}
 
-	reviewOutputs := convertReviews(reviews)
+	reviewOutputs := mapEntityReviewsToSchema(reviews)
 
 	resp := schema.GetReviewsResponse{}
 	resp.Body.Data = reviewOutputs
@@ -51,15 +51,15 @@ func (h *reviewHandler) GetReviews(ctx context.Context, _ *schema.GetReviewsRequ
 	return &resp, nil
 }
 
-func convertReviews(reviews []entity.Review) []schema.Review {
+func mapEntityReviewsToSchema(reviews []entity.Review) []schema.Review {
 	reviewOutputs := make([]schema.Review, len(reviews))
 	for i, r := range reviews {
-		reviewOutputs[i] = convertReview(r)
+		reviewOutputs[i] = mapEntityReviewToSchema(r)
 	}
 	return reviewOutputs
 }
 
-func convertReview(review entity.Review) schema.Review {
+func mapEntityReviewToSchema(review entity.Review) schema.Review {
 	return schema.Review{
 		ID:        review.ID,
 		Author:    review.Author,
