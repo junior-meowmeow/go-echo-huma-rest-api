@@ -17,8 +17,8 @@ type FileRecordDocument struct {
 	ContentType string `bson:"contentType"`
 	S3Key       string `bson:"s3Key"`
 
-	CreatedAt  time.Time `bson:"createdAt"`
-	ModifiedAt time.Time `bson:"modifiedAt"`
+	CreatedAt time.Time `bson:"createdAt"`
+	UpdatedAt time.Time `bson:"updatedAt"`
 }
 
 func NewFileRecordDocument(entity *entity.FileRecord) (FileRecordDocument, error) {
@@ -40,7 +40,7 @@ func NewFileRecordDocument(entity *entity.FileRecord) (FileRecordDocument, error
 		ContentType: entity.ContentType,
 		S3Key:       entity.S3Key,
 		CreatedAt:   entity.CreatedAt,
-		ModifiedAt:  entity.ModifiedAt,
+		UpdatedAt:   entity.UpdatedAt,
 	}
 
 	return fileRecordDocument, nil
@@ -54,6 +54,6 @@ func (document *FileRecordDocument) ToEntity() entity.FileRecord {
 		ContentType: document.ContentType,
 		S3Key:       document.S3Key,
 		CreatedAt:   document.CreatedAt,
-		ModifiedAt:  document.ModifiedAt,
+		UpdatedAt:   document.UpdatedAt,
 	}
 }

@@ -17,8 +17,8 @@ type BookDocument struct {
 	Metadata         BookMetadata `bson:"metadata"`
 	CoverImageFileID string       `bson:"coverImageFileID"`
 
-	CreatedAt  time.Time `bson:"createdAt"`
-	ModifiedAt time.Time `bson:"modifiedAt"`
+	CreatedAt time.Time `bson:"createdAt"`
+	UpdatedAt time.Time `bson:"updatedAt"`
 }
 
 type BookMetadata struct {
@@ -50,7 +50,7 @@ func NewBookDocument(entity *entity.Book) (BookDocument, error) {
 		},
 		CoverImageFileID: entity.CoverImageFileID,
 		CreatedAt:        entity.CreatedAt,
-		ModifiedAt:       entity.ModifiedAt,
+		UpdatedAt:        entity.UpdatedAt,
 	}
 
 	return bookDocument, nil
@@ -68,6 +68,6 @@ func (document *BookDocument) ToEntity() entity.Book {
 		},
 		CoverImageFileID: document.CoverImageFileID,
 		CreatedAt:        document.CreatedAt,
-		ModifiedAt:       document.ModifiedAt,
+		UpdatedAt:        document.UpdatedAt,
 	}
 }

@@ -29,7 +29,7 @@ func NewBookUseCase(bookRepository repository.BookRepository) *bookUseCase {
 func (u *bookUseCase) CreateBook(ctx context.Context, book *entity.Book) (string, error) {
 	currentTime := time.Now()
 	book.CreatedAt = currentTime
-	book.ModifiedAt = currentTime
+	book.UpdatedAt = currentTime
 
 	id, err := u.BookRepository.CreateBook(ctx, book)
 	if err != nil {

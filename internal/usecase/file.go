@@ -68,7 +68,7 @@ func (u *fileUseCase) UploadFile(ctx context.Context, fileStream io.Reader, file
 		ContentType: contentType,
 		S3Key:       objectKey,
 		CreatedAt:   currentTime,
-		ModifiedAt:  currentTime,
+		UpdatedAt:   currentTime,
 	}
 
 	id, err := u.FileRecordRepository.CreateFileRecord(ctx, fileRecord)

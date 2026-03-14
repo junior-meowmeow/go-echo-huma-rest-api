@@ -12,8 +12,8 @@ type Book struct {
 	Metadata         BookMetadata
 	CoverImageFileID string
 
-	CreatedAt  time.Time
-	ModifiedAt time.Time
+	CreatedAt time.Time
+	UpdatedAt time.Time
 }
 
 type BookMetadata struct {

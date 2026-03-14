@@ -12,4 +12,5 @@ type Review struct {
 	Message string
 
 	CreatedAt time.Time
+	UpdatedAt time.Time
 }

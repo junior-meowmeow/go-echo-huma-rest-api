@@ -26,6 +26,7 @@ func NewReviewUseCase(reviewRepository repository.ReviewRepository) *reviewUseCa
 func (u *reviewUseCase) PostReview(ctx context.Context, review *entity.Review) error {
 	currentTime := time.Now()
 	review.CreatedAt = currentTime
+	review.UpdatedAt = currentTime
 
 	if err := u.ReviewRepository.CreateReview(ctx, review); err != nil {
 		return err

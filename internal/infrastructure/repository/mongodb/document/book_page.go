@@ -18,8 +18,8 @@ type BookPageDocument struct {
 	Metadata            BookPageMetadata `bson:"metadata"`
 	AttachedImageFileID string           `bson:"attachedImageFileID,omitempty"`
 
-	CreatedAt  time.Time `bson:"createdAt"`
-	ModifiedAt time.Time `bson:"modifiedAt"`
+	CreatedAt time.Time `bson:"createdAt"`
+	UpdatedAt time.Time `bson:"updatedAt"`
 }
 
 type BookPageMetadata struct {
@@ -54,7 +54,7 @@ func NewBookPageDocument(entity *entity.BookPage) (BookPageDocument, error) {
 		},
 		AttachedImageFileID: entity.AttachedImageFileID,
 		CreatedAt:           entity.CreatedAt,
-		ModifiedAt:          entity.ModifiedAt,
+		UpdatedAt:           entity.UpdatedAt,
 	}
 
 	return bookPageDocument, nil
@@ -72,6 +72,6 @@ func (document *BookPageDocument) ToEntity() entity.BookPage {
 		},
 		AttachedImageFileID: document.AttachedImageFileID,
 		CreatedAt:           document.CreatedAt,
-		ModifiedAt:          document.ModifiedAt,
+		UpdatedAt:           document.UpdatedAt,
 	}
 }

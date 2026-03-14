@@ -17,6 +17,7 @@ type ReviewDocument struct {
 	Message string `bson:"message"`
 
 	CreatedAt time.Time `bson:"createdAt"`
+	UpdatedAt time.Time `bson:"updatedAt"`
 }
 
 func NewReviewDocument(entity *entity.Review) (ReviewDocument, error) {
@@ -37,6 +38,7 @@ func NewReviewDocument(entity *entity.Review) (ReviewDocument, error) {
 		Rating:    entity.Rating,
 		Message:   entity.Message,
 		CreatedAt: entity.CreatedAt,
+		UpdatedAt: entity.UpdatedAt,
 	}
 
 	return reviewDocument, nil
@@ -49,5 +51,6 @@ func (document *ReviewDocument) ToEntity() entity.Review {
 		Rating:    document.Rating,
 		Message:   document.Message,
 		CreatedAt: document.CreatedAt,
+		UpdatedAt: document.UpdatedAt,
 	}
 }

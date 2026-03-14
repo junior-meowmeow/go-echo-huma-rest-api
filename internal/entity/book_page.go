@@ -13,8 +13,8 @@ type BookPage struct {
 	Metadata            BookPageMetadata
 	AttachedImageFileID string
 
-	CreatedAt  time.Time
-	ModifiedAt time.Time
+	CreatedAt time.Time
+	UpdatedAt time.Time
 }
 
 type BookPageMetadata struct {

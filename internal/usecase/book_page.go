@@ -38,7 +38,7 @@ func (u *bookPageUseCase) CreateBookPage(ctx context.Context, bookPage *entity.B
 
 	currentTime := time.Now()
 	bookPage.CreatedAt = currentTime
-	bookPage.ModifiedAt = currentTime
+	bookPage.UpdatedAt = currentTime
 
 	id, err := u.BookPageRepository.CreateBookPage(ctx, bookPage)
 	if err != nil {
