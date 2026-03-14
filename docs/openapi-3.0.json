@@ -802,7 +802,7 @@
         ]
       }
     },
-    "/v1/book_pages/": {
+    "/v1/book_pages": {
       "get": {
         "description": "Get book pages in a book.",
         "operationId": "get-book-pages-v1",
@@ -1113,7 +1113,7 @@
         ]
       }
     },
-    "/v1/books/": {
+    "/v1/books": {
       "get": {
         "description": "Get a list of books.",
         "operationId": "get-books-v1",
@@ -1381,7 +1381,7 @@
         ]
       }
     },
-    "/v1/pets/": {
+    "/v1/pets": {
       "get": {
         "description": "Get available pets.",
         "operationId": "get-availble-pets-v1",
@@ -1458,7 +1458,7 @@
         ]
       }
     },
-    "/v1/reviews/": {
+    "/v1/reviews": {
       "get": {
         "description": "Get all reviews from database.",
         "operationId": "get-reviews-v1",

@@ -17,7 +17,7 @@ func RegisterReviewRoutes(api huma.API, h *handler.Handlers) {
 	huma.Register(api, huma.Operation{
 		OperationID:   "create-review",
 		Method:        http.MethodPost,
-		Path:          "/",
+		Path:          "",
 		Summary:       "Post new review",
 		Description:   "Post a new review to database.",
 		Tags:          []string{"Reviews"},
@@ -27,7 +27,7 @@ func RegisterReviewRoutes(api huma.API, h *handler.Handlers) {
 	huma.Register(api, huma.Operation{
 		OperationID: "get-reviews",
 		Method:      http.MethodGet,
-		Path:        "/",
+		Path:        "",
 		Summary:     "Get all reviews",
 		Description: "Get all reviews from database.",
 		Tags:        []string{"Reviews"},

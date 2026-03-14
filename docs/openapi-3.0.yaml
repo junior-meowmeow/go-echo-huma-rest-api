@@ -598,7 +598,7 @@ paths:
       summary: Test S3 Connection
       tags:
         - Miscellaneous
-  /v1/book_pages/:
+  /v1/book_pages:
     get:
       description: Get book pages in a book.
       operationId: get-book-pages-v1
@@ -809,7 +809,7 @@ paths:
       summary: Get Book Page (V1)
       tags:
         - Book Pages
-  /v1/books/:
+  /v1/books:
     get:
       description: Get a list of books.
       operationId: get-books-v1
@@ -985,7 +985,7 @@ paths:
       summary: Upload file to object storage (V1)
       tags:
         - Files
-  /v1/pets/:
+  /v1/pets:
     get:
       description: Get available pets.
       operationId: get-availble-pets-v1
@@ -1034,7 +1034,7 @@ paths:
       summary: Get Pet (V1)
       tags:
         - Pets
-  /v1/reviews/:
+  /v1/reviews:
     get:
       description: Get all reviews from database.
       operationId: get-reviews-v1

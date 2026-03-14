@@ -17,7 +17,7 @@ func RegisterBookPageRoutes(api huma.API, h *handler.Handlers) {
 	huma.Register(api, huma.Operation{
 		OperationID:   "create-book-page",
 		Method:        http.MethodPost,
-		Path:          "/",
+		Path:          "",
 		Summary:       "Create Book Page",
 		Description:   "Create a new book page.",
 		Tags:          []string{"Book Pages"},
@@ -27,7 +27,7 @@ func RegisterBookPageRoutes(api huma.API, h *handler.Handlers) {
 	huma.Register(api, huma.Operation{
 		OperationID: "get-book-pages",
 		Method:      http.MethodGet,
-		Path:        "/",
+		Path:        "",
 		Summary:     "Get Book Pages",
 		Description: "Get book pages in a book.",
 		Tags:        []string{"Book Pages"},

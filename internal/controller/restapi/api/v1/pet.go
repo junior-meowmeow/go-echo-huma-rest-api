@@ -17,7 +17,7 @@ func RegisterPetRoutes(api huma.API, h *handler.Handlers) {
 	huma.Register(api, huma.Operation{
 		OperationID: "get-availble-pets",
 		Method:      http.MethodGet,
-		Path:        "/",
+		Path:        "",
 		Summary:     "Get Available Pets",
 		Description: "Get available pets.",
 		Tags:        []string{"Pets"},

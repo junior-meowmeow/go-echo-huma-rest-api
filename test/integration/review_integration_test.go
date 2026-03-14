@@ -59,7 +59,7 @@ func (s *ReviewSuite) TestCreateAndGetReview() {
 
 	s.Assert().Equal(http.StatusOK, w.Code)
 
-	var responseBody []struct {
+	type review struct {
 		ID        string `json:"id"`
 		Author    string `json:"author"`
 		Rating    int    `json:"rating"`
@@ -67,12 +67,18 @@ func (s *ReviewSuite) TestCreateAndGetReview() {
 		CreatedAt string `json:"createdAt"`
 	}
 
+	type reviewResponse struct {
+		Data []review `json:"data"`
+	}
+
+	var responseBody reviewResponse
+
 	err = json.Unmarshal(w.Body.Bytes(), &responseBody)
 	s.Require().NoError(err)
 
 	s.Require().NotEmpty(responseBody)
 
-	firstReview := responseBody[0]
+	firstReview := responseBody.Data[0]
 	s.Equal("Test", firstReview.Author)
 	s.Equal(5, firstReview.Rating)
 	s.Equal("Test Message", firstReview.Message)
@@ -111,11 +117,24 @@ func (s *ReviewSuite) TestCreateReviewWithInvalidRating() {
 
 	s.Assert().Equal(http.StatusOK, w.Code)
 
-	var responseBody []interface{}
+	type review struct {
+		ID        string `json:"id"`
+		Author    string `json:"author"`
+		Rating    int    `json:"rating"`
+		Message   string `json:"message"`
+		CreatedAt string `json:"createdAt"`
+	}
+
+	type reviewResponse struct {
+		Data []review `json:"data"`
+	}
+
+	var responseBody reviewResponse
+
 	err = json.Unmarshal(w.Body.Bytes(), &responseBody)
 	s.Require().NoError(err)
 
-	s.Assert().Len(responseBody, 0, "Database should be empty after failed creation")
+	s.Assert().Len(responseBody.Data, 0, "Database should be empty after failed creation")
 }
 
 func (s *ReviewSuite) TestCreateReview_ValidationErrors() {
