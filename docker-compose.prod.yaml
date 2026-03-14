@@ -23,6 +23,7 @@ services:
       AWS_SESSION_TOKEN:
       S3_ENDPOINT:
       S3_BUCKET:
+      PETSTORE_URL:
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:${PORT}/health"]
       interval: 30s

@@ -44,6 +44,13 @@ func CreateHumaConfig(apiBasePath string) huma.Config {
 			Description: "Base Server",
 		},
 	}
+	humaConfig.OpenAPI.Components.SecuritySchemes = map[string]*huma.SecurityScheme{
+		"bearerAuth": {
+			Type:         "http",
+			Scheme:       "bearer",
+			BearerFormat: "JWT",
+		},
+	}
 	// disable the $schema property
 	// humaConfig.CreateHooks = nil
 	return humaConfig

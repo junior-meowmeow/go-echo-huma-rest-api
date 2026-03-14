@@ -3,10 +3,12 @@ package app
 import (
 	"context"
 	"log"
+	"time"
 
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/config"
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/controller/restapi/api"
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/controller/restapi/handler"
+	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/infrastructure/external"
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/infrastructure/repository"
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/infrastructure/storage"
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/usecase"
@@ -36,12 +38,20 @@ func NewApplication(ctx context.Context, cfg config.Config) (*Application, error
 		return nil, err
 	}
 
+	// Initialize External Service Clients
+	petStoreClient, err := newPetStoreClient(cfg.PetStoreURL, 5*time.Second)
+	if err != nil {
+		log.Printf("Failed to initialize PetStore client: %v\n", err)
+		return nil, err
+	}
+
 	// Initialize Infrastructures
 	repositories := repository.NewRepositories(mongoDB)
 	storages := storage.NewStorages(s3Client, cfg.S3Bucket)
+	externalServices := external.NewExternalServices(petStoreClient)
 
 	// Initialize Use Cases
-	usecases := usecase.NewUseCases(repositories, storages)
+	usecases := usecase.NewUseCases(repositories, storages, externalServices)
 
 	// Initialize REST API Handlers
 	handlers := handler.NewHandlers(usecases)

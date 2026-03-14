@@ -295,6 +295,23 @@ components:
         - downloadUrl
         - expiresAt
       type: object
+    GetAvailablePetsResponseBody:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          example: https://example.com/schemas/GetAvailablePetsResponseBody.json
+          format: uri
+          readOnly: true
+          type: string
+        data:
+          items:
+            $ref: "#/components/schemas/Pet"
+          nullable: true
+          type: array
+      required:
+        - data
+      type: object
     GetBookPagesResponseBody:
       additionalProperties: false
       properties:
@@ -403,6 +420,62 @@ components:
       required:
         - message
       type: object
+    Pet:
+      additionalProperties: false
+      properties:
+        $schema:
+          description: A URL to the JSON Schema for this object.
+          example: https://example.com/schemas/Pet.json
+          format: uri
+          readOnly: true
+          type: string
+        category:
+          $ref: "#/components/schemas/PetCategory"
+          description: Pet category
+        id:
+          description: Pet ID
+          format: int64
+          type: integer
+        name:
+          description: Pet name
+          type: string
+        photoUrls:
+          description: Pet Photo URLs
+          items:
+            type: string
+          nullable: true
+          type: array
+        status:
+          description: Pet status (available, pending, sold)
+          type: string
+        tags:
+          description: Pet tags
+          items:
+            type: string
+          nullable: true
+          type: array
+      required:
+        - id
+        - name
+        - category
+        - photoUrls
+        - status
+        - tags
+      type: object
+    PetCategory:
+      additionalProperties: false
+      properties:
+        id:
+          description: Category ID
+          format: int64
+          type: integer
+        name:
+          description: Category name
+          type: string
+      required:
+        - id
+        - name
+      type: object
     Review:
       additionalProperties: false
       properties:
@@ -444,6 +517,11 @@ components:
       required:
         - id
       type: object
+  securitySchemes:
+    bearerAuth:
+      bearerFormat: JWT
+      scheme: bearer
+      type: http
 info:
   title: API Reference Documentation
   version: 1.0.0
@@ -907,6 +985,55 @@ paths:
       summary: Upload file to object storage (V1)
       tags:
         - Files
+  /v1/pets/:
+    get:
+      description: Get available pets.
+      operationId: get-availble-pets-v1
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetAvailablePetsResponseBody"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Get Available Pets (V1)
+      tags:
+        - Pets
+  /v1/pets/{id}:
+    get:
+      description: Get a pet by ID.
+      operationId: get-pet-by-id-v1
+      parameters:
+        - description: Pet ID
+          in: path
+          name: id
+          required: true
+          schema:
+            description: Pet ID
+            format: int64
+            type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Pet"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Get Pet (V1)
+      tags:
+        - Pets
   /v1/reviews/:
     get:
       description: Get all reviews from database.

@@ -20,6 +20,7 @@ type Config struct {
 	DBPass      string
 	S3Endpoint  string
 	S3Bucket    string
+	PetStoreURL string
 }
 
 // Load environment variables and returns a Config. (Simple version)
@@ -47,6 +48,7 @@ func NewConfig() Config {
 		DBPass:      getEnv("DB_PASS", "pass"),
 		S3Endpoint:  getEnv("S3_ENDPOINT", "http://localhost:8333"),
 		S3Bucket:    getEnv("S3_BUCKET", "test-bucket"),
+		PetStoreURL: getEnv("PETSTORE_URL", "http://localhost:8080/api/v3"),
 	}
 }
 

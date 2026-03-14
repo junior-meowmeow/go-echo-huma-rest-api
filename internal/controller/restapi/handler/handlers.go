@@ -11,6 +11,7 @@ type Handlers struct {
 	Book     BookHandler
 	BookPage BookPageHandler
 	Health   HealthHandler
+	Pet      PetHandler
 }
 
 func NewHandlers(usecases *usecase.UseCases) *Handlers {
@@ -21,5 +22,6 @@ func NewHandlers(usecases *usecase.UseCases) *Handlers {
 		Book:     NewBookHandler(usecases.Book),
 		BookPage: NewBookPageHandler(usecases.BookPage),
 		Health:   NewHealthHandler(usecases.Health),
+		Pet:      NewPetHandler(usecases.Pet),
 	}
 }

@@ -22,4 +22,5 @@ func RegisterRoutes(api huma.API, h *handler.Handlers) {
 	RegisterFileGroup(api, h)
 	RegisterBookGroup(api, h)
 	RegisterBookPageGroup(api, h)
+	RegisterPetGroup(api, h)
 }
