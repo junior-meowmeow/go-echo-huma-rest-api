@@ -10,6 +10,12 @@ import (
 func RegisterReviewGroup(api huma.API, h *handler.Handlers) {
 	reviewGroup := huma.NewGroup(api, "/reviews")
 
+	openapi := api.OpenAPI()
+	openapi.Tags = append(openapi.Tags, &huma.Tag{
+		Name:        "Reviews",
+		Description: "Operations related to reviews.",
+	})
+
 	RegisterReviewRoutes(reviewGroup, h)
 }
 

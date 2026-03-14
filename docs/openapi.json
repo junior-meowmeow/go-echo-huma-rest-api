@@ -661,7 +661,7 @@
       }
     },
     "securitySchemes": {
-      "bearerAuth": {
+      "BearerAuth": {
         "bearerFormat": "JWT",
         "scheme": "bearer",
         "type": "http"
@@ -752,6 +752,59 @@
         "summary": "Get health status",
         "tags": [
           "Monitoring"
+        ]
+      }
+    },
+    "/test-auth/{name}\t": {
+      "get": {
+        "operationId": "test-auth",
+        "parameters": [
+          {
+            "description": "Name to greet",
+            "example": "world",
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "description": "Name to greet",
+              "examples": [
+                "world"
+              ],
+              "maxLength": 30,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GreetingResponseBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "summary": "Test Bearar Auth",
+        "tags": [
+          "Miscellaneous"
         ]
       }
     },
@@ -1520,6 +1573,28 @@
     {
       "description": "Base Server",
       "url": ""
+    }
+  ],
+  "tags": [
+    {
+      "description": "File upload/download services.",
+      "name": "Files"
+    },
+    {
+      "description": "Operations related to books.",
+      "name": "Books"
+    },
+    {
+      "description": "Operations related to book pages.",
+      "name": "Book Pages"
+    },
+    {
+      "description": "Operations related to pets from Petstore service.",
+      "name": "Pets"
+    },
+    {
+      "description": "Operations related to reviews.",
+      "name": "Reviews"
     }
   ]
 }

@@ -18,9 +18,9 @@ func RegisterGroup(api huma.API, h *handler.Handlers) {
 }
 
 func RegisterRoutes(api huma.API, h *handler.Handlers) {
-	RegisterReviewGroup(api, h)
 	RegisterFileGroup(api, h)
 	RegisterBookGroup(api, h)
 	RegisterBookPageGroup(api, h)
 	RegisterPetGroup(api, h)
+	RegisterReviewGroup(api, h)
 }

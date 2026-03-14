@@ -10,6 +10,12 @@ import (
 func RegisterFileGroup(api huma.API, h *handler.Handlers) {
 	fileGroup := huma.NewGroup(api, "/files")
 
+	openapi := api.OpenAPI()
+	openapi.Tags = append(openapi.Tags, &huma.Tag{
+		Name:        "Files",
+		Description: "File upload/download services.",
+	})
+
 	RegisterFileRoutes(fileGroup, h)
 }
 

@@ -10,6 +10,12 @@ import (
 func RegisterPetGroup(api huma.API, h *handler.Handlers) {
 	bookGroup := huma.NewGroup(api, "/pets")
 
+	openapi := api.OpenAPI()
+	openapi.Tags = append(openapi.Tags, &huma.Tag{
+		Name:        "Pets",
+		Description: "Operations related to pets from Petstore service.",
+	})
+
 	RegisterPetRoutes(bookGroup, h)
 }
 

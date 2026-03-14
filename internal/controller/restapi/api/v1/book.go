@@ -10,6 +10,12 @@ import (
 func RegisterBookGroup(api huma.API, h *handler.Handlers) {
 	bookGroup := huma.NewGroup(api, "/books")
 
+	openapi := api.OpenAPI()
+	openapi.Tags = append(openapi.Tags, &huma.Tag{
+		Name:        "Books",
+		Description: "Operations related to books.",
+	})
+
 	RegisterBookRoutes(bookGroup, h)
 }
 

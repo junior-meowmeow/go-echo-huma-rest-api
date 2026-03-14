@@ -36,4 +36,15 @@ func RegisterRoutes(api huma.API, h *handler.Handlers) {
 		Description: "Directly lists files from the S3 bucket to verify connectivity.",
 		Tags:        []string{"Miscellaneous"},
 	}, h.File.GetS3FileList)
+
+	huma.Register(api, huma.Operation{
+		OperationID: "test-auth",
+		Method:      http.MethodGet,
+		Path:        "/test-auth/{name}	",
+		Summary:     "Test Bearar Auth",
+		Security: []map[string][]string{
+			{"BearerAuth": {}},
+		},
+		Tags: []string{"Miscellaneous"},
+	}, h.Greeting.GetGreeting)
 }
