@@ -24,7 +24,7 @@ func NewHealthHandler(healthUseCase usecase.HealthUseCase) *healthHandler {
 func (h *healthHandler) GetHealthStatus(ctx context.Context, _ *schema.GetHealthStatusRequest) (*schema.GetHealthStatusResponse, error) {
 	status, err := h.HealthUseCase.GetHealthStatus(ctx)
 	if err != nil {
-		return nil, err
+		return nil, resolveError(err)
 	}
 
 	resp := schema.GetHealthStatusResponse{}

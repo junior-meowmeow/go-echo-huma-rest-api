@@ -12,6 +12,7 @@ import (
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/controller/restapi/api"
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/controller/restapi/handler"
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/usecase"
+	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/util"
 )
 
 func main() {
@@ -19,7 +20,7 @@ func main() {
 	handlers := handler.NewHandlers(&usecase.UseCases{})
 
 	// Initialize Router and Register APIs
-	router := api.NewRouter(handlers, "")
+	router := api.NewRouter(handlers, &util.Utilities{}, "")
 
 	// Request API Documentations and Write them to docs/
 	requestAndWriteDocs(router)

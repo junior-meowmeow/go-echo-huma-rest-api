@@ -6,21 +6,25 @@ import (
 	"github.com/danielgtaylor/huma/v2"
 )
 
-func RegisterGroup(api huma.API, h *handler.Handlers) {
-	v1Group := huma.NewGroup(api, "/v1")
+func RegisterGroup(public huma.API, protected huma.API, h *handler.Handlers) {
+	publicGroup := huma.NewGroup(public, "/v1")
+	protectedGroup := huma.NewGroup(protected, "/v1")
 
-	v1Group.UseSimpleModifier(func(op *huma.Operation) {
+	modifier := func(op *huma.Operation) {
 		op.OperationID = op.OperationID + "-v1"
 		op.Summary = op.Summary + " (V1)"
-	})
+	}
+	publicGroup.UseSimpleModifier(modifier)
+	protectedGroup.UseSimpleModifier(modifier)
 
-	RegisterRoutes(v1Group, h)
+	RegisterRoutes(publicGroup, protectedGroup, h)
 }
 
-func RegisterRoutes(api huma.API, h *handler.Handlers) {
-	RegisterFileGroup(api, h)
-	RegisterBookGroup(api, h)
-	RegisterBookPageGroup(api, h)
-	RegisterPetGroup(api, h)
-	RegisterReviewGroup(api, h)
+func RegisterRoutes(public huma.API, protected huma.API, h *handler.Handlers) {
+	RegisterFileGroup(public, protected, h)
+	RegisterBookGroup(public, protected, h)
+	RegisterBookPageGroup(public, protected, h)
+	RegisterPetGroup(public, protected, h)
+	RegisterReviewGroup(public, protected, h)
+	RegisterUserGroup(public, protected, h)
 }

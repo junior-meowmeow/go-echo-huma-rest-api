@@ -7,20 +7,15 @@ import (
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/controller/restapi/handler"
 )
 
-func RegisterPetGroup(api huma.API, h *handler.Handlers) {
-	bookGroup := huma.NewGroup(api, "/pets")
+func RegisterPetGroup(public huma.API, protected huma.API, h *handler.Handlers) {
+	publicGroup := huma.NewGroup(public, "/pets")
+	protectedGroup := huma.NewGroup(protected, "/pets")
 
-	openapi := api.OpenAPI()
-	openapi.Tags = append(openapi.Tags, &huma.Tag{
-		Name:        "Pets",
-		Description: "Operations related to pets from Petstore service.",
-	})
-
-	RegisterPetRoutes(bookGroup, h)
+	RegisterPetRoutes(publicGroup, protectedGroup, h)
 }
 
-func RegisterPetRoutes(api huma.API, h *handler.Handlers) {
-	huma.Register(api, huma.Operation{
+func RegisterPetRoutes(public huma.API, protected huma.API, h *handler.Handlers) {
+	huma.Register(public, huma.Operation{
 		OperationID: "get-availble-pets",
 		Method:      http.MethodGet,
 		Path:        "",
@@ -29,7 +24,7 @@ func RegisterPetRoutes(api huma.API, h *handler.Handlers) {
 		Tags:        []string{"Pets"},
 	}, h.Pet.GetAvailablePets)
 
-	huma.Register(api, huma.Operation{
+	huma.Register(public, huma.Operation{
 		OperationID: "get-pet-by-id",
 		Method:      http.MethodGet,
 		Path:        "/{id}",

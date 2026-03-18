@@ -11,6 +11,7 @@ type Repositories struct {
 	FileRecord FileRecordRepository
 	Book       BookRepository
 	BookPage   BookPageRepository
+	User       UserRepository
 }
 
 func NewRepositories(mongoDB *mongo.Database) *Repositories {
@@ -19,5 +20,6 @@ func NewRepositories(mongoDB *mongo.Database) *Repositories {
 		FileRecord: mongodb.NewFileRecordRepository(mongoDB),
 		Book:       mongodb.NewBookRepository(mongoDB),
 		BookPage:   mongodb.NewBookPageRepository(mongoDB),
+		User:       mongodb.NewUserRepository(mongoDB),
 	}
 }

@@ -3,6 +3,8 @@ package api
 import (
 	v1 "github.com/junior-meowmeow/go-echo-huma-rest-api/internal/controller/restapi/api/v1"
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/controller/restapi/handler"
+	customMiddleware "github.com/junior-meowmeow/go-echo-huma-rest-api/internal/controller/restapi/middleware"
+	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/util"
 
 	"github.com/danielgtaylor/huma/v2"
 	"github.com/danielgtaylor/huma/v2/adapters/humaecho"
@@ -12,44 +14,41 @@ import (
 	_ "github.com/danielgtaylor/huma/v2/formats/cbor"
 )
 
-func NewRouter(handlers *handler.Handlers, apiBasePath string) *echo.Echo {
+func NewRouter(handlers *handler.Handlers, utilities *util.Utilities, apiBasePath string) *echo.Echo {
 	router := echo.New()
-	router.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins: []string{"*"},
-		AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
-	}))
+	AddEchoMiddlewares(router)
 	RegisterDocumentations(router, apiBasePath)
 
 	humaConfig := CreateHumaConfig(apiBasePath)
+	AddOpenAPITags(humaConfig.OpenAPI)
 	api := humaecho.New(router, humaConfig)
 
-	RegisterRoutes(api, handlers)
-	v1.RegisterGroup(api, handlers)
+	public := huma.NewGroup(api, "")
+
+	protected := huma.NewGroup(api, "")
+	protected.UseMiddleware(
+		customMiddleware.RequireToken(protected, utilities.Token),
+	)
+	protected.UseSimpleModifier(func(op *huma.Operation) {
+		op.Security = []map[string][]string{
+			{"BearerAuth": {}},
+		}
+	})
+
+	RegisterRoutes(public, protected, handlers)
+	v1.RegisterGroup(public, protected, handlers)
 
 	return router
 }
 
-func RegisterDocumentations(router *echo.Echo, apiBasePath string) {
-	router.GET("/docs", StoplightElements(apiBasePath))
-	router.GET("/docs/scalar", ScalarDocs(apiBasePath))
-	router.GET("/docs/swagger", SwaggerUI(apiBasePath))
-}
-
-func CreateHumaConfig(apiBasePath string) huma.Config {
-	humaConfig := huma.DefaultConfig("API Reference Documentation", "1.0.0")
-	humaConfig.DocsPath = ""
-	humaConfig.OpenAPI.Servers = []*huma.Server{
-		{
-			URL:         apiBasePath,
-			Description: "Base Server",
-		},
-	}
-	humaConfig.Components.SecuritySchemes = map[string]*huma.SecurityScheme{
-		"BearerAuth": {
-			Type:         "http",
-			Scheme:       "bearer",
-			BearerFormat: "JWT",
-		},
-	}
-	return humaConfig
+func AddEchoMiddlewares(router *echo.Echo) {
+	router.Use(middleware.Recover())
+	router.Use(middleware.RequestID())
+	router.Use(middleware.Logger())
+	router.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+		AllowOrigins: []string{"*"},
+		AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
+	}))
+	router.Use(middleware.Secure())
+	router.Use(middleware.RateLimiter(middleware.NewRateLimiterMemoryStore(20)))
 }

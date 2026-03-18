@@ -15,3 +15,9 @@ type FileRecord struct {
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }
+
+type FileDownloadInfo struct {
+	FileName       string
+	DownloadURL    string
+	ExpirationTime time.Time
+}

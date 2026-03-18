@@ -2,6 +2,7 @@ package mongodb
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/entity"
@@ -49,8 +50,8 @@ func (r *bookRepository) GetBookByID(ctx context.Context, id string) (entity.Boo
 	var document document.BookDocument
 	err = r.Collection.FindOne(ctx, bson.D{{Key: "_id", Value: oid}}).Decode(&document)
 	if err != nil {
-		if err == mongo.ErrNoDocuments {
-			return book, fmt.Errorf("book not found")
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return book, fmt.Errorf("failed to get book: %w: %w", entity.ErrNotFound, err)
 		}
 		return book, err
 	}

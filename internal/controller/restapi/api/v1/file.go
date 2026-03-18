@@ -7,20 +7,15 @@ import (
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/controller/restapi/handler"
 )
 
-func RegisterFileGroup(api huma.API, h *handler.Handlers) {
-	fileGroup := huma.NewGroup(api, "/files")
+func RegisterFileGroup(public huma.API, protected huma.API, h *handler.Handlers) {
+	publicGroup := huma.NewGroup(public, "/files")
+	protectedGroup := huma.NewGroup(protected, "/files")
 
-	openapi := api.OpenAPI()
-	openapi.Tags = append(openapi.Tags, &huma.Tag{
-		Name:        "Files",
-		Description: "File upload/download services.",
-	})
-
-	RegisterFileRoutes(fileGroup, h)
+	RegisterFileRoutes(publicGroup, protectedGroup, h)
 }
 
-func RegisterFileRoutes(api huma.API, h *handler.Handlers) {
-	huma.Register(api, huma.Operation{
+func RegisterFileRoutes(public huma.API, protected huma.API, h *handler.Handlers) {
+	huma.Register(public, huma.Operation{
 		OperationID: "upload-file",
 		Method:      http.MethodPost,
 		Path:        "/upload",
@@ -29,7 +24,7 @@ func RegisterFileRoutes(api huma.API, h *handler.Handlers) {
 		Tags:        []string{"Files"},
 	}, h.File.UploadFile)
 
-	huma.Register(api, huma.Operation{
+	huma.Register(public, huma.Operation{
 		OperationID: "get-file-download-link",
 		Method:      http.MethodGet,
 		Path:        "/download/{id}",

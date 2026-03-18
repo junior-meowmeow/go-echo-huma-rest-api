@@ -8,8 +8,8 @@ import (
 	"github.com/danielgtaylor/huma/v2"
 )
 
-func RegisterRoutes(api huma.API, h *handler.Handlers) {
-	huma.Register(api, huma.Operation{
+func RegisterRoutes(public huma.API, protected huma.API, h *handler.Handlers) {
+	huma.Register(public, huma.Operation{
 		OperationID:   "health-check",
 		Method:        http.MethodGet,
 		Path:          "/health",
@@ -19,7 +19,7 @@ func RegisterRoutes(api huma.API, h *handler.Handlers) {
 		DefaultStatus: 200,
 	}, h.Health.GetHealthStatus)
 
-	huma.Register(api, huma.Operation{
+	huma.Register(public, huma.Operation{
 		OperationID: "get-greeting",
 		Method:      http.MethodGet,
 		Path:        "/greeting/{name}",
@@ -28,7 +28,7 @@ func RegisterRoutes(api huma.API, h *handler.Handlers) {
 		Tags:        []string{"Miscellaneous"},
 	}, h.Greeting.GetGreeting)
 
-	huma.Register(api, huma.Operation{
+	huma.Register(public, huma.Operation{
 		OperationID: "list-s3-files",
 		Method:      http.MethodGet,
 		Path:        "/test-s3",
@@ -37,10 +37,10 @@ func RegisterRoutes(api huma.API, h *handler.Handlers) {
 		Tags:        []string{"Miscellaneous"},
 	}, h.File.GetS3FileList)
 
-	huma.Register(api, huma.Operation{
+	huma.Register(public, huma.Operation{
 		OperationID: "test-auth",
 		Method:      http.MethodGet,
-		Path:        "/test-auth/{name}	",
+		Path:        "/test-auth/{name}",
 		Summary:     "Test Bearar Auth",
 		Security: []map[string][]string{
 			{"BearerAuth": {}},

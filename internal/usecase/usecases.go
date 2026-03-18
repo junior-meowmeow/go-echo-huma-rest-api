@@ -4,6 +4,7 @@ import (
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/infrastructure/external"
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/infrastructure/repository"
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/infrastructure/storage"
+	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/util"
 )
 
 type UseCases struct {
@@ -14,9 +15,14 @@ type UseCases struct {
 	BookPage BookPageUseCase
 	Health   HealthUseCase
 	Pet      PetUseCase
+	User     UserUseCase
 }
 
-func NewUseCases(repositories *repository.Repositories, storages *storage.Storages, services *external.ExternalServices) *UseCases {
+func NewUseCases(repositories *repository.Repositories,
+	storages *storage.Storages,
+	services *external.ExternalServices,
+	utilities *util.Utilities,
+) *UseCases {
 	return &UseCases{
 		Greeting: NewGreetingUseCase(),
 		Review:   NewReviewUseCase(repositories.Review),
@@ -25,5 +31,6 @@ func NewUseCases(repositories *repository.Repositories, storages *storage.Storag
 		BookPage: NewBookPageUseCase(repositories.Book, repositories.BookPage),
 		Health:   NewHealthUseCase(),
 		Pet:      NewPetUseCase(services.PetService),
+		User:     NewUserUseCase(repositories.User, utilities.Token),
 	}
 }

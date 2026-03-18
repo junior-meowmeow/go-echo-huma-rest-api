@@ -498,6 +498,67 @@
         ],
         "type": "object"
       },
+      "LoginUserRequestBody": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "https://example.com/schemas/LoginUserRequestBody.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "password": {
+            "description": "User password",
+            "examples": [
+              "pass_word"
+            ],
+            "format": "password",
+            "maxLength": 100,
+            "minLength": 8,
+            "type": "string",
+            "writeOnly": true
+          },
+          "username": {
+            "description": "User name",
+            "examples": [
+              "new_user"
+            ],
+            "maxLength": 50,
+            "minLength": 3,
+            "type": "string"
+          }
+        },
+        "required": [
+          "username",
+          "password"
+        ],
+        "type": "object"
+      },
+      "LoginUserResponseBody": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "https://example.com/schemas/LoginUserResponseBody.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "token": {
+            "description": "JWT Bearer token for authentication",
+            "type": "string"
+          }
+        },
+        "required": [
+          "token"
+        ],
+        "type": "object"
+      },
       "Pet": {
         "additionalProperties": false,
         "properties": {
@@ -579,6 +640,78 @@
         "required": [
           "id",
           "name"
+        ],
+        "type": "object"
+      },
+      "RegisterUserRequestBody": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "https://example.com/schemas/RegisterUserRequestBody.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "password": {
+            "description": "User password",
+            "examples": [
+              "pass_word"
+            ],
+            "format": "password",
+            "maxLength": 100,
+            "minLength": 8,
+            "type": "string",
+            "writeOnly": true
+          },
+          "role": {
+            "description": "User role.",
+            "enum": [
+              "user",
+              " admin"
+            ],
+            "examples": [
+              "user"
+            ],
+            "type": "string"
+          },
+          "username": {
+            "description": "User name",
+            "examples": [
+              "new_user"
+            ],
+            "maxLength": 50,
+            "minLength": 3,
+            "type": "string"
+          }
+        },
+        "required": [
+          "username",
+          "password"
+        ],
+        "type": "object"
+      },
+      "RegisterUserResponseBody": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "https://example.com/schemas/RegisterUserResponseBody.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "id": {
+            "description": "Created User ID",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
         ],
         "type": "object"
       },
@@ -755,7 +888,7 @@
         ]
       }
     },
-    "/test-auth/{name}\t": {
+    "/test-auth/{name}": {
       "get": {
         "operationId": "test-auth",
         "parameters": [
@@ -1529,6 +1662,11 @@
             "description": "Error"
           }
         },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
         "summary": "Get all reviews (V1)",
         "tags": [
           "Reviews"
@@ -1562,9 +1700,98 @@
             "description": "Error"
           }
         },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
         "summary": "Post new review (V1)",
         "tags": [
           "Reviews"
+        ]
+      }
+    },
+    "/v1/users/login": {
+      "post": {
+        "description": "Authenticate a user and return a JWT Bearer token.",
+        "operationId": "login-user-v1",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginUserRequestBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginUserResponseBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Log in a user (V1)",
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/v1/users/register": {
+      "post": {
+        "description": "Create a new user account with a username and password.",
+        "operationId": "register-user-v1",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterUserRequestBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegisterUserResponseBody"
+                }
+              }
+            },
+            "description": "Created"
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Register a new user (V1)",
+        "tags": [
+          "Users"
         ]
       }
     }
@@ -1576,6 +1803,14 @@
     }
   ],
   "tags": [
+    {
+      "description": "Operations related to user authentication.",
+      "name": "Users"
+    },
+    {
+      "description": "Operations related to reviews.",
+      "name": "Reviews"
+    },
     {
       "description": "File upload/download services.",
       "name": "Files"
@@ -1591,10 +1826,6 @@
     {
       "description": "Operations related to pets from Petstore service.",
       "name": "Pets"
-    },
-    {
-      "description": "Operations related to reviews.",
-      "name": "Reviews"
     }
   ]
 }

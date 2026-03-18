@@ -41,7 +41,7 @@ func (h *bookPageHandler) CreateBookPage(ctx context.Context, request *schema.Cr
 
 	id, err := h.BookPageUseCase.CreateBookPage(ctx, bookPage)
 	if err != nil {
-		return nil, err
+		return nil, resolveError(err)
 	}
 
 	resp := schema.CreateBookPageResponse{}
@@ -61,7 +61,7 @@ func (h *bookPageHandler) GetBookPages(ctx context.Context, request *schema.GetB
 	}
 
 	if err != nil {
-		return nil, err
+		return nil, resolveError(err)
 	}
 
 	bookPageOutputs := mapEntityBookPagesToSchema(bookPages)
@@ -75,7 +75,7 @@ func (h *bookPageHandler) GetBookPages(ctx context.Context, request *schema.GetB
 func (h *bookPageHandler) GetBookPagesByRange(ctx context.Context, request *schema.GetBookPagesRangeRequest) (*schema.GetBookPagesResponse, error) {
 	bookPages, err := h.BookPageUseCase.GetBookPagesByRange(ctx, request.BookID, request.StartPage, request.EndPage)
 	if err != nil {
-		return nil, err
+		return nil, resolveError(err)
 	}
 
 	bookPageOutputs := mapEntityBookPagesToSchema(bookPages)
@@ -89,7 +89,7 @@ func (h *bookPageHandler) GetBookPagesByRange(ctx context.Context, request *sche
 func (h *bookPageHandler) GetBookPagesByOffset(ctx context.Context, request *schema.GetBookPagesOffsetRequest) (*schema.GetBookPagesResponse, error) {
 	bookPages, err := h.BookPageUseCase.GetBookPagesByOffset(ctx, request.BookID, request.CenterPage, request.Offset)
 	if err != nil {
-		return nil, err
+		return nil, resolveError(err)
 	}
 
 	bookPageOutputs := mapEntityBookPagesToSchema(bookPages)
@@ -103,7 +103,7 @@ func (h *bookPageHandler) GetBookPagesByOffset(ctx context.Context, request *sch
 func (h *bookPageHandler) GetBookPageByID(ctx context.Context, request *schema.GetBookPageByIDRequest) (*schema.GetBookPageByIDResponse, error) {
 	bookPage, err := h.BookPageUseCase.GetBookPageByID(ctx, request.ID)
 	if err != nil {
-		return nil, err
+		return nil, resolveError(err)
 	}
 
 	bookPageOutput := mapEntityBookPageToSchema(bookPage)

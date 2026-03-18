@@ -11,6 +11,7 @@ import (
 type Config struct {
 	Port        int
 	APIBasePath string
+	JWTSecret   string
 	MongoHost   string
 	MongoPort   string
 	MongoUser   string
@@ -39,6 +40,7 @@ func NewConfig() Config {
 	return Config{
 		Port:        port,
 		APIBasePath: getEnv("API_BASE_PATH", ""),
+		JWTSecret:   getEnv("JWT_SECRET", "test-secret"),
 		MongoHost:   getEnv("MONGO_HOST", "mongo"),
 		MongoPort:   getEnv("MONGO_PORT", "27017"),
 		MongoUser:   getEnv("MONGO_USER", "user"),

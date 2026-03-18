@@ -7,20 +7,15 @@ import (
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/controller/restapi/handler"
 )
 
-func RegisterBookGroup(api huma.API, h *handler.Handlers) {
-	bookGroup := huma.NewGroup(api, "/books")
+func RegisterBookGroup(public huma.API, protected huma.API, h *handler.Handlers) {
+	publicGroup := huma.NewGroup(public, "/books")
+	protectedGroup := huma.NewGroup(protected, "/books")
 
-	openapi := api.OpenAPI()
-	openapi.Tags = append(openapi.Tags, &huma.Tag{
-		Name:        "Books",
-		Description: "Operations related to books.",
-	})
-
-	RegisterBookRoutes(bookGroup, h)
+	RegisterBookRoutes(publicGroup, protectedGroup, h)
 }
 
-func RegisterBookRoutes(api huma.API, h *handler.Handlers) {
-	huma.Register(api, huma.Operation{
+func RegisterBookRoutes(public huma.API, protected huma.API, h *handler.Handlers) {
+	huma.Register(public, huma.Operation{
 		OperationID:   "create-book",
 		Method:        http.MethodPost,
 		Path:          "",
@@ -30,7 +25,7 @@ func RegisterBookRoutes(api huma.API, h *handler.Handlers) {
 		DefaultStatus: http.StatusCreated,
 	}, h.Book.CreateBook)
 
-	huma.Register(api, huma.Operation{
+	huma.Register(public, huma.Operation{
 		OperationID: "get-books",
 		Method:      http.MethodGet,
 		Path:        "",
@@ -39,7 +34,7 @@ func RegisterBookRoutes(api huma.API, h *handler.Handlers) {
 		Tags:        []string{"Books"},
 	}, h.Book.GetBooks)
 
-	huma.Register(api, huma.Operation{
+	huma.Register(public, huma.Operation{
 		OperationID: "get-book-by-id",
 		Method:      http.MethodGet,
 		Path:        "/{id}",

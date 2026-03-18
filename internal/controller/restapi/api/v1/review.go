@@ -5,22 +5,18 @@ import (
 
 	"github.com/danielgtaylor/huma/v2"
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/controller/restapi/handler"
+	customMiddleware "github.com/junior-meowmeow/go-echo-huma-rest-api/internal/controller/restapi/middleware"
 )
 
-func RegisterReviewGroup(api huma.API, h *handler.Handlers) {
-	reviewGroup := huma.NewGroup(api, "/reviews")
+func RegisterReviewGroup(public huma.API, protected huma.API, h *handler.Handlers) {
+	publicGroup := huma.NewGroup(public, "/reviews")
+	protectedGroup := huma.NewGroup(protected, "/reviews")
 
-	openapi := api.OpenAPI()
-	openapi.Tags = append(openapi.Tags, &huma.Tag{
-		Name:        "Reviews",
-		Description: "Operations related to reviews.",
-	})
-
-	RegisterReviewRoutes(reviewGroup, h)
+	RegisterReviewRoutes(publicGroup, protectedGroup, h)
 }
 
-func RegisterReviewRoutes(api huma.API, h *handler.Handlers) {
-	huma.Register(api, huma.Operation{
+func RegisterReviewRoutes(public huma.API, protected huma.API, h *handler.Handlers) {
+	huma.Register(protected, huma.Operation{
 		OperationID:   "create-review",
 		Method:        http.MethodPost,
 		Path:          "",
@@ -30,12 +26,15 @@ func RegisterReviewRoutes(api huma.API, h *handler.Handlers) {
 		DefaultStatus: http.StatusCreated,
 	}, h.Review.CreateReview)
 
-	huma.Register(api, huma.Operation{
+	huma.Register(protected, huma.Operation{
 		OperationID: "get-reviews",
 		Method:      http.MethodGet,
 		Path:        "",
 		Summary:     "Get all reviews",
 		Description: "Get all reviews from database.",
 		Tags:        []string{"Reviews"},
+		Middlewares: huma.Middlewares{
+			customMiddleware.RequireAdminRole(protected),
+		},
 	}, h.Review.GetReviews)
 }

@@ -22,10 +22,7 @@ func NewGreetingHandler(greetingUseCase usecase.GreetingUseCase) *greetingHandle
 }
 
 func (h *greetingHandler) GetGreeting(ctx context.Context, request *schema.GreetingRequest) (*schema.GreetingResponse, error) {
-	message, err := h.GreetingUseCase.GetGreetingMessage(ctx, request.Name)
-	if err != nil {
-		return nil, err
-	}
+	message := h.GreetingUseCase.GetGreetingMessage(ctx, request.Name)
 
 	resp := schema.GreetingResponse{}
 	resp.Body.Message = message

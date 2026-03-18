@@ -6,7 +6,7 @@ import (
 )
 
 type GreetingUseCase interface {
-	GetGreetingMessage(ctx context.Context, name string) (string, error)
+	GetGreetingMessage(ctx context.Context, name string) string
 }
 
 type greetingUseCase struct {
@@ -16,8 +16,8 @@ func NewGreetingUseCase() *greetingUseCase {
 	return &greetingUseCase{}
 }
 
-func (u *greetingUseCase) GetGreetingMessage(ctx context.Context, name string) (string, error) {
+func (u *greetingUseCase) GetGreetingMessage(ctx context.Context, name string) string {
 	message := fmt.Sprintf("Hello, %s!", name)
 
-	return message, nil
+	return message
 }

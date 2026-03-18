@@ -16,7 +16,7 @@ import (
 
 type FileUseCase interface {
 	UploadFile(ctx context.Context, fileStream io.Reader, filename string, size int64, contentType string, baseKey string) (string, error)
-	GetFileDownloadLink(ctx context.Context, fileID string) (url string, expiresAt time.Time, fileName string, err error)
+	GetFileDownloadLink(ctx context.Context, fileID string) (entity.FileDownloadInfo, error)
 	GetS3FileList(ctx context.Context) ([]string, error)
 }
 
@@ -79,10 +79,10 @@ func (u *fileUseCase) UploadFile(ctx context.Context, fileStream io.Reader, file
 	return id, nil
 }
 
-func (u *fileUseCase) GetFileDownloadLink(ctx context.Context, fileID string) (string, time.Time, string, error) {
+func (u *fileUseCase) GetFileDownloadLink(ctx context.Context, fileID string) (entity.FileDownloadInfo, error) {
 	fileRecord, err := u.FileRecordRepository.GetFileRecordByID(ctx, fileID)
 	if err != nil {
-		return "", time.Time{}, "", fmt.Errorf("file not found: %w", err)
+		return entity.FileDownloadInfo{}, fmt.Errorf("file not found: %w", err)
 	}
 
 	duration := 15 * time.Minute
@@ -90,10 +90,16 @@ func (u *fileUseCase) GetFileDownloadLink(ctx context.Context, fileID string) (s
 
 	url, err := u.FileStorage.GetPresignedDownloadURL(ctx, fileRecord.S3Key, fileRecord.FileName, duration)
 	if err != nil {
-		return "", time.Time{}, "", fmt.Errorf("failed to presign url: %w", err)
+		return entity.FileDownloadInfo{}, fmt.Errorf("failed to presign url: %w", err)
 	}
 
-	return url, expirationTime, fileRecord.FileName, nil
+	fileDownloadInfo := entity.FileDownloadInfo{
+		DownloadURL:    url,
+		ExpirationTime: expirationTime,
+		FileName:       fileRecord.FileName,
+	}
+
+	return fileDownloadInfo, nil
 }
 
 func (u *fileUseCase) GetS3FileList(ctx context.Context) ([]string, error) {

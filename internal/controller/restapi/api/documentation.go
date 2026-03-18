@@ -6,6 +6,12 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+func RegisterDocumentations(router *echo.Echo, apiBasePath string) {
+	router.GET("/docs", StoplightElements(apiBasePath))
+	router.GET("/docs/scalar", ScalarDocs(apiBasePath))
+	router.GET("/docs/swagger", SwaggerUI(apiBasePath))
+}
+
 func StoplightElements(apiBasePath string) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		return c.HTML(http.StatusOK, `<!doctype html>

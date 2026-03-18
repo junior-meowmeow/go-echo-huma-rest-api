@@ -7,20 +7,15 @@ import (
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/controller/restapi/handler"
 )
 
-func RegisterBookPageGroup(api huma.API, h *handler.Handlers) {
-	bookPageGroup := huma.NewGroup(api, "/book_pages")
+func RegisterBookPageGroup(public huma.API, protected huma.API, h *handler.Handlers) {
+	publicGroup := huma.NewGroup(public, "/book_pages")
+	protectedGroup := huma.NewGroup(protected, "/book_pages")
 
-	openapi := api.OpenAPI()
-	openapi.Tags = append(openapi.Tags, &huma.Tag{
-		Name:        "Book Pages",
-		Description: "Operations related to book pages.",
-	})
-
-	RegisterBookPageRoutes(bookPageGroup, h)
+	RegisterBookPageRoutes(publicGroup, protectedGroup, h)
 }
 
-func RegisterBookPageRoutes(api huma.API, h *handler.Handlers) {
-	huma.Register(api, huma.Operation{
+func RegisterBookPageRoutes(public huma.API, protected huma.API, h *handler.Handlers) {
+	huma.Register(public, huma.Operation{
 		OperationID:   "create-book-page",
 		Method:        http.MethodPost,
 		Path:          "",
@@ -30,7 +25,7 @@ func RegisterBookPageRoutes(api huma.API, h *handler.Handlers) {
 		DefaultStatus: http.StatusCreated,
 	}, h.BookPage.CreateBookPage)
 
-	huma.Register(api, huma.Operation{
+	huma.Register(public, huma.Operation{
 		OperationID: "get-book-pages",
 		Method:      http.MethodGet,
 		Path:        "",
@@ -39,7 +34,7 @@ func RegisterBookPageRoutes(api huma.API, h *handler.Handlers) {
 		Tags:        []string{"Book Pages"},
 	}, h.BookPage.GetBookPages)
 
-	huma.Register(api, huma.Operation{
+	huma.Register(public, huma.Operation{
 		OperationID: "get-book-pages-range",
 		Method:      http.MethodGet,
 		Path:        "/range",
@@ -48,7 +43,7 @@ func RegisterBookPageRoutes(api huma.API, h *handler.Handlers) {
 		Tags:        []string{"Book Pages"},
 	}, h.BookPage.GetBookPagesByRange)
 
-	huma.Register(api, huma.Operation{
+	huma.Register(public, huma.Operation{
 		OperationID: "get-book-pages-offset",
 		Method:      http.MethodGet,
 		Path:        "/offset",
@@ -57,7 +52,7 @@ func RegisterBookPageRoutes(api huma.API, h *handler.Handlers) {
 		Tags:        []string{"Book Pages"},
 	}, h.BookPage.GetBookPagesByOffset)
 
-	huma.Register(api, huma.Operation{
+	huma.Register(public, huma.Operation{
 		OperationID: "get-book-page-by-id",
 		Method:      http.MethodGet,
 		Path:        "/{id}",

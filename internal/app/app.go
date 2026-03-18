@@ -12,6 +12,7 @@ import (
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/infrastructure/repository"
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/infrastructure/storage"
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/usecase"
+	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/util"
 
 	"github.com/labstack/echo/v4"
 	"go.mongodb.org/mongo-driver/v2/mongo"
@@ -50,14 +51,17 @@ func NewApplication(ctx context.Context, cfg config.Config) (*Application, error
 	storages := storage.NewStorages(s3Client, cfg.S3Bucket)
 	externalServices := external.NewExternalServices(petStoreClient)
 
+	// Initialize Utilities
+	utilities := util.NewUtilities(cfg.JWTSecret)
+
 	// Initialize Use Cases
-	usecases := usecase.NewUseCases(repositories, storages, externalServices)
+	usecases := usecase.NewUseCases(repositories, storages, externalServices, utilities)
 
 	// Initialize REST API Handlers
 	handlers := handler.NewHandlers(usecases)
 
-	// Initialize Router and Register APIs
-	router := api.NewRouter(handlers, cfg.APIBasePath)
+	// Initialize REST API Router and Register APIs
+	router := api.NewRouter(handlers, utilities, cfg.APIBasePath)
 
 	// Initialize Application
 	application := Application{

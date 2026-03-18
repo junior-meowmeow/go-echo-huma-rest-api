@@ -2,6 +2,7 @@ package mongodb
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/entity"
@@ -48,8 +49,8 @@ func (r *fileRecordRepository) GetFileRecordByID(ctx context.Context, fileID str
 	var document document.FileRecordDocument
 	err = r.Collection.FindOne(ctx, bson.D{{Key: "_id", Value: oid}}).Decode(&document)
 	if err != nil {
-		if err == mongo.ErrNoDocuments {
-			return fileRecord, fmt.Errorf("file record not found")
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return fileRecord, fmt.Errorf("failed to get file record: %w: %w", entity.ErrNotFound, err)
 		}
 		return fileRecord, err
 	}

@@ -38,7 +38,7 @@ func (h *bookHandler) CreateBook(ctx context.Context, request *schema.CreateBook
 
 	id, err := h.BookUseCase.CreateBook(ctx, book)
 	if err != nil {
-		return nil, err
+		return nil, resolveError(err)
 	}
 
 	resp := schema.CreateBookResponse{}
@@ -58,7 +58,7 @@ func (h *bookHandler) GetBooks(ctx context.Context, request *schema.GetBooksRequ
 	}
 
 	if err != nil {
-		return nil, err
+		return nil, resolveError(err)
 	}
 
 	bookOutputs := mapEntityBooksToSchema(books)
@@ -72,7 +72,7 @@ func (h *bookHandler) GetBooks(ctx context.Context, request *schema.GetBooksRequ
 func (h *bookHandler) GetBookByID(ctx context.Context, request *schema.GetBookByIDRequest) (*schema.GetBookByIDResponse, error) {
 	book, err := h.BookUseCase.GetBookByID(ctx, request.ID)
 	if err != nil {
-		return nil, err
+		return nil, resolveError(err)
 	}
 
 	bookOutput := mapEntityBookToSchema(book)
