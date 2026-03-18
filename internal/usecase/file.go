@@ -8,8 +8,7 @@ import (
 	"time"
 
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/domain/entity"
-	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/infrastructure/repository"
-	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/infrastructure/storage"
+	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/domain/port"
 
 	"github.com/google/uuid"
 )
@@ -21,11 +20,11 @@ type FileUseCase interface {
 }
 
 type fileUseCase struct {
-	FileRecordRepository repository.FileRecordRepository
-	FileStorage          storage.FileStorage
+	FileRecordRepository port.FileRecordRepository
+	FileStorage          port.FileStorage
 }
 
-func NewFileUseCase(fileRecordRepository repository.FileRecordRepository, fileStorage storage.FileStorage) *fileUseCase {
+func NewFileUseCase(fileRecordRepository port.FileRecordRepository, fileStorage port.FileStorage) *fileUseCase {
 	return &fileUseCase{
 		FileRecordRepository: fileRecordRepository,
 		FileStorage:          fileStorage,

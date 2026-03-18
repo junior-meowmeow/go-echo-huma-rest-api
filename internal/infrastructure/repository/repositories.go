@@ -1,17 +1,18 @@
 package repository
 
 import (
+	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/domain/port"
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/infrastructure/repository/mongodb"
 
 	"go.mongodb.org/mongo-driver/v2/mongo"
 )
 
 type Repositories struct {
-	Review     ReviewRepository
-	FileRecord FileRecordRepository
-	Book       BookRepository
-	BookPage   BookPageRepository
-	User       UserRepository
+	Review     port.ReviewRepository
+	FileRecord port.FileRecordRepository
+	Book       port.BookRepository
+	BookPage   port.BookPageRepository
+	User       port.UserRepository
 }
 
 func NewRepositories(mongoDB *mongo.Database) *Repositories {

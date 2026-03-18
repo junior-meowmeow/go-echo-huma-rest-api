@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/domain/entity"
-	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/infrastructure/repository"
+	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/domain/port"
 )
 
 type BookUseCase interface {
@@ -17,10 +17,10 @@ type BookUseCase interface {
 }
 
 type bookUseCase struct {
-	BookRepository repository.BookRepository
+	BookRepository port.BookRepository
 }
 
-func NewBookUseCase(bookRepository repository.BookRepository) *bookUseCase {
+func NewBookUseCase(bookRepository port.BookRepository) *bookUseCase {
 	return &bookUseCase{
 		BookRepository: bookRepository,
 	}

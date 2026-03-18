@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/domain/entity"
-	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/infrastructure/repository"
+	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/domain/port"
 )
 
 type ReviewUseCase interface {
@@ -14,10 +14,10 @@ type ReviewUseCase interface {
 }
 
 type reviewUseCase struct {
-	ReviewRepository repository.ReviewRepository
+	ReviewRepository port.ReviewRepository
 }
 
-func NewReviewUseCase(reviewRepository repository.ReviewRepository) *reviewUseCase {
+func NewReviewUseCase(reviewRepository port.ReviewRepository) *reviewUseCase {
 	return &reviewUseCase{
 		ReviewRepository: reviewRepository,
 	}

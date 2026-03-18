@@ -7,8 +7,9 @@ import (
 	"time"
 
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/domain/entity"
-	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/infrastructure/repository"
+	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/domain/port"
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/util/auth"
+
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -18,11 +19,11 @@ type UserUseCase interface {
 }
 
 type userUseCase struct {
-	UserRepository repository.UserRepository
+	UserRepository port.UserRepository
 	TokenUtility   auth.TokenUtility
 }
 
-func NewUserUseCase(userRepository repository.UserRepository, tokenUtility auth.TokenUtility) *userUseCase {
+func NewUserUseCase(userRepository port.UserRepository, tokenUtility auth.TokenUtility) *userUseCase {
 	return &userUseCase{
 		UserRepository: userRepository,
 		TokenUtility:   tokenUtility,

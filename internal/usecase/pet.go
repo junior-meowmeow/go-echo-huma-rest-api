@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/domain/entity"
-	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/infrastructure/external"
+	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/domain/port"
 )
 
 type PetUseCase interface {
@@ -14,10 +14,10 @@ type PetUseCase interface {
 }
 
 type petUseCase struct {
-	PetService external.PetService
+	PetService port.PetService
 }
 
-func NewPetUseCase(petService external.PetService) *petUseCase {
+func NewPetUseCase(petService port.PetService) *petUseCase {
 	return &petUseCase{
 		PetService: petService,
 	}
