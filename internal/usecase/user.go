@@ -8,7 +8,7 @@ import (
 
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/domain/entity"
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/domain/port"
-	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/util/auth"
+	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/utility/auth"
 
 	"golang.org/x/crypto/bcrypt"
 )

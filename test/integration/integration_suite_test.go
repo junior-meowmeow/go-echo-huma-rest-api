@@ -9,7 +9,7 @@ import (
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/infrastructure/repository"
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/infrastructure/storage"
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/usecase"
-	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/util"
+	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/utility"
 
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/stretchr/testify/suite"
@@ -25,7 +25,7 @@ type IntegrationTestSuite struct {
 	Repositories     *repository.Repositories
 	Storages         *storage.Storages
 	ExternalServices *external.ExternalServices
-	Utilities        *util.Utilities
+	Utilities        *utility.Utilities
 	Router           http.Handler
 }
 
@@ -36,7 +36,7 @@ func (s *IntegrationTestSuite) SetupSuite() {
 	s.Repositories = repository.NewRepositories(s.MongoDB)
 	s.Storages = storage.NewStorages(s.S3Client, "test-bucket")
 	s.ExternalServices = external.NewExternalServices(nil)
-	s.Utilities = util.NewUtilities("test-secret")
+	s.Utilities = utility.NewUtilities("test-secret")
 
 	usecases := usecase.NewUseCases(s.Repositories, s.Storages, s.ExternalServices, s.Utilities)
 	handlers := handler.NewHandlers(usecases)

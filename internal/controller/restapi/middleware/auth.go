@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/danielgtaylor/huma/v2"
-	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/util/auth"
+	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/utility/auth"
 )
 
 func RequireToken(api huma.API, tokenUtility auth.TokenUtility) func(huma.Context, func(huma.Context)) {

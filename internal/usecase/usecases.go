@@ -4,7 +4,7 @@ import (
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/infrastructure/external"
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/infrastructure/repository"
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/infrastructure/storage"
-	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/util"
+	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/utility"
 )
 
 type UseCases struct {
@@ -21,7 +21,7 @@ type UseCases struct {
 func NewUseCases(repositories *repository.Repositories,
 	storages *storage.Storages,
 	services *external.ExternalServices,
-	utilities *util.Utilities,
+	utilities *utility.Utilities,
 ) *UseCases {
 	return &UseCases{
 		Greeting: NewGreetingUseCase(),

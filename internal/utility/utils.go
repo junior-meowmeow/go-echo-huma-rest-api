@@ -1,7 +1,7 @@
-package util
+package utility
 
 import (
-	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/util/auth"
+	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/utility/auth"
 )
 
 type Utilities struct {

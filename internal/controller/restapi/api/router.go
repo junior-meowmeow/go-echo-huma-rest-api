@@ -4,7 +4,7 @@ import (
 	v1 "github.com/junior-meowmeow/go-echo-huma-rest-api/internal/controller/restapi/api/v1"
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/controller/restapi/handler"
 	customMiddleware "github.com/junior-meowmeow/go-echo-huma-rest-api/internal/controller/restapi/middleware"
-	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/util"
+	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/utility"
 
 	"github.com/danielgtaylor/huma/v2"
 	"github.com/danielgtaylor/huma/v2/adapters/humaecho"
@@ -14,7 +14,7 @@ import (
 	_ "github.com/danielgtaylor/huma/v2/formats/cbor"
 )
 
-func NewRouter(handlers *handler.Handlers, utilities *util.Utilities, apiBasePath string) *echo.Echo {
+func NewRouter(handlers *handler.Handlers, utilities *utility.Utilities, apiBasePath string) *echo.Echo {
 	router := echo.New()
 	AddEchoMiddlewares(router)
 	RegisterDocumentations(router, apiBasePath)
