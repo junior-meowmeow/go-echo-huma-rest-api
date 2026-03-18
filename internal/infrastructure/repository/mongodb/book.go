@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/entity"
+	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/domain/entity"
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/infrastructure/repository/mongodb/document"
 
 	"go.mongodb.org/mongo-driver/v2/bson"

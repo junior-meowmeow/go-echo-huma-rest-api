@@ -3,7 +3,7 @@ package external
 import (
 	"context"
 
-	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/entity"
+	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/domain/entity"
 )
 
 type PetService interface {

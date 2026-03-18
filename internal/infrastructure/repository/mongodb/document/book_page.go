@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/entity"
+	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/domain/entity"
 
 	"go.mongodb.org/mongo-driver/v2/bson"
 )

@@ -4,7 +4,7 @@ import (
 	"errors"
 
 	"github.com/danielgtaylor/huma/v2"
-	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/entity"
+	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/domain/entity"
 )
 
 // Default error handler

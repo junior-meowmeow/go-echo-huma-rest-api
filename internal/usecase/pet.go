@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/entity"
+	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/domain/entity"
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/infrastructure/external"
 )
 
