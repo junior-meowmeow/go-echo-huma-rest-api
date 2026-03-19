@@ -8,6 +8,7 @@ import (
 
 	"github.com/danielgtaylor/huma/v2"
 	"github.com/danielgtaylor/huma/v2/adapters/humaecho"
+	"github.com/labstack/echo-contrib/echoprometheus"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 
@@ -17,6 +18,7 @@ import (
 func NewRouter(handlers *handler.Handlers, utilities *utility.Utilities, apiBasePath string) *echo.Echo {
 	router := echo.New()
 	AddEchoMiddlewares(router)
+	AddEchoPrometheus(router)
 	RegisterDocumentations(router, apiBasePath)
 
 	humaConfig := CreateHumaConfig(apiBasePath)
@@ -44,11 +46,16 @@ func NewRouter(handlers *handler.Handlers, utilities *utility.Utilities, apiBase
 func AddEchoMiddlewares(router *echo.Echo) {
 	router.Use(middleware.Recover())
 	router.Use(middleware.RequestID())
-	router.Use(middleware.Logger())
+	router.Use(middleware.RequestLogger())
 	router.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins: []string{"*"},
 		AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
 	}))
 	router.Use(middleware.Secure())
 	router.Use(middleware.RateLimiter(middleware.NewRateLimiterMemoryStore(20)))
+}
+
+func AddEchoPrometheus(router *echo.Echo) {
+	router.Use(echoprometheus.NewMiddleware("myapp"))
+	router.GET("/metrics", echoprometheus.NewHandler())
 }

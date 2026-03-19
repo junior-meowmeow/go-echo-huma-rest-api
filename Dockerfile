@@ -1,5 +1,5 @@
 # Stage 1: Modules caching (Common base)
-FROM golang:1.24-alpine AS base
+FROM golang:1.25-alpine AS base
 WORKDIR /app
 COPY go.mod go.sum ./
 RUN go mod download
