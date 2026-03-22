@@ -46,7 +46,7 @@ tmp_dir = "tmp"
   stop_on_error = true
 
   # Send Interrupt signal before killing process (windows does not support this)
-  send_interrupt = false
+  send_interrupt = true
 
   # Delay after sending Interrupt signal
   kill_delay = 500 # ms
