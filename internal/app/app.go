@@ -25,22 +25,22 @@ type Application struct {
 
 func NewApplication(ctx context.Context, cfg config.Config) (*Application, error) {
 	// Initialize MongoDB
-	mongoClient, err := newMongoDBClient(ctx, cfg.MongoUser, cfg.MongoPass, cfg.MongoHost, cfg.MongoPort)
+	mongoClient, err := newMongoDBClient(ctx, cfg.Mongo)
 	if err != nil {
 		log.Printf("Failed to connect to MongoDB: %v\n", err)
 		return nil, err
 	}
-	mongoDB := mongoClient.Database(cfg.DBName)
+	mongoDB := mongoClient.Database(cfg.Mongo.DBName)
 
 	// Initialize S3
-	s3Client, err := newS3Client(ctx, cfg.S3Endpoint)
+	s3Client, err := newS3Client(ctx, cfg.S3)
 	if err != nil {
 		log.Printf("Failed to connect to S3: %v\n", err)
 		return nil, err
 	}
 
 	// Initialize External Service Clients
-	petStoreClient, err := newPetStoreClient(cfg.PetStoreURL, 5*time.Second)
+	petStoreClient, err := newPetStoreClient(cfg.Client.PetStoreURL, 5*time.Second)
 	if err != nil {
 		log.Printf("Failed to initialize PetStore client: %v\n", err)
 		return nil, err
@@ -48,11 +48,11 @@ func NewApplication(ctx context.Context, cfg config.Config) (*Application, error
 
 	// Initialize Infrastructures
 	repositories := repository.NewRepositories(mongoDB)
-	storages := storage.NewStorages(s3Client, cfg.S3Bucket)
+	storages := storage.NewStorages(s3Client, cfg.S3.Bucket)
 	externalServices := external.NewExternalServices(petStoreClient)
 
 	// Initialize Utilities
-	utilities := utility.NewUtilities(cfg.JWTSecret)
+	utilities := utility.NewUtilities(cfg.Auth.JWTSecret)
 
 	// Initialize Use Cases
 	usecases := usecase.NewUseCases(repositories, storages, externalServices, utilities)
@@ -61,7 +61,7 @@ func NewApplication(ctx context.Context, cfg config.Config) (*Application, error
 	handlers := handler.NewHandlers(usecases)
 
 	// Initialize REST API Router and Register APIs
-	router := api.NewRouter(handlers, utilities, cfg.APIBasePath)
+	router := api.NewRouter(handlers, utilities, cfg.App)
 
 	// Initialize Application
 	application := Application{

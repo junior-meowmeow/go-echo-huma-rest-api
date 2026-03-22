@@ -1,62 +1,71 @@
 package config
 
 import (
-	"log"
+	"fmt"
 	"os"
-	"strconv"
+	"path/filepath"
 
+	"github.com/caarlos0/env/v11"
 	"github.com/joho/godotenv"
 )
 
 type Config struct {
-	Port        int
-	APIBasePath string
-	JWTSecret   string
-	MongoHost   string
-	MongoPort   string
-	MongoUser   string
-	MongoPass   string
-	DBName      string
-	DBUser      string
-	DBPass      string
-	S3Endpoint  string
-	S3Bucket    string
-	PetStoreURL string
+	App    AppConfig
+	Auth   AuthConfig
+	Log    LogConfig
+	Mongo  MongoConfig
+	S3     S3Config
+	Client ClientConfig
 }
 
-// Load environment variables and returns a Config. (Simple version)
-func NewConfig() Config {
-	err := godotenv.Load()
-	if err != nil {
-		log.Println("Error loading .env file")
-	}
-
-	portStr := getEnv("PORT", "8888")
-	port, err := strconv.Atoi(portStr)
-	if err != nil {
-		log.Fatalf("invalid PORT: %v", err)
-	}
-
-	return Config{
-		Port:        port,
-		APIBasePath: getEnv("API_BASE_PATH", ""),
-		JWTSecret:   getEnv("JWT_SECRET", "test-secret"),
-		MongoHost:   getEnv("MONGO_HOST", "mongo"),
-		MongoPort:   getEnv("MONGO_PORT", "27017"),
-		MongoUser:   getEnv("MONGO_USER", "user"),
-		MongoPass:   getEnv("MONGO_PASS", "pass"),
-		DBName:      getEnv("DB_NAME", "test"),
-		DBUser:      getEnv("DB_USER", "user"),
-		DBPass:      getEnv("DB_PASS", "pass"),
-		S3Endpoint:  getEnv("S3_ENDPOINT", "http://localhost:8333"),
-		S3Bucket:    getEnv("S3_BUCKET", "test-bucket"),
-		PetStoreURL: getEnv("PETSTORE_URL", "http://localhost:8080/api/v3"),
-	}
+type AppConfig struct {
+	Port        int    `env:"PORT" envDefault:"8000"`
+	APIBasePath string `env:"API_BASE_PATH"`
 }
 
-func getEnv(key, def string) string {
-	if v := os.Getenv(key); v != "" {
-		return v
+type AuthConfig struct {
+	JWTSecret string `env:"JWT_SECRET" envDefault:"test-secret"`
+}
+
+type LogConfig struct {
+	Level string `env:"LOG_LEVEL" envDefault:"info"`
+}
+
+type MongoConfig struct {
+	Host   string `env:"MONGO_HOST" envDefault:"mongo"`
+	Port   string `env:"MONGO_PORT" envDefault:"27017"`
+	DBName string `env:"DB_NAME" envDefault:"testdb"`
+	DBUser string `env:"DB_USER" envDefault:"user"`
+	DBPass string `env:"DB_PASS" envDefault:"pass"`
+}
+
+type S3Config struct {
+	Endpoint string `env:"S3_ENDPOINT" envDefault:"http://localhost:8333"`
+	Bucket   string `env:"S3_BUCKET" envDefault:"test-bucket"`
+}
+
+type ClientConfig struct {
+	PetStoreURL string `env:"PETSTORE_URL" envDefault:"http://localhost:8080/api/v3"`
+}
+
+// NewConfig loads environment variables and returns a Config.
+func NewConfig() (Config, error) {
+	envType := os.Getenv("APP_ENV")
+	if envType == "" {
+		envType = "local"
 	}
-	return def
+
+	if envType == "local" {
+		basePath := "./config"
+		// Load env files with precedence.
+		godotenv.Load(filepath.Join(basePath, ".env.local"))
+		godotenv.Load(filepath.Join(basePath, ".env"))
+	}
+
+	var cfg Config
+	if err := env.Parse(&cfg); err != nil {
+		return Config{}, fmt.Errorf("Failed to parse environment variables: %w", err)
+	}
+
+	return cfg, nil
 }

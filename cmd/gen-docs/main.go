@@ -9,6 +9,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/config"
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/controller/restapi/api"
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/controller/restapi/handler"
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/usecase"
@@ -20,7 +21,7 @@ func main() {
 	handlers := handler.NewHandlers(&usecase.UseCases{})
 
 	// Initialize Router and Register APIs
-	router := api.NewRouter(handlers, &utility.Utilities{}, "")
+	router := api.NewRouter(handlers, &utility.Utilities{}, config.AppConfig{})
 
 	// Request API Documentations and Write them to docs/
 	requestAndWriteDocs(router)

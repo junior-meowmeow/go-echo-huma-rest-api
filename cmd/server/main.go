@@ -19,14 +19,17 @@ type Options struct {
 
 func main() {
 	// Load configurations
-	cfg := config.NewConfig()
+	cfg, err := config.NewConfig()
+	if err != nil {
+		log.Fatalf("Failed to load configurations: %v", err)
+	}
 
 	// Create a CLI app which takes options
 	cli := humacli.New(func(hooks humacli.Hooks, options *Options) {
 
 		// Options overrides configurations
 		if options.Port != 8888 {
-			cfg.Port = options.Port
+			cfg.App.Port = options.Port
 		}
 
 		// Initialize Application
@@ -37,13 +40,13 @@ func main() {
 
 		// Create a HTTP server
 		server := http.Server{
-			Addr:    fmt.Sprintf(":%d", cfg.Port),
+			Addr:    fmt.Sprintf(":%d", cfg.App.Port),
 			Handler: application.Router,
 		}
 
 		hooks.OnStart(func() {
-			log.Printf("Starting server on port %d...\n", cfg.Port)
-			log.Printf("API documentation is hosted at http://localhost:%d%s/docs\n", cfg.Port, cfg.APIBasePath)
+			log.Printf("Starting server on port %d...\n", cfg.App.Port)
+			log.Printf("API documentation is hosted at http://localhost:%d%s/docs\n", cfg.App.Port, cfg.App.APIBasePath)
 			server.ListenAndServe()
 		})
 

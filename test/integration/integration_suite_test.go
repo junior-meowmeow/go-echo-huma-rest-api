@@ -3,6 +3,7 @@ package integration_test
 import (
 	"net/http"
 
+	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/config"
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/controller/restapi/api"
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/controller/restapi/handler"
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/infrastructure/external"
@@ -40,5 +41,5 @@ func (s *IntegrationTestSuite) SetupSuite() {
 
 	usecases := usecase.NewUseCases(s.Repositories, s.Storages, s.ExternalServices, s.Utilities)
 	handlers := handler.NewHandlers(usecases)
-	s.Router = api.NewRouter(handlers, s.Utilities, "")
+	s.Router = api.NewRouter(handlers, s.Utilities, config.AppConfig{})
 }

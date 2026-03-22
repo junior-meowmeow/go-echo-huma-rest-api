@@ -16,31 +16,31 @@ test:
 	go test ./... -v -cover
 
 dev-build:
-	docker compose -f docker-compose.dev.yaml --env-file .env.dev build
+	docker compose -f docker-compose.dev.yaml --env-file ./config/.env.dev build
 
 dev-up:
-	docker compose -f docker-compose.dev.yaml --env-file .env.dev up -d
+	docker compose -f docker-compose.dev.yaml --env-file ./config/.env.dev up -d
 
 dev-down:
-	docker compose -f docker-compose.dev.yaml --env-file .env.dev down
+	docker compose -f docker-compose.dev.yaml --env-file ./config/.env.dev down
 
 dev-down-v:
-	docker compose -f docker-compose.dev.yaml --env-file .env.dev down -v
+	docker compose -f docker-compose.dev.yaml --env-file ./config/.env.dev down -v
 
 prod-build:
-	docker compose -f docker-compose.prod.yaml --env-file .env.prod build
+	docker compose -f docker-compose.prod.yaml --env-file ./config/.env.prod build
 
 prod-up:
-	docker compose -f docker-compose.prod.yaml --env-file .env.prod up -d
+	docker compose -f docker-compose.prod.yaml --env-file ./config/.env.prod up -d
 
 prod-down:
-	docker compose -f docker-compose.prod.yaml --env-file .env.prod down
+	docker compose -f docker-compose.prod.yaml --env-file ./config/.env.prod down
 
 db-up:
-	docker compose -f docker-compose.db.yaml --env-file .env.prod up -d
+	docker compose -f docker-compose.db.yaml --env-file ./config/.env.prod up -d
 
 db-down:
-	docker compose -f docker-compose.db.yaml --env-file .env.prod down
+	docker compose -f docker-compose.db.yaml --env-file ./config/.env.prod down
 
 db-down-v:
-	docker compose -f docker-compose.db.yaml --env-file .env.prod down -v
+	docker compose -f docker-compose.db.yaml --env-file ./config/.env.prod down -v
