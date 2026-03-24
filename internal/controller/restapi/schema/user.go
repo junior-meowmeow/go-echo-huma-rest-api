@@ -13,7 +13,7 @@ type PasswordSchema struct {
 }
 
 type RoleSchema struct {
-	Role string `json:"role,omitempty" enum:"user, admin" doc:"User role." example:"user"`
+	Role string `json:"role,omitempty" enum:"user,admin" doc:"User role." example:"user"`
 }
 
 type User struct {

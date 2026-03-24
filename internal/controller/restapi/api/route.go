@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/controller/restapi/handler"
+	customMiddleware "github.com/junior-meowmeow/go-echo-huma-rest-api/internal/controller/restapi/middleware"
 
 	"github.com/danielgtaylor/huma/v2"
 )
@@ -37,13 +38,21 @@ func RegisterRoutes(public huma.API, protected huma.API, h *handler.Handlers) {
 		Tags:        []string{"Miscellaneous"},
 	}, h.File.GetS3FileList)
 
-	huma.Register(public, huma.Operation{
+	huma.Register(protected, huma.Operation{
 		OperationID: "test-auth",
 		Method:      http.MethodGet,
 		Path:        "/test-auth/{name}",
-		Summary:     "Test Bearar Auth",
-		Security: []map[string][]string{
-			{"BearerAuth": {}},
+		Summary:     "Test JWT Auth",
+		Tags:        []string{"Miscellaneous"},
+	}, h.Greeting.GetGreeting)
+
+	huma.Register(protected, huma.Operation{
+		OperationID: "test-auth-admin",
+		Method:      http.MethodGet,
+		Path:        "/test-auth-admin/{name}",
+		Summary:     "Test Admin Role Auth",
+		Middlewares: huma.Middlewares{
+			customMiddleware.RequireAdminRole(protected),
 		},
 		Tags: []string{"Miscellaneous"},
 	}, h.Greeting.GetGreeting)

@@ -5,7 +5,6 @@ import (
 
 	"github.com/danielgtaylor/huma/v2"
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/controller/restapi/handler"
-	customMiddleware "github.com/junior-meowmeow/go-echo-huma-rest-api/internal/controller/restapi/middleware"
 )
 
 func RegisterReviewGroup(public huma.API, protected huma.API, h *handler.Handlers) {
@@ -16,7 +15,7 @@ func RegisterReviewGroup(public huma.API, protected huma.API, h *handler.Handler
 }
 
 func RegisterReviewRoutes(public huma.API, protected huma.API, h *handler.Handlers) {
-	huma.Register(protected, huma.Operation{
+	huma.Register(public, huma.Operation{
 		OperationID:   "create-review",
 		Method:        http.MethodPost,
 		Path:          "",
@@ -26,15 +25,12 @@ func RegisterReviewRoutes(public huma.API, protected huma.API, h *handler.Handle
 		DefaultStatus: http.StatusCreated,
 	}, h.Review.CreateReview)
 
-	huma.Register(protected, huma.Operation{
+	huma.Register(public, huma.Operation{
 		OperationID: "get-reviews",
 		Method:      http.MethodGet,
 		Path:        "",
 		Summary:     "Get all reviews",
 		Description: "Get all reviews from database.",
 		Tags:        []string{"Reviews"},
-		Middlewares: huma.Middlewares{
-			customMiddleware.RequireAdminRole(protected),
-		},
 	}, h.Review.GetReviews)
 }

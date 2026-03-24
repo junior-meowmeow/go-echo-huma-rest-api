@@ -64,6 +64,6 @@ func TestFileRecordRepository(t *testing.T) {
 		_, err := repo.GetFileRecordByID(ctx, "invalid-hex-string")
 
 		assert.Error(t, err)
-		assert.Equal(t, "invalid ID format", err.Error())
+		assert.Equal(t, "invalid file record ID format", err.Error())
 	})
 }
