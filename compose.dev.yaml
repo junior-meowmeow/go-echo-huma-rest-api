@@ -1,10 +1,26 @@
 services:
+  api-server:
+    extends:
+      file: compose.yaml
+      service: api-server
+    build:
+      target: dev
+    image: go-echo-huma-dev
+    volumes:
+      - .:/app
+    depends_on:
+      - mongo
+      - petstore
+    networks:
+      - app-network
+
   mongo:
     image: mongo:8.0
     restart: always
     ports:
-      - ${MONGO_PORT}:27017
+      - ${MONGO_PORT:-27017}:27017
     networks:
+      - app-network
       - mongo-network
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER}
@@ -20,7 +36,7 @@ services:
     image: mongo-express
     restart: always
     ports:
-      - ${MONGO_EXPRESS_PORT}:8081
+      - ${MONGO_EXPRESS_PORT:-8081}:8081
     networks:
       - mongo-network
     environment:
@@ -31,10 +47,33 @@ services:
     depends_on:
       - mongo
 
+  petstore:
+    image: swaggerapi/petstore3:1.0.25
+    restart: always
+    ports:
+      - 8080:8080
+    networks:
+      - app-network
+      
+  prometheus:
+    image: prom/prometheus
+    restart: always
+    ports:
+      - 9090:9090
+    depends_on:
+      - api-server
+    networks:
+      - app-network
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+
 volumes:
   mongo-data:
 
 networks:
+  app-network:
+    name: app-network
+    driver: bridge
   mongo-network:
     name: mongo-network
     driver: bridge

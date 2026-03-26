@@ -1,46 +1,57 @@
-.PHONY: tidy build run gen-docs test dev-build dev-up dev-down dev-down-v prod-build prod-up prod-down db-up db-down db-down-v
-
+.PHONY: tidy
 tidy:
 	go mod tidy
 
-build:
-	go build -o bin/server ./cmd/server
-
+.PHONY: run
 run:
 	go run ./cmd/server
 
+.PHONY: gen-docs
 gen-docs:
 	go run ./cmd/gen-docs
 
+.PHONY: test
 test:
-	go test ./... -v -cover
+	go test ./... -v
 
+.PHONY: test-cover
+test-cover:
+	go test ./... -cover
+
+.PHONY: test-clean
+test-clean:
+	go clean -testcache && go test -v ./... -cover
+
+COMPOSE := docker compose
+ENV_FILE := --env-file ./config/.env
+
+.PHONY: compose-build
+compose-build:
+	$(COMPOSE) build
+
+.PHONY: compose-up
+compose-up:
+	$(COMPOSE) ${ENV_FILE} up -d
+
+.PHONY: compose-down
+compose-down:
+	$(COMPOSE) ${ENV_FILE} down
+
+DEV_COMPOSE := docker compose -f compose.dev.yaml
+DEV_ENV_FILE := --env-file ./config/.env.dev
+
+.PHONY: dev-build
 dev-build:
-	docker compose -f docker-compose.dev.yaml --env-file ./config/.env.dev build
+	$(DEV_COMPOSE) build
 
+.PHONY: dev-up
 dev-up:
-	docker compose -f docker-compose.dev.yaml --env-file ./config/.env.dev up -d
+	$(DEV_COMPOSE) ${DEV_ENV_FILE} up -d
 
+.PHONY: dev-down
 dev-down:
-	docker compose -f docker-compose.dev.yaml --env-file ./config/.env.dev down
+	$(DEV_COMPOSE) ${DEV_ENV_FILE} down
 
+.PHONY: dev-down-v
 dev-down-v:
-	docker compose -f docker-compose.dev.yaml --env-file ./config/.env.dev down -v
-
-prod-build:
-	docker compose -f docker-compose.prod.yaml --env-file ./config/.env.prod build
-
-prod-up:
-	docker compose -f docker-compose.prod.yaml --env-file ./config/.env.prod up -d
-
-prod-down:
-	docker compose -f docker-compose.prod.yaml --env-file ./config/.env.prod down
-
-db-up:
-	docker compose -f docker-compose.db.yaml --env-file ./config/.env.prod up -d
-
-db-down:
-	docker compose -f docker-compose.db.yaml --env-file ./config/.env.prod down
-
-db-down-v:
-	docker compose -f docker-compose.db.yaml --env-file ./config/.env.prod down -v
+	$(DEV_COMPOSE) ${DEV_ENV_FILE} down -v
