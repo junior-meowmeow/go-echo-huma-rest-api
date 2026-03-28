@@ -3,10 +3,10 @@ package api
 import (
 	"net/http"
 
+	"github.com/danielgtaylor/huma/v2"
+
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/controller/restapi/handler"
 	customMiddleware "github.com/junior-meowmeow/go-echo-huma-rest-api/internal/controller/restapi/middleware"
-
-	"github.com/danielgtaylor/huma/v2"
 )
 
 func RegisterRoutes(public huma.API, protected huma.API, h *handler.Handlers) {

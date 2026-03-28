@@ -1,12 +1,6 @@
 package api
 
 import (
-	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/config"
-	v1 "github.com/junior-meowmeow/go-echo-huma-rest-api/internal/controller/restapi/api/v1"
-	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/controller/restapi/handler"
-	customMiddleware "github.com/junior-meowmeow/go-echo-huma-rest-api/internal/controller/restapi/middleware"
-	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/utility"
-
 	"github.com/danielgtaylor/huma/v2"
 	"github.com/danielgtaylor/huma/v2/adapters/humaecho"
 	"github.com/labstack/echo-contrib/echoprometheus"
@@ -14,6 +8,12 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 
 	_ "github.com/danielgtaylor/huma/v2/formats/cbor"
+
+	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/config"
+	v1 "github.com/junior-meowmeow/go-echo-huma-rest-api/internal/controller/restapi/api/v1"
+	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/controller/restapi/handler"
+	customMiddleware "github.com/junior-meowmeow/go-echo-huma-rest-api/internal/controller/restapi/middleware"
+	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/utility"
 )
 
 func NewRouter(handlers *handler.Handlers, utilities *utility.Utilities, appConfig config.AppConfig) *echo.Echo {

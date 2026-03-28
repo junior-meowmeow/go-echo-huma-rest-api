@@ -5,11 +5,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/domain/entity"
-	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/infrastructure/repository/mongodb"
-
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/domain/entity"
+	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/infrastructure/repository/mongodb"
 )
 
 func TestFileRecordRepository(t *testing.T) {

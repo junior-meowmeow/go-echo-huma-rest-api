@@ -4,11 +4,16 @@ tidy:
 
 .PHONY: fmt
 fmt:
-	go fmt ./...
+# 	go fmt ./...
+	golangci-lint fmt ./...
 
 .PHONY: lint
 lint:
 	golangci-lint run ./...
+
+.PHONY: vulncheck
+vulncheck:
+	govulncheck ./...
 
 .PHONY: run
 run:

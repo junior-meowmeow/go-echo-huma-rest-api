@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/domain/entity"
 )
 

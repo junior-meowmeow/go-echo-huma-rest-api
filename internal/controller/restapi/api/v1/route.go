@@ -1,9 +1,9 @@
 package v1
 
 import (
-	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/controller/restapi/handler"
-
 	"github.com/danielgtaylor/huma/v2"
+
+	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/controller/restapi/handler"
 )
 
 func RegisterGroup(public huma.API, protected huma.API, h *handler.Handlers) {

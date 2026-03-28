@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/danielgtaylor/huma/v2"
+
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/utility/auth"
 )
 

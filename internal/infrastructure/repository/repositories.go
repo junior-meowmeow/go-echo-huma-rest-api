@@ -1,10 +1,10 @@
 package repository
 
 import (
+	"go.mongodb.org/mongo-driver/v2/mongo"
+
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/domain/port"
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/infrastructure/repository/mongodb"
-
-	"go.mongodb.org/mongo-driver/v2/mongo"
 )
 
 type Repositories struct {

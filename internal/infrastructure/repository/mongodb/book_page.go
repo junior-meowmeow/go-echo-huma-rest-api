@@ -5,12 +5,12 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/domain/entity"
-	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/infrastructure/repository/mongodb/document"
-
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 	"go.mongodb.org/mongo-driver/v2/mongo/options"
+
+	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/domain/entity"
+	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/infrastructure/repository/mongodb/document"
 )
 
 type bookPageRepository struct {

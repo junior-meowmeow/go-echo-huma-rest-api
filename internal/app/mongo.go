@@ -6,10 +6,10 @@ import (
 	"log"
 	"time"
 
-	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/config"
-
 	"go.mongodb.org/mongo-driver/v2/mongo"
 	"go.mongodb.org/mongo-driver/v2/mongo/options"
+
+	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/config"
 )
 
 func newMongoDBClient(ctx context.Context, cfg config.MongoConfig) (*mongo.Client, error) {

@@ -2,6 +2,7 @@ package storage
 
 import (
 	"github.com/aws/aws-sdk-go-v2/service/s3"
+
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/domain/port"
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/infrastructure/storage/s3api"
 )

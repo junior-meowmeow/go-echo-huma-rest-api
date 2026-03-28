@@ -5,6 +5,9 @@ import (
 	"log"
 	"time"
 
+	"github.com/labstack/echo/v4"
+	"go.mongodb.org/mongo-driver/v2/mongo"
+
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/config"
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/controller/restapi/api"
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/controller/restapi/handler"
@@ -13,9 +16,6 @@ import (
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/infrastructure/storage"
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/usecase"
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/utility"
-
-	"github.com/labstack/echo/v4"
-	"go.mongodb.org/mongo-driver/v2/mongo"
 )
 
 type Application struct {
