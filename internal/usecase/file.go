@@ -31,7 +31,14 @@ func NewFileUseCase(fileRecordRepository port.FileRecordRepository, fileStorage 
 	}
 }
 
-func (u *fileUseCase) UploadFile(ctx context.Context, fileStream io.Reader, fileName string, size int64, contentType string, baseKey string) (string, error) {
+func (u *fileUseCase) UploadFile(
+	ctx context.Context,
+	fileStream io.Reader,
+	fileName string,
+	size int64,
+	contentType string,
+	baseKey string,
+) (string, error) {
 	ext := filepath.Ext(fileName)
 	var objectKey string
 

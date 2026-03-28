@@ -26,7 +26,10 @@ func NewBookPageHandler(bookPageUseCase usecase.BookPageUseCase) *bookPageHandle
 	}
 }
 
-func (h *bookPageHandler) CreateBookPage(ctx context.Context, request *schema.CreateBookPageRequest) (*schema.CreateBookPageResponse, error) {
+func (h *bookPageHandler) CreateBookPage(
+	ctx context.Context,
+	request *schema.CreateBookPageRequest,
+) (*schema.CreateBookPageResponse, error) {
 	metadata := request.Body.Metadata
 	bookPage := &entity.BookPage{
 		BookID:     request.Body.BookID,
@@ -72,7 +75,10 @@ func (h *bookPageHandler) GetBookPages(ctx context.Context, request *schema.GetB
 	return &resp, nil
 }
 
-func (h *bookPageHandler) GetBookPagesByRange(ctx context.Context, request *schema.GetBookPagesRangeRequest) (*schema.GetBookPagesResponse, error) {
+func (h *bookPageHandler) GetBookPagesByRange(
+	ctx context.Context,
+	request *schema.GetBookPagesRangeRequest,
+) (*schema.GetBookPagesResponse, error) {
 	bookPages, err := h.BookPageUseCase.GetBookPagesByRange(ctx, request.BookID, request.StartPage, request.EndPage)
 	if err != nil {
 		return nil, resolveError(err)
@@ -86,7 +92,10 @@ func (h *bookPageHandler) GetBookPagesByRange(ctx context.Context, request *sche
 	return &resp, nil
 }
 
-func (h *bookPageHandler) GetBookPagesByOffset(ctx context.Context, request *schema.GetBookPagesOffsetRequest) (*schema.GetBookPagesResponse, error) {
+func (h *bookPageHandler) GetBookPagesByOffset(
+	ctx context.Context,
+	request *schema.GetBookPagesOffsetRequest,
+) (*schema.GetBookPagesResponse, error) {
 	bookPages, err := h.BookPageUseCase.GetBookPagesByOffset(ctx, request.BookID, request.CenterPage, request.Offset)
 	if err != nil {
 		return nil, resolveError(err)
@@ -100,7 +109,10 @@ func (h *bookPageHandler) GetBookPagesByOffset(ctx context.Context, request *sch
 	return &resp, nil
 }
 
-func (h *bookPageHandler) GetBookPageByID(ctx context.Context, request *schema.GetBookPageByIDRequest) (*schema.GetBookPageByIDResponse, error) {
+func (h *bookPageHandler) GetBookPageByID(
+	ctx context.Context,
+	request *schema.GetBookPageByIDRequest,
+) (*schema.GetBookPageByIDResponse, error) {
 	bookPage, err := h.BookPageUseCase.GetBookPageByID(ctx, request.ID)
 	if err != nil {
 		return nil, resolveError(err)

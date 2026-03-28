@@ -23,7 +23,10 @@ func NewPetHandler(petUseCase usecase.PetUseCase) *petHandler {
 	}
 }
 
-func (h *petHandler) GetAvailablePets(ctx context.Context, request *schema.GetAvailablePetsRequest) (*schema.GetAvailablePetsResponse, error) {
+func (h *petHandler) GetAvailablePets(
+	ctx context.Context,
+	request *schema.GetAvailablePetsRequest,
+) (*schema.GetAvailablePetsResponse, error) {
 	pets, err := h.PetUseCase.GetAvailablePets(ctx)
 	if err != nil {
 		return nil, resolveError(err)

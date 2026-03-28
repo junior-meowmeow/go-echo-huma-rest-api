@@ -45,7 +45,10 @@ func (h *fileHandler) UploadFile(ctx context.Context, input *schema.UploadFileRe
 	return &resp, nil
 }
 
-func (h *fileHandler) GetFileDownloadLink(ctx context.Context, request *schema.GetFileDownloadLinkRequest) (*schema.GetFileDownloadLinkResponse, error) {
+func (h *fileHandler) GetFileDownloadLink(
+	ctx context.Context,
+	request *schema.GetFileDownloadLinkRequest,
+) (*schema.GetFileDownloadLinkResponse, error) {
 	fileDownloadInfo, err := h.FileUseCase.GetFileDownloadLink(ctx, request.ID)
 	if err != nil {
 		return nil, resolveError(err)

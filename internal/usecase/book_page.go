@@ -57,7 +57,12 @@ func (u *bookPageUseCase) GetAllBookPages(ctx context.Context, bookID string) ([
 	return bookPages, nil
 }
 
-func (u *bookPageUseCase) GetBookPagesWithPagination(ctx context.Context, bookID string, pageSize int64, pageNumber int64) ([]entity.BookPage, error) {
+func (u *bookPageUseCase) GetBookPagesWithPagination(
+	ctx context.Context,
+	bookID string,
+	pageSize int64,
+	pageNumber int64,
+) ([]entity.BookPage, error) {
 	bookPages, err := u.BookPageRepository.GetBookpagesByBookIDWithPagination(ctx, bookID, pageSize, pageNumber)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch book pages: %w", err)
@@ -66,7 +71,12 @@ func (u *bookPageUseCase) GetBookPagesWithPagination(ctx context.Context, bookID
 	return bookPages, nil
 }
 
-func (u *bookPageUseCase) GetBookPagesByRange(ctx context.Context, bookID string, startPage int64, endPage int64) ([]entity.BookPage, error) {
+func (u *bookPageUseCase) GetBookPagesByRange(
+	ctx context.Context,
+	bookID string,
+	startPage int64,
+	endPage int64,
+) ([]entity.BookPage, error) {
 	bookPages, err := u.BookPageRepository.GetBookpagesByPageRange(ctx, bookID, startPage, endPage)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch book pages by range: %w", err)
@@ -75,7 +85,12 @@ func (u *bookPageUseCase) GetBookPagesByRange(ctx context.Context, bookID string
 	return bookPages, nil
 }
 
-func (u *bookPageUseCase) GetBookPagesByOffset(ctx context.Context, bookID string, centerPage int64, offset int64) ([]entity.BookPage, error) {
+func (u *bookPageUseCase) GetBookPagesByOffset(
+	ctx context.Context,
+	bookID string,
+	centerPage int64,
+	offset int64,
+) ([]entity.BookPage, error) {
 	bookPages, err := u.BookPageRepository.GetBookpagesAroundPageNumber(ctx, bookID, centerPage, offset)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch book pages by offset: %w", err)
