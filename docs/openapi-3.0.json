@@ -598,7 +598,7 @@
             "description": "User role.",
             "enum": [
               "user",
-              " admin"
+              "admin"
             ],
             "example": "user",
             "type": "string"
@@ -800,6 +800,57 @@
         ]
       }
     },
+    "/test-auth-admin/{name}": {
+      "get": {
+        "operationId": "test-auth-admin",
+        "parameters": [
+          {
+            "description": "Name to greet",
+            "example": "world",
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "description": "Name to greet",
+              "example": "world",
+              "maxLength": 30,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GreetingResponseBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "summary": "Test Admin Role Auth",
+        "tags": [
+          "Miscellaneous"
+        ]
+      }
+    },
     "/test-auth/{name}": {
       "get": {
         "operationId": "test-auth",
@@ -845,7 +896,7 @@
             "BearerAuth": []
           }
         ],
-        "summary": "Test Bearar Auth",
+        "summary": "Test JWT Auth",
         "tags": [
           "Miscellaneous"
         ]
@@ -1572,11 +1623,6 @@
             "description": "Error"
           }
         },
-        "security": [
-          {
-            "BearerAuth": []
-          }
-        ],
         "summary": "Get all reviews (V1)",
         "tags": [
           "Reviews"
@@ -1610,11 +1656,6 @@
             "description": "Error"
           }
         },
-        "security": [
-          {
-            "BearerAuth": []
-          }
-        ],
         "summary": "Post new review (V1)",
         "tags": [
           "Reviews"

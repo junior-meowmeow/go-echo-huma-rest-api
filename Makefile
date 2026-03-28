@@ -2,6 +2,14 @@
 tidy:
 	go mod tidy
 
+.PHONY: fmt
+fmt:
+	go fmt ./...
+
+.PHONY: lint
+lint:
+	golangci-lint run ./...
+
 .PHONY: run
 run:
 	go run ./cmd/server
@@ -21,6 +29,10 @@ test-cover:
 .PHONY: test-clean
 test-clean:
 	go clean -testcache && go test -v ./... -cover
+
+.PHONY: pre-commit
+pre-commit: tidy fmt lint gen-docs test
+	@echo "✅ All pre-commit checks passed."
 
 COMPOSE := docker compose
 ENV_FILE := --env-file ./config/.env
