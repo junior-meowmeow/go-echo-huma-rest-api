@@ -78,10 +78,10 @@ func TestReviewRepository(t *testing.T) {
 		reviews, err := repo.GetReviews(ctx, 10)
 		require.NoError(t, err)
 
-		assert.True(t, len(reviews) == 3)
+		assert.Len(t, reviews, 3)
 
 		// Verify descending order logic manually for safety
-		for i := 0; i < len(reviews)-1; i++ {
+		for i := range len(reviews) - 1 {
 			// Current record should be newer (after) or equal to the next record
 			isNewerOrEqual := reviews[i].CreatedAt.After(reviews[i+1].CreatedAt) || reviews[i].CreatedAt.Equal(reviews[i+1].CreatedAt)
 			assert.True(t, isNewerOrEqual, "Reviews should be sorted by CreatedAt desc")
@@ -91,6 +91,6 @@ func TestReviewRepository(t *testing.T) {
 		limit := int64(2)
 		limitedReviews, err := repo.GetReviews(ctx, limit)
 		require.NoError(t, err)
-		assert.Equal(t, int(limit), len(limitedReviews), "Should respect the limit")
+		assert.Len(t, limitedReviews, int(limit), "Should respect the limit")
 	})
 }

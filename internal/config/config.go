@@ -2,8 +2,10 @@ package config
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/caarlos0/env/v11"
 	"github.com/joho/godotenv"
@@ -24,7 +26,8 @@ type AppConfig struct {
 }
 
 type AuthConfig struct {
-	JWTSecret string `env:"JWT_SECRET" envDefault:"test-secret"`
+	JWTSecret       string        `env:"JWT_SECRET" envDefault:"test-secret"`
+	TokenExpiration time.Duration `env:"TOKEN_EXPIRATION" envDefault:"72h"`
 }
 
 type LogConfig struct {
@@ -58,13 +61,17 @@ func NewConfig() (Config, error) {
 	if envType == "local" {
 		basePath := "./config"
 		// Load env files with precedence.
-		godotenv.Load(filepath.Join(basePath, ".env.local"))
-		godotenv.Load(filepath.Join(basePath, ".env"))
+		if err := godotenv.Load(filepath.Join(basePath, ".env.local")); err != nil {
+			log.Printf("Could not load .env.local: %v", err)
+		}
+		if err := godotenv.Load(filepath.Join(basePath, ".env")); err != nil {
+			log.Printf("Could not load .env: %v", err)
+		}
 	}
 
 	var cfg Config
 	if err := env.Parse(&cfg); err != nil {
-		return Config{}, fmt.Errorf("Failed to parse environment variables: %w", err)
+		return Config{}, fmt.Errorf("failed to parse environment variables: %w", err)
 	}
 
 	return cfg, nil

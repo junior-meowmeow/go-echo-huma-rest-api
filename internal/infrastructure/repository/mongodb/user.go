@@ -16,24 +16,30 @@ type userRepository struct {
 	Collection *mongo.Collection
 }
 
+//revive:disable:unexported-return // Intentionally returns an unexported struct to enforce dependency on the interface in other layers.
 func NewUserRepository(db *mongo.Database) *userRepository {
 	return &userRepository{
 		Collection: db.Collection("users"),
 	}
 }
 
+//revive:enable:unexported-return
+
 func (r *userRepository) CreateUser(ctx context.Context, user *entity.User) (string, error) {
-	document, err := document.NewUserDocument(user)
+	doc, err := document.NewUserDocument(user)
 	if err != nil {
 		return "", fmt.Errorf("failed to convert user to document: %w", err)
 	}
 
-	result, err := r.Collection.InsertOne(ctx, document)
+	result, err := r.Collection.InsertOne(ctx, doc)
 	if err != nil {
 		return "", fmt.Errorf("failed to insert user document: %w", err)
 	}
 
-	insertedID := result.InsertedID.(bson.ObjectID).Hex()
+	insertedID, err := document.IDToString(result.InsertedID)
+	if err != nil {
+		return "", fmt.Errorf("failed to convert inserted id to string: %w", err)
+	}
 
 	return insertedID, nil
 }
@@ -41,8 +47,8 @@ func (r *userRepository) CreateUser(ctx context.Context, user *entity.User) (str
 func (r *userRepository) GetUserByUsername(ctx context.Context, username string) (entity.User, error) {
 	var user entity.User
 
-	var document document.UserDocument
-	err := r.Collection.FindOne(ctx, bson.M{"username": username}).Decode(&document)
+	var doc document.UserDocument
+	err := r.Collection.FindOne(ctx, bson.M{"username": username}).Decode(&doc)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
 			return user, fmt.Errorf("failed to get user: %w: %w", entity.ErrNotFound, err)
@@ -50,7 +56,7 @@ func (r *userRepository) GetUserByUsername(ctx context.Context, username string)
 		return user, err
 	}
 
-	user = document.ToEntity()
+	user = doc.ToEntity()
 
 	return user, nil
 }

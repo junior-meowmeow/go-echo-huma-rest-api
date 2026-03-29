@@ -21,39 +21,36 @@ type FileRecordDocument struct {
 	UpdatedAt time.Time `bson:"updatedAt"`
 }
 
-func NewFileRecordDocument(entity *entity.FileRecord) (FileRecordDocument, error) {
+func NewFileRecordDocument(fileRecord *entity.FileRecord) (FileRecordDocument, error) {
 	var fileRecordDocument FileRecordDocument
 	var err error
 
-	var oid bson.ObjectID
-	if entity.ID != "" {
-		oid, err = bson.ObjectIDFromHex(entity.ID)
-		if err != nil {
-			return fileRecordDocument, fmt.Errorf("invalid file record ID format: %w", err)
-		}
+	oid, err := StringToObjectID(fileRecord.ID)
+	if err != nil {
+		return fileRecordDocument, fmt.Errorf("invalid file record ID format: %w", err)
 	}
 
 	fileRecordDocument = FileRecordDocument{
 		ID:          oid,
-		FileName:    entity.FileName,
-		Size:        entity.Size,
-		ContentType: entity.ContentType,
-		S3Key:       entity.S3Key,
-		CreatedAt:   entity.CreatedAt,
-		UpdatedAt:   entity.UpdatedAt,
+		FileName:    fileRecord.FileName,
+		Size:        fileRecord.Size,
+		ContentType: fileRecord.ContentType,
+		S3Key:       fileRecord.S3Key,
+		CreatedAt:   fileRecord.CreatedAt,
+		UpdatedAt:   fileRecord.UpdatedAt,
 	}
 
 	return fileRecordDocument, nil
 }
 
-func (document *FileRecordDocument) ToEntity() entity.FileRecord {
+func (doc *FileRecordDocument) ToEntity() entity.FileRecord {
 	return entity.FileRecord{
-		ID:          document.ID.Hex(),
-		FileName:    document.FileName,
-		Size:        document.Size,
-		ContentType: document.ContentType,
-		S3Key:       document.S3Key,
-		CreatedAt:   document.CreatedAt,
-		UpdatedAt:   document.UpdatedAt,
+		ID:          doc.ID.Hex(),
+		FileName:    doc.FileName,
+		Size:        doc.Size,
+		ContentType: doc.ContentType,
+		S3Key:       doc.S3Key,
+		CreatedAt:   doc.CreatedAt,
+		UpdatedAt:   doc.UpdatedAt,
 	}
 }

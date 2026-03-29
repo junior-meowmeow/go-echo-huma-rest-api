@@ -9,6 +9,7 @@ import (
 	customMiddleware "github.com/junior-meowmeow/go-echo-huma-rest-api/internal/controller/restapi/middleware"
 )
 
+//revive:disable-next-line:unused-parameter // Keeps a consistent signature across all route registration functions.
 func RegisterRoutes(public huma.API, protected huma.API, h *handler.Handlers) {
 	huma.Register(public, huma.Operation{
 		OperationID:   "health-check",
@@ -17,7 +18,7 @@ func RegisterRoutes(public huma.API, protected huma.API, h *handler.Handlers) {
 		Summary:       "Get health status",
 		Description:   "Get a health check status of the server.",
 		Tags:          []string{"Monitoring"},
-		DefaultStatus: 200,
+		DefaultStatus: http.StatusOK,
 	}, h.Health.GetHealthStatus)
 
 	huma.Register(public, huma.Operation{

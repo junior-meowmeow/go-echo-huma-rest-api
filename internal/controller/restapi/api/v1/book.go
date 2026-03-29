@@ -15,6 +15,7 @@ func RegisterBookGroup(public huma.API, protected huma.API, h *handler.Handlers)
 	RegisterBookRoutes(publicGroup, protectedGroup, h)
 }
 
+//revive:disable-next-line:unused-parameter // Keeps a consistent signature across all route registration functions.
 func RegisterBookRoutes(public huma.API, protected huma.API, h *handler.Handlers) {
 	huma.Register(public, huma.Operation{
 		OperationID:   "create-book",

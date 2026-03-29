@@ -15,6 +15,7 @@ func RegisterFileGroup(public huma.API, protected huma.API, h *handler.Handlers)
 	RegisterFileRoutes(publicGroup, protectedGroup, h)
 }
 
+//revive:disable-next-line:unused-parameter // Keeps a consistent signature across all route registration functions.
 func RegisterFileRoutes(public huma.API, protected huma.API, h *handler.Handlers) {
 	huma.Register(public, huma.Operation{
 		OperationID: "upload-file",

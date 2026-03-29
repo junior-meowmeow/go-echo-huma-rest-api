@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"net"
 	"time"
 
 	"go.mongodb.org/mongo-driver/v2/mongo"
@@ -13,7 +14,8 @@ import (
 )
 
 func newMongoDBClient(ctx context.Context, cfg config.MongoConfig) (*mongo.Client, error) {
-	mongoURI := fmt.Sprintf("mongodb://%s:%s@%s:%s/%s", cfg.DBUser, cfg.DBPass, cfg.Host, cfg.Port, cfg.DBName)
+	mongoHostPort := net.JoinHostPort(cfg.Host, cfg.Port)
+	mongoURI := fmt.Sprintf("mongodb://%s:%s@%s/%s", cfg.DBUser, cfg.DBPass, mongoHostPort, cfg.DBName)
 
 	opts := options.Client().ApplyURI(mongoURI)
 
@@ -21,7 +23,7 @@ func newMongoDBClient(ctx context.Context, cfg config.MongoConfig) (*mongo.Clien
 	if err != nil {
 		return nil, fmt.Errorf("failed to create mongo client: %w", err)
 	}
-	log.Printf("Created a new MongoDB client and connected to %s:%s\n", cfg.Host, cfg.Port)
+	log.Printf("Created a new MongoDB client and connected to %s\n", mongoHostPort)
 
 	if err := pingMongoDB(ctx, client); err != nil {
 		return nil, fmt.Errorf("failed to ping mongoDB: %w", err)
@@ -31,7 +33,8 @@ func newMongoDBClient(ctx context.Context, cfg config.MongoConfig) (*mongo.Clien
 }
 
 func pingMongoDB(ctx context.Context, client *mongo.Client) error {
-	pingCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	const pingTimeout = 5 * time.Second
+	pingCtx, cancel := context.WithTimeout(ctx, pingTimeout)
 	defer cancel()
 
 	return client.Ping(pingCtx, nil)

@@ -40,7 +40,8 @@ func NewApplication(ctx context.Context, cfg config.Config) (*Application, error
 	}
 
 	// Initialize External Service Clients
-	petStoreClient, err := newPetStoreClient(cfg.Client.PetStoreURL, 5*time.Second)
+	const clientTimeout = 5 * time.Second
+	petStoreClient, err := newPetStoreClient(cfg.Client.PetStoreURL, clientTimeout)
 	if err != nil {
 		log.Printf("Failed to initialize PetStore client: %v\n", err)
 		return nil, err
@@ -52,7 +53,7 @@ func NewApplication(ctx context.Context, cfg config.Config) (*Application, error
 	externalServices := external.NewExternalServices(petStoreClient)
 
 	// Initialize Utilities
-	utilities := utility.NewUtilities(cfg.Auth.JWTSecret)
+	utilities := utility.NewUtilities(cfg.Auth.JWTSecret, cfg.Auth.TokenExpiration)
 
 	// Initialize Use Cases
 	usecases := usecase.NewUseCases(repositories, storages, externalServices, utilities)

@@ -8,6 +8,8 @@ services:
     image: go-echo-huma-dev
     volumes:
       - .:/app
+    environment:
+      APP_ENV: development
     depends_on:
       - mongo
       - petstore

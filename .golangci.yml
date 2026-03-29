@@ -47,7 +47,7 @@ linters:
     - depguard # checks if package imports are in a list of acceptable packages
     - dupl # tool for code clone detection
     - durationcheck # checks for two durations multiplied together
-    - embeddedstructfieldcheck # checks embedded types in structs
+    # - embeddedstructfieldcheck # checks embedded types in structs
     - errcheck # checking for unchecked errors, these unchecked errors can be critical bugs in some cases
     - errname # checks that sentinel errors are prefixed with the Err and error types are suffixed with the Error
     - errorlint # finds code that will cause problems with the error wrapping scheme introduced in Go 1.13
@@ -386,6 +386,14 @@ linters:
       patterns:
         - ".*"
 
+    revive:
+      enable-default-rules: true
+      rules:
+        # https://github.com/mgechev/revive/blob/HEAD/RULES_DESCRIPTIONS.md#exported
+        - name: exported
+          arguments:
+            - "disable-stuttering-check"
+
     rowserrcheck:
       # database/sql is always checked.
       # Default: []
@@ -454,6 +462,8 @@ linters:
       - text: 'comment on exported \S+ \S+ should be of the form ".+"'
         source: '// ?(nolint|TODO)'
         linters: [ revive, staticcheck ]
+      - text: 'shadow: declaration of "(err|ctx)" shadows declaration at'
+        linters: [ govet ]
       - path: '_test\.go'
         linters:
           - bodyclose

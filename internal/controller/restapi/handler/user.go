@@ -20,11 +20,14 @@ type userHandler struct {
 	UserUseCase usecase.UserUseCase
 }
 
+//revive:disable:unexported-return // Intentionally returns an unexported struct to enforce dependency on the interface in other layers.
 func NewUserHandler(userUseCase usecase.UserUseCase) *userHandler {
 	return &userHandler{
 		UserUseCase: userUseCase,
 	}
 }
+
+//revive:enable:unexported-return
 
 func (h *userHandler) RegisterUser(ctx context.Context, request *schema.RegisterUserRequest) (*schema.RegisterUserResponse, error) {
 	user := &entity.User{

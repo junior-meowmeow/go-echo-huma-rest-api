@@ -16,24 +16,30 @@ type fileRecordRepository struct {
 	Collection *mongo.Collection
 }
 
+//revive:disable:unexported-return // Intentionally returns an unexported struct to enforce dependency on the interface in other layers.
 func NewFileRecordRepository(db *mongo.Database) *fileRecordRepository {
 	return &fileRecordRepository{
 		Collection: db.Collection("filerecords"),
 	}
 }
 
+//revive:enable:unexported-return
+
 func (r *fileRecordRepository) CreateFileRecord(ctx context.Context, fileRecord *entity.FileRecord) (string, error) {
-	document, err := document.NewFileRecordDocument(fileRecord)
+	doc, err := document.NewFileRecordDocument(fileRecord)
 	if err != nil {
 		return "", fmt.Errorf("failed to convert file record to document: %w", err)
 	}
 
-	result, err := r.Collection.InsertOne(ctx, document)
+	result, err := r.Collection.InsertOne(ctx, doc)
 	if err != nil {
 		return "", fmt.Errorf("failed to insert file record document: %w", err)
 	}
 
-	insertedID := result.InsertedID.(bson.ObjectID).Hex()
+	insertedID, err := document.IDToString(result.InsertedID)
+	if err != nil {
+		return "", fmt.Errorf("failed to convert inserted id to string: %w", err)
+	}
 
 	return insertedID, nil
 }
@@ -41,13 +47,13 @@ func (r *fileRecordRepository) CreateFileRecord(ctx context.Context, fileRecord 
 func (r *fileRecordRepository) GetFileRecordByID(ctx context.Context, fileID string) (entity.FileRecord, error) {
 	var fileRecord entity.FileRecord
 
-	oid, err := bson.ObjectIDFromHex(fileID)
+	oid, err := document.StringToObjectID(fileID)
 	if err != nil {
-		return fileRecord, fmt.Errorf("invalid file record ID format")
+		return fileRecord, fmt.Errorf("invalid file record ID format: %w", err)
 	}
 
-	var document document.FileRecordDocument
-	err = r.Collection.FindOne(ctx, bson.D{{Key: "_id", Value: oid}}).Decode(&document)
+	var doc document.FileRecordDocument
+	err = r.Collection.FindOne(ctx, bson.D{{Key: "_id", Value: oid}}).Decode(&doc)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
 			return fileRecord, fmt.Errorf("failed to get file record: %w: %w", entity.ErrNotFound, err)
@@ -55,7 +61,7 @@ func (r *fileRecordRepository) GetFileRecordByID(ctx context.Context, fileID str
 		return fileRecord, err
 	}
 
-	fileRecord = document.ToEntity()
+	fileRecord = doc.ToEntity()
 
 	return fileRecord, nil
 }

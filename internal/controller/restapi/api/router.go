@@ -7,8 +7,6 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 
-	_ "github.com/danielgtaylor/huma/v2/formats/cbor"
-
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/config"
 	v1 "github.com/junior-meowmeow/go-echo-huma-rest-api/internal/controller/restapi/api/v1"
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/controller/restapi/handler"
@@ -53,7 +51,8 @@ func AddEchoMiddlewares(router *echo.Echo) {
 		AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
 	}))
 	router.Use(middleware.Secure())
-	router.Use(middleware.RateLimiter(middleware.NewRateLimiterMemoryStore(20)))
+	const maxReqPerSec = 20
+	router.Use(middleware.RateLimiter(middleware.NewRateLimiterMemoryStore(maxReqPerSec)))
 }
 
 func AddEchoPrometheus(router *echo.Echo) {

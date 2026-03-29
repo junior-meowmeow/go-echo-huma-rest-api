@@ -15,11 +15,14 @@ type healthHandler struct {
 	HealthUseCase usecase.HealthUseCase
 }
 
+//revive:disable:unexported-return // Intentionally returns an unexported struct to enforce dependency on the interface in other layers.
 func NewHealthHandler(healthUseCase usecase.HealthUseCase) *healthHandler {
 	return &healthHandler{
 		HealthUseCase: healthUseCase,
 	}
 }
+
+//revive:enable:unexported-return
 
 func (h *healthHandler) GetHealthStatus(ctx context.Context, _ *schema.GetHealthStatusRequest) (*schema.GetHealthStatusResponse, error) {
 	status, err := h.HealthUseCase.GetHealthStatus(ctx)

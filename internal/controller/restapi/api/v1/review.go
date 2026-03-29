@@ -15,6 +15,7 @@ func RegisterReviewGroup(public huma.API, protected huma.API, h *handler.Handler
 	RegisterReviewRoutes(publicGroup, protectedGroup, h)
 }
 
+//revive:disable-next-line:unused-parameter // Keeps a consistent signature across all route registration functions.
 func RegisterReviewRoutes(public huma.API, protected huma.API, h *handler.Handlers) {
 	huma.Register(public, huma.Operation{
 		OperationID:   "create-review",

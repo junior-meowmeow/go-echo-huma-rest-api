@@ -40,7 +40,7 @@ func (s *ReviewSuite) TestCreateAndGetReview() {
 	s.Require().NoError(err)
 
 	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("POST", "/v1/reviews", bytes.NewBuffer(jsonPayload))
+	req, _ := http.NewRequest(http.MethodPost, "/v1/reviews", bytes.NewBuffer(jsonPayload))
 	req.Header.Set("Content-Type", "application/json")
 
 	s.Router.ServeHTTP(w, req)
@@ -50,14 +50,14 @@ func (s *ReviewSuite) TestCreateAndGetReview() {
 		s.T().Logf("Response Body: %s", w.Body.String())
 	}
 
-	s.Assert().Equal(http.StatusCreated, w.Code)
+	s.Equal(http.StatusCreated, w.Code)
 
 	// 2. GET Reviews
 	w = httptest.NewRecorder()
-	req, _ = http.NewRequest("GET", "/v1/reviews", nil)
+	req, _ = http.NewRequest(http.MethodGet, "/v1/reviews", nil)
 	s.Router.ServeHTTP(w, req)
 
-	s.Assert().Equal(http.StatusOK, w.Code)
+	s.Equal(http.StatusOK, w.Code)
 
 	type review struct {
 		ID        string `json:"id"`
@@ -102,20 +102,20 @@ func (s *ReviewSuite) TestCreateReviewWithInvalidRating() {
 	s.Require().NoError(err)
 
 	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("POST", "/v1/reviews", bytes.NewBuffer(jsonPayload))
+	req, _ := http.NewRequest(http.MethodPost, "/v1/reviews", bytes.NewBuffer(jsonPayload))
 	req.Header.Set("Content-Type", "application/json")
 
 	s.Router.ServeHTTP(w, req)
 
-	s.Assert().NotEqual(http.StatusCreated, w.Code, "Should not create resource")
-	s.Assert().Equal(http.StatusUnprocessableEntity, w.Code, "Should return status 422")
+	s.NotEqual(http.StatusCreated, w.Code, "Should not create resource")
+	s.Equal(http.StatusUnprocessableEntity, w.Code, "Should return status 422")
 
 	// 2. GET Reviews (Verify that new review is not created)
 	w = httptest.NewRecorder()
-	req, _ = http.NewRequest("GET", "/v1/reviews", nil)
+	req, _ = http.NewRequest(http.MethodGet, "/v1/reviews", nil)
 	s.Router.ServeHTTP(w, req)
 
-	s.Assert().Equal(http.StatusOK, w.Code)
+	s.Equal(http.StatusOK, w.Code)
 
 	type review struct {
 		ID        string `json:"id"`
@@ -134,7 +134,7 @@ func (s *ReviewSuite) TestCreateReviewWithInvalidRating() {
 	err = json.Unmarshal(w.Body.Bytes(), &responseBody)
 	s.Require().NoError(err)
 
-	s.Assert().Len(responseBody.Data, 0, "Database should be empty after failed creation")
+	s.Empty(responseBody.Data, "Database should be empty after failed creation")
 }
 
 func (s *ReviewSuite) TestCreateReview_ValidationErrors() {
@@ -198,19 +198,19 @@ func (s *ReviewSuite) TestCreateReview_ValidationErrors() {
 
 			// Make Request
 			w := httptest.NewRecorder()
-			req, _ := http.NewRequest("POST", "/v1/reviews", bytes.NewBuffer(jsonPayload))
+			req, _ := http.NewRequest(http.MethodPost, "/v1/reviews", bytes.NewBuffer(jsonPayload))
 			req.Header.Set("Content-Type", "application/json")
 
 			s.Router.ServeHTTP(w, req)
 
 			// Assert Status Code
-			s.Assert().Equal(tt.wantStatus, w.Code, "Expected failure status for case: %s", tt.name)
+			s.Equal(tt.wantStatus, w.Code, "Expected failure status for case: %s", tt.name)
 
 			// Verify that new review is not created
 			// Access the collection directly to ensure count is 0.
 			count, err := s.MongoDB.Collection("reviews").CountDocuments(context.Background(), bson.D{})
 			s.Require().NoError(err)
-			s.Assert().Equal(int64(0), count, "DB should be empty for case: %s", tt.name)
+			s.Equal(int64(0), count, "DB should be empty for case: %s", tt.name)
 		})
 	}
 }

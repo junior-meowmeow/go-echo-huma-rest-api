@@ -17,11 +17,14 @@ type reviewUseCase struct {
 	ReviewRepository port.ReviewRepository
 }
 
+//revive:disable:unexported-return // Intentionally returns an unexported struct to enforce dependency on the interface in other layers.
 func NewReviewUseCase(reviewRepository port.ReviewRepository) *reviewUseCase {
 	return &reviewUseCase{
 		ReviewRepository: reviewRepository,
 	}
 }
+
+//revive:enable:unexported-return
 
 func (u *reviewUseCase) PostReview(ctx context.Context, review *entity.Review) error {
 	currentTime := time.Now()

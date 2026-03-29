@@ -18,11 +18,14 @@ type bookHandler struct {
 	BookUseCase usecase.BookUseCase
 }
 
+//revive:disable:unexported-return // Intentionally returns an unexported struct to enforce dependency on the interface in other layers.
 func NewBookHandler(bookUseCase usecase.BookUseCase) *bookHandler {
 	return &bookHandler{
 		BookUseCase: bookUseCase,
 	}
 }
+
+//revive:enable:unexported-return
 
 func (h *bookHandler) CreateBook(ctx context.Context, request *schema.CreateBookRequest) (*schema.CreateBookResponse, error) {
 	book := &entity.Book{

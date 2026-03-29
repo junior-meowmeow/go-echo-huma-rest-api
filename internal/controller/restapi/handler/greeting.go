@@ -15,11 +15,14 @@ type greetingHandler struct {
 	GreetingUseCase usecase.GreetingUseCase
 }
 
+//revive:disable:unexported-return // Intentionally returns an unexported struct to enforce dependency on the interface in other layers.
 func NewGreetingHandler(greetingUseCase usecase.GreetingUseCase) *greetingHandler {
 	return &greetingHandler{
 		GreetingUseCase: greetingUseCase,
 	}
 }
+
+//revive:enable:unexported-return
 
 func (h *greetingHandler) GetGreeting(ctx context.Context, request *schema.GreetingRequest) (*schema.GreetingResponse, error) {
 	message := h.GreetingUseCase.GetGreetingMessage(ctx, request.Name)

@@ -17,12 +17,16 @@ type petHandler struct {
 	PetUseCase usecase.PetUseCase
 }
 
+//revive:disable:unexported-return // Intentionally returns an unexported struct to enforce dependency on the interface in other layers.
 func NewPetHandler(petUseCase usecase.PetUseCase) *petHandler {
 	return &petHandler{
 		PetUseCase: petUseCase,
 	}
 }
 
+//revive:enable:unexported-return
+
+//revive:disable:unused-parameter // Keeps a consistent signature across all handler functions.
 func (h *petHandler) GetAvailablePets(
 	ctx context.Context,
 	request *schema.GetAvailablePetsRequest,
@@ -37,6 +41,8 @@ func (h *petHandler) GetAvailablePets(
 
 	return &resp, nil
 }
+
+//revive:enable:unused-parameter
 
 func (h *petHandler) GetPetByID(ctx context.Context, request *schema.GetPetByIDRequest) (*schema.GetPetByIDResponse, error) {
 	pet, err := h.PetUseCase.GetPetByID(ctx, request.ID)

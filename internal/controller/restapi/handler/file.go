@@ -17,11 +17,14 @@ type fileHandler struct {
 	FileUseCase usecase.FileUseCase
 }
 
+//revive:disable:unexported-return // Intentionally returns an unexported struct to enforce dependency on the interface in other layers.
 func NewFileHandler(fileUseCase usecase.FileUseCase) *fileHandler {
 	return &fileHandler{
 		FileUseCase: fileUseCase,
 	}
 }
+
+//revive:enable:unexported-return
 
 func (h *fileHandler) UploadFile(ctx context.Context, input *schema.UploadFileRequest) (*schema.UploadFileResponse, error) {
 	formData := input.RawBody.Data()

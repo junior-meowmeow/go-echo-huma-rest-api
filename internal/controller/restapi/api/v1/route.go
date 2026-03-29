@@ -11,8 +11,8 @@ func RegisterGroup(public huma.API, protected huma.API, h *handler.Handlers) {
 	protectedGroup := huma.NewGroup(protected, "/v1")
 
 	modifier := func(op *huma.Operation) {
-		op.OperationID = op.OperationID + "-v1"
-		op.Summary = op.Summary + " (V1)"
+		op.OperationID += "-v1"
+		op.Summary += " (V1)"
 	}
 	publicGroup.UseSimpleModifier(modifier)
 	protectedGroup.UseSimpleModifier(modifier)

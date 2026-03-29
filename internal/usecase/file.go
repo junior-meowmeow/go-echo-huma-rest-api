@@ -24,12 +24,15 @@ type fileUseCase struct {
 	FileStorage          port.FileStorage
 }
 
+//revive:disable:unexported-return // Intentionally returns an unexported struct to enforce dependency on the interface in other layers.
 func NewFileUseCase(fileRecordRepository port.FileRecordRepository, fileStorage port.FileStorage) *fileUseCase {
 	return &fileUseCase{
 		FileRecordRepository: fileRecordRepository,
 		FileStorage:          fileStorage,
 	}
 }
+
+//revive:enable:unexported-return
 
 func (u *fileUseCase) UploadFile(
 	ctx context.Context,
@@ -91,7 +94,7 @@ func (u *fileUseCase) GetFileDownloadLink(ctx context.Context, fileID string) (e
 		return entity.FileDownloadInfo{}, fmt.Errorf("file not found: %w", err)
 	}
 
-	duration := 15 * time.Minute
+	const duration = 15 * time.Minute
 	expirationTime := time.Now().Add(duration)
 
 	url, err := u.FileStorage.GetPresignedDownloadURL(ctx, fileRecord.S3Key, fileRecord.FileName, duration)
@@ -109,7 +112,8 @@ func (u *fileUseCase) GetFileDownloadLink(ctx context.Context, fileID string) (e
 }
 
 func (u *fileUseCase) GetS3FileList(ctx context.Context) ([]string, error) {
-	fileKeys, err := u.FileStorage.ListFiles(ctx, 20)
+	const filesLimit = 20
+	fileKeys, err := u.FileStorage.ListFiles(ctx, filesLimit)
 	if err != nil {
 		return nil, fmt.Errorf("failed to list S3 files: %w", err)
 	}

@@ -2,6 +2,7 @@ package integration_test
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/stretchr/testify/suite"
@@ -37,7 +38,7 @@ func (s *IntegrationTestSuite) SetupSuite() {
 	s.Repositories = repository.NewRepositories(s.MongoDB)
 	s.Storages = storage.NewStorages(s.S3Client, "test-bucket")
 	s.ExternalServices = external.NewExternalServices(nil)
-	s.Utilities = utility.NewUtilities("test-secret")
+	s.Utilities = utility.NewUtilities("test-secret", 72*time.Hour)
 
 	usecases := usecase.NewUseCases(s.Repositories, s.Storages, s.ExternalServices, s.Utilities)
 	handlers := handler.NewHandlers(usecases)

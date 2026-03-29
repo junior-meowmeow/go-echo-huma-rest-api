@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"log"
 	"net/http"
 	"strings"
 
@@ -13,7 +14,10 @@ func RequireToken(api huma.API, tokenUtility auth.TokenUtility) func(huma.Contex
 	return func(ctx huma.Context, next func(huma.Context)) {
 		authHeader := ctx.Header("Authorization")
 		if authHeader == "" || !strings.HasPrefix(authHeader, "Bearer ") {
-			huma.WriteErr(api, ctx, http.StatusUnauthorized, "missing or invalid Authorization header")
+			err := huma.WriteErr(api, ctx, http.StatusUnauthorized, "missing or invalid Authorization header")
+			if err != nil {
+				log.Printf("failed to write error response: %v", err)
+			}
 			return
 		}
 
@@ -21,7 +25,10 @@ func RequireToken(api huma.API, tokenUtility auth.TokenUtility) func(huma.Contex
 
 		authContext, err := tokenUtility.ParseToken(tokenString)
 		if err != nil {
-			huma.WriteErr(api, ctx, http.StatusUnauthorized, "invalid or expired token")
+			err := huma.WriteErr(api, ctx, http.StatusUnauthorized, "invalid or expired token")
+			if err != nil {
+				log.Printf("failed to write error response: %v", err)
+			}
 			return
 		}
 
@@ -39,7 +46,10 @@ func requireRole(api huma.API, role string) func(huma.Context, func(huma.Context
 		authContext, ok := ctx.Context().Value(auth.AuthContextKey).(auth.AuthContext)
 
 		if !ok || authContext.Role != role {
-			huma.WriteErr(api, ctx, http.StatusForbidden, "insufficient permissions")
+			err := huma.WriteErr(api, ctx, http.StatusForbidden, "insufficient permissions")
+			if err != nil {
+				log.Printf("failed to write error response: %v", err)
+			}
 			return
 		}
 

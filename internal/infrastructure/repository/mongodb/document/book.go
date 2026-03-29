@@ -27,47 +27,44 @@ type BookMetadata struct {
 	Genre  string `bson:"genre"`
 }
 
-func NewBookDocument(entity *entity.Book) (BookDocument, error) {
+func NewBookDocument(book *entity.Book) (BookDocument, error) {
 	var bookDocument BookDocument
 	var err error
 
-	var oid bson.ObjectID
-	if entity.ID != "" {
-		oid, err = bson.ObjectIDFromHex(entity.ID)
-		if err != nil {
-			return bookDocument, fmt.Errorf("invalid book ID format: %w", err)
-		}
+	oid, err := StringToObjectID(book.ID)
+	if err != nil {
+		return bookDocument, fmt.Errorf("invalid book ID format: %w", err)
 	}
 
 	bookDocument = BookDocument{
 		ID:          oid,
-		Name:        entity.Name,
-		Description: entity.Description,
+		Name:        book.Name,
+		Description: book.Description,
 		Metadata: BookMetadata{
-			Author: entity.Metadata.Author,
-			ISBN:   entity.Metadata.ISBN,
-			Genre:  entity.Metadata.Genre,
+			Author: book.Metadata.Author,
+			ISBN:   book.Metadata.ISBN,
+			Genre:  book.Metadata.Genre,
 		},
-		CoverImageFileID: entity.CoverImageFileID,
-		CreatedAt:        entity.CreatedAt,
-		UpdatedAt:        entity.UpdatedAt,
+		CoverImageFileID: book.CoverImageFileID,
+		CreatedAt:        book.CreatedAt,
+		UpdatedAt:        book.UpdatedAt,
 	}
 
 	return bookDocument, nil
 }
 
-func (document *BookDocument) ToEntity() entity.Book {
+func (doc *BookDocument) ToEntity() entity.Book {
 	return entity.Book{
-		ID:          document.ID.Hex(),
-		Name:        document.Name,
-		Description: document.Description,
+		ID:          doc.ID.Hex(),
+		Name:        doc.Name,
+		Description: doc.Description,
 		Metadata: entity.BookMetadata{
-			Author: document.Metadata.Author,
-			ISBN:   document.Metadata.ISBN,
-			Genre:  document.Metadata.Genre,
+			Author: doc.Metadata.Author,
+			ISBN:   doc.Metadata.ISBN,
+			Genre:  doc.Metadata.Genre,
 		},
-		CoverImageFileID: document.CoverImageFileID,
-		CreatedAt:        document.CreatedAt,
-		UpdatedAt:        document.UpdatedAt,
+		CoverImageFileID: doc.CoverImageFileID,
+		CreatedAt:        doc.CreatedAt,
+		UpdatedAt:        doc.UpdatedAt,
 	}
 }

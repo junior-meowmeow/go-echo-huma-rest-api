@@ -53,7 +53,7 @@ func TestFileRecordRepository(t *testing.T) {
 		fakeID := "000000000000000000000000"
 		_, err := repo.GetFileRecordByID(ctx, fakeID)
 
-		assert.Error(t, err)
+		require.Error(t, err)
 		// Mongo driver returns "mongo: no documents in result"
 		assert.Contains(t, err.Error(), "no documents")
 	})
@@ -63,7 +63,7 @@ func TestFileRecordRepository(t *testing.T) {
 
 		_, err := repo.GetFileRecordByID(ctx, "invalid-hex-string")
 
-		assert.Error(t, err)
-		assert.Equal(t, "invalid file record ID format", err.Error())
+		require.Error(t, err)
+		assert.ErrorContains(t, err, "invalid file record ID format")
 	})
 }

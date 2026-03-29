@@ -1,3 +1,4 @@
+//nolint:dupl // Documents are intended to follow a similar pattern.
 package document
 
 import (
@@ -20,37 +21,34 @@ type ReviewDocument struct {
 	UpdatedAt time.Time `bson:"updatedAt"`
 }
 
-func NewReviewDocument(entity *entity.Review) (ReviewDocument, error) {
+func NewReviewDocument(review *entity.Review) (ReviewDocument, error) {
 	var reviewDocument ReviewDocument
 	var err error
 
-	var oid bson.ObjectID
-	if entity.ID != "" {
-		oid, err = bson.ObjectIDFromHex(entity.ID)
-		if err != nil {
-			return reviewDocument, fmt.Errorf("invalid review ID format: %w", err)
-		}
+	oid, err := StringToObjectID(review.ID)
+	if err != nil {
+		return reviewDocument, fmt.Errorf("invalid review ID format: %w", err)
 	}
 
 	reviewDocument = ReviewDocument{
 		ID:        oid,
-		Author:    entity.Author,
-		Rating:    entity.Rating,
-		Message:   entity.Message,
-		CreatedAt: entity.CreatedAt,
-		UpdatedAt: entity.UpdatedAt,
+		Author:    review.Author,
+		Rating:    review.Rating,
+		Message:   review.Message,
+		CreatedAt: review.CreatedAt,
+		UpdatedAt: review.UpdatedAt,
 	}
 
 	return reviewDocument, nil
 }
 
-func (document *ReviewDocument) ToEntity() entity.Review {
+func (doc *ReviewDocument) ToEntity() entity.Review {
 	return entity.Review{
-		ID:        document.ID.Hex(),
-		Author:    document.Author,
-		Rating:    document.Rating,
-		Message:   document.Message,
-		CreatedAt: document.CreatedAt,
-		UpdatedAt: document.UpdatedAt,
+		ID:        doc.ID.Hex(),
+		Author:    doc.Author,
+		Rating:    doc.Rating,
+		Message:   doc.Message,
+		CreatedAt: doc.CreatedAt,
+		UpdatedAt: doc.UpdatedAt,
 	}
 }

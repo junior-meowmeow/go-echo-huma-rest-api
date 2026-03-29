@@ -23,12 +23,15 @@ type userUseCase struct {
 	TokenUtility   auth.TokenUtility
 }
 
+//revive:disable:unexported-return // Intentionally returns an unexported struct to enforce dependency on the interface in other layers.
 func NewUserUseCase(userRepository port.UserRepository, tokenUtility auth.TokenUtility) *userUseCase {
 	return &userUseCase{
 		UserRepository: userRepository,
 		TokenUtility:   tokenUtility,
 	}
 }
+
+//revive:enable:unexported-return
 
 func (u *userUseCase) RegisterUser(ctx context.Context, user *entity.User, password string) (string, error) {
 	_, err := u.UserRepository.GetUserByUsername(ctx, user.Username)
@@ -74,7 +77,7 @@ func (u *userUseCase) LoginUser(ctx context.Context, username string, password s
 
 	token, err := u.TokenUtility.GenerateToken(user.ID, user.Role)
 	if err != nil {
-		return "", fmt.Errorf("failed to generate token")
+		return "", fmt.Errorf("failed to generate token: %w", err)
 	}
 
 	return token, nil

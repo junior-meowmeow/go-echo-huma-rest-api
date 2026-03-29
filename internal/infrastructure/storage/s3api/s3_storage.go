@@ -18,6 +18,7 @@ type s3Storage struct {
 	BucketName    string
 }
 
+//revive:disable:unexported-return // Intentionally returns an unexported struct to enforce dependency on the interface in other layers.
 func NewS3Storage(client *s3.Client, bucketName string) *s3Storage {
 	presignClient := s3.NewPresignClient(client)
 	return &s3Storage{
@@ -26,6 +27,8 @@ func NewS3Storage(client *s3.Client, bucketName string) *s3Storage {
 		BucketName:    bucketName,
 	}
 }
+
+//revive:enable:unexported-return
 
 func (s *s3Storage) UploadFile(ctx context.Context, key string, file io.Reader, size int64, contentType string) error {
 	_, err := s.Client.PutObject(ctx, &s3.PutObjectInput{
@@ -74,6 +77,12 @@ func (s *s3Storage) CheckFileExists(ctx context.Context, key string) (bool, erro
 }
 
 func (s *s3Storage) ListFiles(ctx context.Context, maxKeys int) ([]string, error) {
+	// Limit to prevent integer overflow conversion. (ListObjectsV2 can list up to 1000)
+	const maxKeysLimit = 1000
+	if maxKeys > maxKeysLimit {
+		maxKeys = maxKeysLimit
+	}
+
 	output, err := s.Client.ListObjectsV2(ctx, &s3.ListObjectsV2Input{
 		Bucket:  aws.String(s.BucketName),
 		MaxKeys: aws.Int32(int32(maxKeys)),

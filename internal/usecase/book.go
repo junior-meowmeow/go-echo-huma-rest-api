@@ -20,11 +20,14 @@ type bookUseCase struct {
 	BookRepository port.BookRepository
 }
 
+//revive:disable:unexported-return // Intentionally returns an unexported struct to enforce dependency on the interface in other layers.
 func NewBookUseCase(bookRepository port.BookRepository) *bookUseCase {
 	return &bookUseCase{
 		BookRepository: bookRepository,
 	}
 }
+
+//revive:enable:unexported-return
 
 func (u *bookUseCase) CreateBook(ctx context.Context, book *entity.Book) (string, error) {
 	currentTime := time.Now()

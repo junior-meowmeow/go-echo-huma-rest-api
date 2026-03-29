@@ -1,3 +1,4 @@
+//nolint:dupl // Documents are intended to follow a similar pattern.
 package document
 
 import (
@@ -20,37 +21,34 @@ type UserDocument struct {
 	UpdatedAt time.Time `bson:"updatedAt"`
 }
 
-func NewUserDocument(entity *entity.User) (UserDocument, error) {
+func NewUserDocument(user *entity.User) (UserDocument, error) {
 	var userDocument UserDocument
 	var err error
 
-	var oid bson.ObjectID
-	if entity.ID != "" {
-		oid, err = bson.ObjectIDFromHex(entity.ID)
-		if err != nil {
-			return userDocument, fmt.Errorf("invalid user ID format: %w", err)
-		}
+	oid, err := StringToObjectID(user.ID)
+	if err != nil {
+		return userDocument, fmt.Errorf("invalid user ID format: %w", err)
 	}
 
 	userDocument = UserDocument{
 		ID:        oid,
-		Username:  entity.Username,
-		Password:  entity.Password,
-		Role:      entity.Role,
-		CreatedAt: entity.CreatedAt,
-		UpdatedAt: entity.UpdatedAt,
+		Username:  user.Username,
+		Password:  user.Password,
+		Role:      user.Role,
+		CreatedAt: user.CreatedAt,
+		UpdatedAt: user.UpdatedAt,
 	}
 
 	return userDocument, nil
 }
 
-func (document *UserDocument) ToEntity() entity.User {
+func (doc *UserDocument) ToEntity() entity.User {
 	return entity.User{
-		ID:        document.ID.Hex(),
-		Username:  document.Username,
-		Password:  document.Password,
-		Role:      document.Role,
-		CreatedAt: document.CreatedAt,
-		UpdatedAt: document.UpdatedAt,
+		ID:        doc.ID.Hex(),
+		Username:  doc.Username,
+		Password:  doc.Password,
+		Role:      doc.Role,
+		CreatedAt: doc.CreatedAt,
+		UpdatedAt: doc.UpdatedAt,
 	}
 }

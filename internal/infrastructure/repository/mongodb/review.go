@@ -16,19 +16,22 @@ type reviewRepository struct {
 	Collection *mongo.Collection
 }
 
+//revive:disable:unexported-return // Intentionally returns an unexported struct to enforce dependency on the interface in other layers.
 func NewReviewRepository(db *mongo.Database) *reviewRepository {
 	return &reviewRepository{
 		Collection: db.Collection("reviews"),
 	}
 }
 
+//revive:enable:unexported-return
+
 func (r *reviewRepository) CreateReview(ctx context.Context, review *entity.Review) error {
-	document, err := document.NewReviewDocument(review)
+	doc, err := document.NewReviewDocument(review)
 	if err != nil {
 		return fmt.Errorf("failed to convert review to document: %w", err)
 	}
 
-	_, err = r.Collection.InsertOne(ctx, document)
+	_, err = r.Collection.InsertOne(ctx, doc)
 	if err != nil {
 		return fmt.Errorf("failed to insert review document: %w", err)
 	}
@@ -47,14 +50,14 @@ func (r *reviewRepository) GetReviews(ctx context.Context, limit int64) ([]entit
 	}
 	defer cursor.Close(ctx)
 
-	var documentsList []document.ReviewDocument
-	if err := cursor.All(ctx, &documentsList); err != nil {
+	var docs []document.ReviewDocument
+	if err := cursor.All(ctx, &docs); err != nil {
 		return nil, fmt.Errorf("failed to decode review documents: %w", err)
 	}
 
-	reviews := make([]entity.Review, len(documentsList))
-	for i, document := range documentsList {
-		reviews[i] = document.ToEntity()
+	reviews := make([]entity.Review, len(docs))
+	for i, doc := range docs {
+		reviews[i] = doc.ToEntity()
 	}
 
 	return reviews, nil

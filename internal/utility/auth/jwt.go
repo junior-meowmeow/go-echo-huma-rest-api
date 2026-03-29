@@ -10,12 +10,19 @@ import (
 )
 
 type jwtUtility struct {
-	secretKey string
+	secretKey       string
+	tokenExpiration time.Duration
 }
 
-func NewJWTUtility(secretKey string) *jwtUtility {
-	return &jwtUtility{secretKey: secretKey}
+//revive:disable:unexported-return // Intentionally returns an unexported struct to enforce dependency on the interface in other layers.
+func NewJWTUtility(secretKey string, tokenExpiration time.Duration) *jwtUtility {
+	return &jwtUtility{
+		secretKey:       secretKey,
+		tokenExpiration: tokenExpiration,
+	}
 }
+
+//revive:enable:unexported-return
 
 type CustomClaims struct {
 	jwt.RegisteredClaims
@@ -26,7 +33,7 @@ func (u *jwtUtility) GenerateToken(userID string, role string) (string, error) {
 	claims := CustomClaims{
 		RegisteredClaims: jwt.RegisteredClaims{
 			Subject:   userID,
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(72 * time.Hour)),
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(u.tokenExpiration)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 		},
 		Role: role,

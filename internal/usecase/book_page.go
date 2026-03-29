@@ -23,12 +23,15 @@ type bookPageUseCase struct {
 	BookPageRepository port.BookPageRepository
 }
 
+//revive:disable:unexported-return // Intentionally returns an unexported struct to enforce dependency on the interface in other layers.
 func NewBookPageUseCase(bookRepository port.BookRepository, bookPageRepository port.BookPageRepository) *bookPageUseCase {
 	return &bookPageUseCase{
 		BookRepository:     bookRepository,
 		BookPageRepository: bookPageRepository,
 	}
 }
+
+//revive:enable:unexported-return
 
 func (u *bookPageUseCase) CreateBookPage(ctx context.Context, bookPage *entity.BookPage) (string, error) {
 	_, err := u.BookRepository.GetBookByID(ctx, bookPage.BookID)

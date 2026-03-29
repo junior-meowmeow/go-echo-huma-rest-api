@@ -27,7 +27,7 @@ func TestS3Repository(t *testing.T) {
 	repo := s3api.NewS3Storage(s3Client, bucketName)
 
 	t.Run("UploadFile", func(t *testing.T) {
-		tmpFile, err := os.CreateTemp("", "test-file-*.txt")
+		tmpFile, err := os.CreateTemp(t.TempDir(), "test-file-*.txt")
 		require.NoError(t, err)
 		defer os.Remove(tmpFile.Name())
 		defer tmpFile.Close()
@@ -43,7 +43,7 @@ func TestS3Repository(t *testing.T) {
 		key := "folder/test.txt"
 
 		err = repo.UploadFile(ctx, key, tmpFile, int64(len(content)), "text/plain")
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		// Verification: Check if it really exists in S3
 		_, err = s3Client.HeadObject(ctx, &s3.HeadObjectInput{
@@ -56,7 +56,7 @@ func TestS3Repository(t *testing.T) {
 	t.Run("ListFiles", func(t *testing.T) {
 		// We expect the file from the previous test ("folder/test.txt")
 		keys, err := repo.ListFiles(ctx, 10)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		require.Len(t, keys, 1)
 		assert.Equal(t, "folder/test.txt", keys[0])
@@ -67,7 +67,7 @@ func TestS3Repository(t *testing.T) {
 		filename := "download-me.txt"
 
 		url, err := repo.GetPresignedDownloadURL(ctx, key, filename, 15*time.Minute)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.NotEmpty(t, url)
 
 		t.Logf("Generated Presigned URL: %s", url)

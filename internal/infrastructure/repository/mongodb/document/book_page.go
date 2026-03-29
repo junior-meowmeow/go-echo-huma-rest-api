@@ -27,51 +27,48 @@ type BookPageMetadata struct {
 	Highlight    string `bson:"highlight"`
 }
 
-func NewBookPageDocument(entity *entity.BookPage) (BookPageDocument, error) {
+func NewBookPageDocument(bookPage *entity.BookPage) (BookPageDocument, error) {
 	var bookPageDocument BookPageDocument
 
-	bookOID, err := bson.ObjectIDFromHex(entity.BookID)
+	bookOID, err := StringToObjectID(bookPage.BookID)
 	if err != nil {
 		return bookPageDocument, fmt.Errorf("invalid book ID format: %w", err)
 	}
 
-	var oid bson.ObjectID
-	if entity.ID != "" {
-		oid, err = bson.ObjectIDFromHex(entity.ID)
-		if err != nil {
-			return bookPageDocument, fmt.Errorf("invalid book page ID format: %w", err)
-		}
+	oid, err := StringToObjectID(bookPage.ID)
+	if err != nil {
+		return bookPageDocument, fmt.Errorf("invalid book page ID format: %w", err)
 	}
 
 	bookPageDocument = BookPageDocument{
 		ID:         oid,
 		BookID:     bookOID,
-		PageNumber: entity.PageNumber,
-		Content:    entity.Content,
+		PageNumber: bookPage.PageNumber,
+		Content:    bookPage.Content,
 		Metadata: BookPageMetadata{
-			IsBookmarked: entity.Metadata.IsBookmarked,
-			Highlight:    entity.Metadata.Highlight,
+			IsBookmarked: bookPage.Metadata.IsBookmarked,
+			Highlight:    bookPage.Metadata.Highlight,
 		},
-		AttachedImageFileID: entity.AttachedImageFileID,
-		CreatedAt:           entity.CreatedAt,
-		UpdatedAt:           entity.UpdatedAt,
+		AttachedImageFileID: bookPage.AttachedImageFileID,
+		CreatedAt:           bookPage.CreatedAt,
+		UpdatedAt:           bookPage.UpdatedAt,
 	}
 
 	return bookPageDocument, nil
 }
 
-func (document *BookPageDocument) ToEntity() entity.BookPage {
+func (doc *BookPageDocument) ToEntity() entity.BookPage {
 	return entity.BookPage{
-		ID:         document.ID.Hex(),
-		BookID:     document.BookID.Hex(),
-		PageNumber: document.PageNumber,
-		Content:    document.Content,
+		ID:         doc.ID.Hex(),
+		BookID:     doc.BookID.Hex(),
+		PageNumber: doc.PageNumber,
+		Content:    doc.Content,
 		Metadata: entity.BookPageMetadata{
-			IsBookmarked: document.Metadata.IsBookmarked,
-			Highlight:    document.Metadata.Highlight,
+			IsBookmarked: doc.Metadata.IsBookmarked,
+			Highlight:    doc.Metadata.Highlight,
 		},
-		AttachedImageFileID: document.AttachedImageFileID,
-		CreatedAt:           document.CreatedAt,
-		UpdatedAt:           document.UpdatedAt,
+		AttachedImageFileID: doc.AttachedImageFileID,
+		CreatedAt:           doc.CreatedAt,
+		UpdatedAt:           doc.UpdatedAt,
 	}
 }

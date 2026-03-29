@@ -17,11 +17,14 @@ type petUseCase struct {
 	PetService port.PetService
 }
 
+//revive:disable:unexported-return // Intentionally returns an unexported struct to enforce dependency on the interface in other layers.
 func NewPetUseCase(petService port.PetService) *petUseCase {
 	return &petUseCase{
 		PetService: petService,
 	}
 }
+
+//revive:enable:unexported-return
 
 func (u *petUseCase) GetAvailablePets(ctx context.Context) ([]entity.Pet, error) {
 	pets, err := u.PetService.GetPetsByStatus(ctx, entity.PetStatusAvailable)

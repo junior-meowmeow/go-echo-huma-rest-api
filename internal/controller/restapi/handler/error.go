@@ -8,7 +8,7 @@ import (
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/domain/entity"
 )
 
-// Default error handler
+// Default error handler.
 func resolveError(err error) error {
 	if err == nil {
 		return nil

@@ -20,11 +20,14 @@ type bookPageHandler struct {
 	BookPageUseCase usecase.BookPageUseCase
 }
 
+//revive:disable:unexported-return // Intentionally returns an unexported struct to enforce dependency on the interface in other layers.
 func NewBookPageHandler(bookPageUseCase usecase.BookPageUseCase) *bookPageHandler {
 	return &bookPageHandler{
 		BookPageUseCase: bookPageUseCase,
 	}
 }
+
+//revive:enable:unexported-return
 
 func (h *bookPageHandler) CreateBookPage(
 	ctx context.Context,

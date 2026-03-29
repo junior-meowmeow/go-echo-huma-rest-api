@@ -9,9 +9,11 @@ services:
     ports:
       - ${PORT:-8000}:${PORT:-8000}
     environment:
+      APP_ENV: production
       PORT:
       API_BASE_PATH:
       JWT_SECRET:
+      TOKEN_EXPIRATION:
       LOG_LEVEL:
       MONGO_HOST:
       MONGO_PORT:

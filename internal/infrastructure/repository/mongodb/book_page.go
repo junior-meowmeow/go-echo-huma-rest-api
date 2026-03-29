@@ -17,24 +17,30 @@ type bookPageRepository struct {
 	Collection *mongo.Collection
 }
 
+//revive:disable:unexported-return // Intentionally returns an unexported struct to enforce dependency on the interface in other layers.
 func NewBookPageRepository(db *mongo.Database) *bookPageRepository {
 	return &bookPageRepository{
 		Collection: db.Collection("book_pages"),
 	}
 }
 
+//revive:enable:unexported-return
+
 func (r *bookPageRepository) CreateBookPage(ctx context.Context, bookPage *entity.BookPage) (string, error) {
-	document, err := document.NewBookPageDocument(bookPage)
+	doc, err := document.NewBookPageDocument(bookPage)
 	if err != nil {
 		return "", fmt.Errorf("failed to convert book page to document: %w", err)
 	}
 
-	result, err := r.Collection.InsertOne(ctx, document)
+	result, err := r.Collection.InsertOne(ctx, doc)
 	if err != nil {
 		return "", fmt.Errorf("failed to insert book page document: %w", err)
 	}
 
-	insertedID := result.InsertedID.(bson.ObjectID).Hex()
+	insertedID, err := document.IDToString(result.InsertedID)
+	if err != nil {
+		return "", fmt.Errorf("failed to convert inserted id to string: %w", err)
+	}
 
 	return insertedID, nil
 }
@@ -42,13 +48,13 @@ func (r *bookPageRepository) CreateBookPage(ctx context.Context, bookPage *entit
 func (r *bookPageRepository) GetBookPageByID(ctx context.Context, id string) (entity.BookPage, error) {
 	var bookPage entity.BookPage
 
-	oid, err := bson.ObjectIDFromHex(id)
+	oid, err := document.StringToObjectID(id)
 	if err != nil {
-		return bookPage, fmt.Errorf("invalid book page ID format")
+		return bookPage, fmt.Errorf("invalid book page ID format: %w", err)
 	}
 
-	var document document.BookPageDocument
-	err = r.Collection.FindOne(ctx, bson.D{{Key: "_id", Value: oid}}).Decode(&document)
+	var doc document.BookPageDocument
+	err = r.Collection.FindOne(ctx, bson.D{{Key: "_id", Value: oid}}).Decode(&doc)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
 			return bookPage, fmt.Errorf("failed to get book page: %w: %w", entity.ErrNotFound, err)
@@ -56,18 +62,18 @@ func (r *bookPageRepository) GetBookPageByID(ctx context.Context, id string) (en
 		return bookPage, err
 	}
 
-	bookPage = document.ToEntity()
+	bookPage = doc.ToEntity()
 
 	return bookPage, nil
 }
 
 func (r *bookPageRepository) GetBookPagesByBookID(ctx context.Context, bookID string) ([]entity.BookPage, error) {
-	bookOID, err := bson.ObjectIDFromHex(bookID)
+	bookOID, err := document.StringToObjectID(bookID)
 	if err != nil {
-		return nil, fmt.Errorf("invalid book page ID format")
+		return nil, fmt.Errorf("invalid book page ID format: %w", err)
 	}
 
-	var documents []document.BookPageDocument
+	var docs []document.BookPageDocument
 
 	filter := bson.D{{Key: "book_id", Value: bookOID}}
 
@@ -80,13 +86,13 @@ func (r *bookPageRepository) GetBookPagesByBookID(ctx context.Context, bookID st
 	}
 	defer cursor.Close(ctx)
 
-	if err := cursor.All(ctx, &documents); err != nil {
+	if err := cursor.All(ctx, &docs); err != nil {
 		return nil, fmt.Errorf("failed to decode book page documents: %w", err)
 	}
 
-	bookPages := make([]entity.BookPage, len(documents))
-	for i, document := range documents {
-		bookPages[i] = document.ToEntity()
+	bookPages := make([]entity.BookPage, len(docs))
+	for i, doc := range docs {
+		bookPages[i] = doc.ToEntity()
 	}
 
 	return bookPages, nil
@@ -98,9 +104,9 @@ func (r *bookPageRepository) GetBookpagesByBookIDWithPagination(
 	pageSize int64,
 	pageNumber int64,
 ) ([]entity.BookPage, error) {
-	bookOID, err := bson.ObjectIDFromHex(bookID)
+	bookOID, err := document.StringToObjectID(bookID)
 	if err != nil {
-		return nil, fmt.Errorf("invalid book page ID format")
+		return nil, fmt.Errorf("invalid book page ID format: %w", err)
 	}
 
 	skip := max((pageNumber-1)*pageSize, 0)
@@ -130,9 +136,9 @@ func (r *bookPageRepository) GetBookpagesByPageRange(
 	startPage int64,
 	endPage int64,
 ) ([]entity.BookPage, error) {
-	bookOID, err := bson.ObjectIDFromHex(bookID)
+	bookOID, err := document.StringToObjectID(bookID)
 	if err != nil {
-		return nil, fmt.Errorf("invalid book page ID format")
+		return nil, fmt.Errorf("invalid book page ID format: %w", err)
 	}
 
 	filter := bson.D{
@@ -164,9 +170,9 @@ func (r *bookPageRepository) GetBookpagesAroundPageNumber(
 	centerPage int64,
 	offset int64,
 ) ([]entity.BookPage, error) {
-	bookOID, err := bson.ObjectIDFromHex(bookID)
+	bookOID, err := document.StringToObjectID(bookID)
 	if err != nil {
-		return nil, fmt.Errorf("invalid book ID format")
+		return nil, fmt.Errorf("invalid book ID format: %w", err)
 	}
 
 	// Fetch "Past + Center" (<= page number)

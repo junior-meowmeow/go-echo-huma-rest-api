@@ -4,7 +4,6 @@ tidy:
 
 .PHONY: fmt
 fmt:
-# 	go fmt ./...
 	golangci-lint fmt ./...
 
 .PHONY: lint
@@ -36,7 +35,7 @@ test-clean:
 	go clean -testcache && go test -v ./... -cover
 
 .PHONY: pre-commit
-pre-commit: tidy fmt lint gen-docs test
+pre-commit: tidy vulncheck fmt lint gen-docs test
 	@echo "✅ All pre-commit checks passed."
 
 COMPOSE := docker compose

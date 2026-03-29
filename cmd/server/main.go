@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"net"
@@ -32,27 +33,35 @@ func main() {
 	defer stop()
 
 	// Create a HTTP server
+	const readHeaderTimeout = 5 * time.Second
 	server := http.Server{
-		Addr:        fmt.Sprintf(":%d", cfg.App.Port),
-		Handler:     application.Router,
-		BaseContext: func(net.Listener) context.Context { return notifyCtx },
+		Addr:              fmt.Sprintf(":%d", cfg.App.Port),
+		Handler:           application.Router,
+		BaseContext:       func(net.Listener) context.Context { return notifyCtx },
+		ReadHeaderTimeout: readHeaderTimeout,
 	}
 
 	// Run the server
 	go func() {
 		log.Printf("Starting server on port %d...\n", cfg.App.Port)
 		log.Printf("API documentation is hosted at http://localhost:%d%s/docs\n", cfg.App.Port, cfg.App.APIBasePath)
-		server.ListenAndServe()
+		err := server.ListenAndServe()
+		if err != nil && !errors.Is(err, http.ErrServerClosed) {
+			log.Fatalf("Server failed to start or crashed: %v\n", err)
+		}
 	}()
 
 	<-notifyCtx.Done()
 	log.Println("Shutdown signal received, initiating graceful shutdown...")
 
-	shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	const shutdownTimeout = 5 * time.Second
+	shutdownCtx, cancel := context.WithTimeout(context.Background(), shutdownTimeout)
 	defer cancel()
 
 	// Graceful shutdown
-	server.Shutdown(shutdownCtx)
+	if err := server.Shutdown(shutdownCtx); err != nil {
+		log.Printf("Server shutdown with error: %v\n", err)
+	}
 	application.GracefulShutdown(shutdownCtx)
 	log.Println("Server exited gracefully.")
 }

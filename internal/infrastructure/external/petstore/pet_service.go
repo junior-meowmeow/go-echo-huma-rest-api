@@ -2,6 +2,7 @@ package petstore
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 
@@ -13,11 +14,14 @@ type petService struct {
 	petStoreClient *client.ClientWithResponses
 }
 
+//revive:disable:unexported-return // Intentionally returns an unexported struct to enforce dependency on the interface in other layers.
 func NewPetService(petStoreClient *client.ClientWithResponses) *petService {
 	return &petService{
 		petStoreClient: petStoreClient,
 	}
 }
+
+//revive:enable:unexported-return
 
 func (s *petService) GetPetByID(ctx context.Context, id int64) (entity.Pet, error) {
 	resp, err := s.petStoreClient.GetPetByIdWithResponse(ctx, id)
@@ -27,13 +31,13 @@ func (s *petService) GetPetByID(ctx context.Context, id int64) (entity.Pet, erro
 
 	if resp.StatusCode() != http.StatusOK {
 		if resp.StatusCode() == http.StatusNotFound {
-			return entity.Pet{}, fmt.Errorf("pet not found")
+			return entity.Pet{}, errors.New("pet not found")
 		}
 		return entity.Pet{}, fmt.Errorf("unexpected status code from petstore client: %d", resp.StatusCode())
 	}
 
 	if resp.JSON200 == nil {
-		return entity.Pet{}, fmt.Errorf("received 200 OK but body was empty")
+		return entity.Pet{}, errors.New("received 200 OK but body was empty")
 	}
 
 	pet := mapClientPetToEntity(resp.JSON200)

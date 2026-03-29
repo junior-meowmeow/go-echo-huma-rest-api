@@ -15,6 +15,7 @@ func RegisterPetGroup(public huma.API, protected huma.API, h *handler.Handlers) 
 	RegisterPetRoutes(publicGroup, protectedGroup, h)
 }
 
+//revive:disable-next-line:unused-parameter // Keeps a consistent signature across all route registration functions.
 func RegisterPetRoutes(public huma.API, protected huma.API, h *handler.Handlers) {
 	huma.Register(public, huma.Operation{
 		OperationID: "get-availble-pets",

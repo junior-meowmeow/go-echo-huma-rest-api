@@ -2,8 +2,9 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
-	"fmt"
+	"log"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -28,11 +29,12 @@ func main() {
 }
 
 func requestAndWriteDocs(router http.Handler) {
-	fmt.Println("Generating API Documentations...")
+	log.Println("Generating API Documentations...")
 
 	// Ensure docs directory exists
+	//gosec:disable G301 -- For docs directory, 0755 is intended
 	if err := os.MkdirAll("docs", 0755); err != nil {
-		fmt.Printf("❌ Failed to create docs directory: %v\n", err)
+		log.Printf("❌ Failed to create docs directory: %v\n", err)
 		os.Exit(1)
 	}
 
@@ -44,7 +46,7 @@ func requestAndWriteDocs(router http.Handler) {
 	}
 
 	for path, filename := range docsToGen {
-		req := httptest.NewRequest(http.MethodGet, path, nil)
+		req := httptest.NewRequestWithContext(context.Background(), http.MethodGet, path, nil)
 		w := httptest.NewRecorder()
 
 		// Request the documentation from the router
@@ -52,7 +54,7 @@ func requestAndWriteDocs(router http.Handler) {
 
 		// Check if the request was successful
 		if w.Code != http.StatusOK {
-			fmt.Printf("⚠️ Failed to request %s (Status: %d)\n", filename, w.Code)
+			log.Printf("⚠️ Failed to request %s (Status: %d)\n", filename, w.Code)
 			continue
 		}
 
@@ -64,18 +66,19 @@ func requestAndWriteDocs(router http.Handler) {
 			if err := json.Indent(&prettyJSON, outBytes, "", "  "); err == nil {
 				outBytes = prettyJSON.Bytes()
 			} else {
-				fmt.Printf("⚠️ Failed to format JSON for %s: %v\n", filename, err)
+				log.Printf("⚠️ Failed to format JSON for %s: %v\n", filename, err)
 			}
 		}
 
 		// Write the documentation file
+		//gosec:disable G306 -- Generated docs need to be globally readable, 0644 is intended
 		if err := os.WriteFile(filename, outBytes, 0644); err != nil {
-			fmt.Printf("❌ Failed to write %s: %v\n", filename, err)
+			log.Printf("❌ Failed to write %s: %v\n", filename, err)
 			os.Exit(1)
 		}
 
-		fmt.Printf("✅ Generated %s\n", filename)
+		log.Printf("✅ Generated %s\n", filename)
 	}
 
-	fmt.Println("Generated All API Documentations.")
+	log.Println("Generated All API Documentations.")
 }
