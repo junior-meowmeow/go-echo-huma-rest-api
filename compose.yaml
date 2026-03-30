@@ -28,7 +28,7 @@ services:
       AWS_SESSION_TOKEN:
       PETSTORE_URL:
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:${PORT:-8000}/health"]
+      test: ["CMD-SHELL", "wget -qO- http://localhost:${PORT:-8000}/health || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
