@@ -40,7 +40,7 @@ func (h *userHandler) RegisterUser(ctx context.Context, request *schema.Register
 		if errors.Is(err, entity.ErrAlreadyExists) {
 			return nil, huma.Error409Conflict("Username is already taken")
 		}
-		return nil, resolveError(err)
+		return nil, resolveError(ctx, err)
 	}
 
 	resp := &schema.RegisterUserResponse{}
@@ -55,7 +55,7 @@ func (h *userHandler) LoginUser(ctx context.Context, request *schema.LoginUserRe
 		if errors.Is(err, entity.ErrInvalidCredentials) || errors.Is(err, entity.ErrNotFound) {
 			return nil, huma.Error401Unauthorized("Invalid username or password")
 		}
-		return nil, resolveError(err)
+		return nil, resolveError(ctx, err)
 	}
 
 	resp := &schema.LoginUserResponse{}

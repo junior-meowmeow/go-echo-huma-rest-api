@@ -1,8 +1,8 @@
 package auth
 
-type ContextKey string
+type contextKey string
 
-const AuthContextKey ContextKey = "auth"
+const AuthContextKey contextKey = "auth"
 
 type AuthContext struct {
 	UserID string

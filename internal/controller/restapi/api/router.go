@@ -1,6 +1,9 @@
 package api
 
 import (
+	"context"
+	"log/slog"
+
 	"github.com/danielgtaylor/huma/v2"
 	"github.com/danielgtaylor/huma/v2/adapters/humaecho"
 	"github.com/labstack/echo-contrib/echoprometheus"
@@ -44,8 +47,8 @@ func NewRouter(handlers *handler.Handlers, utilities *utility.Utilities, appConf
 
 func AddEchoMiddlewares(router *echo.Echo) {
 	router.Use(middleware.Recover())
-	router.Use(middleware.RequestID())
-	router.Use(middleware.RequestLogger())
+	router.Use(customRequestID())
+	router.Use(customRequestLogger())
 	router.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins: []string{"*"},
 		AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
@@ -58,4 +61,76 @@ func AddEchoMiddlewares(router *echo.Echo) {
 func AddEchoPrometheus(router *echo.Echo) {
 	router.Use(echoprometheus.NewMiddleware("myapp"))
 	router.GET("/metrics", echoprometheus.NewHandler())
+}
+
+func customRequestID() echo.MiddlewareFunc {
+	return middleware.RequestIDWithConfig(middleware.RequestIDConfig{
+		RequestIDHandler: func(c echo.Context, requestID string) {
+			req := c.Request()
+			ctx := context.WithValue(req.Context(), handler.RequestIDKey, requestID)
+			c.SetRequest(req.WithContext(ctx))
+		},
+	})
+}
+
+func customRequestLogger() echo.MiddlewareFunc {
+	skipper := func(c echo.Context) bool {
+		path := c.Request().URL.Path
+		return path == "/health" || path == "/metrics"
+	}
+	return middleware.RequestLoggerWithConfig(middleware.RequestLoggerConfig{
+		LogLatency:       true,
+		LogProtocol:      false,
+		LogRemoteIP:      true,
+		LogHost:          true,
+		LogMethod:        true,
+		LogURI:           true,
+		LogURIPath:       false,
+		LogRoutePath:     false,
+		LogRequestID:     true,
+		LogReferer:       false,
+		LogUserAgent:     true,
+		LogStatus:        true,
+		LogError:         true,
+		LogContentLength: true,
+		LogResponseSize:  true,
+		LogHeaders:       nil,
+		LogQueryParams:   nil,
+		LogFormValues:    nil,
+		HandleError:      true, // forwards error to the global error handler, so it can decide appropriate status code
+		Skipper:          skipper,
+		//revive:disable-next-line:unused-parameter
+		LogValuesFunc: func(c echo.Context, v middleware.RequestLoggerValues) error {
+			if v.Error == nil {
+				slog.LogAttrs(context.Background(), slog.LevelInfo, "HTTP_REQUEST",
+					slog.String("method", v.Method),
+					slog.String("uri", v.URI),
+					slog.Int("status", v.Status),
+					slog.Duration("latency", v.Latency),
+					slog.String("host", v.Host),
+					slog.String("bytes_in", v.ContentLength),
+					slog.Int64("bytes_out", v.ResponseSize),
+					slog.String("user_agent", v.UserAgent),
+					slog.String("remote_ip", v.RemoteIP),
+					slog.String("request_id", v.RequestID),
+				)
+			} else {
+				slog.LogAttrs(context.Background(), slog.LevelError, "HTTP_REQUEST_ERROR",
+					slog.String("method", v.Method),
+					slog.String("uri", v.URI),
+					slog.Int("status", v.Status),
+					slog.Duration("latency", v.Latency),
+					slog.String("host", v.Host),
+					slog.String("bytes_in", v.ContentLength),
+					slog.Int64("bytes_out", v.ResponseSize),
+					slog.String("user_agent", v.UserAgent),
+					slog.String("remote_ip", v.RemoteIP),
+					slog.String("request_id", v.RequestID),
+
+					slog.String("error", v.Error.Error()),
+				)
+			}
+			return nil
+		},
+	})
 }

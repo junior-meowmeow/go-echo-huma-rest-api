@@ -33,7 +33,7 @@ func (h *petHandler) GetAvailablePets(
 ) (*schema.GetAvailablePetsResponse, error) {
 	pets, err := h.PetUseCase.GetAvailablePets(ctx)
 	if err != nil {
-		return nil, resolveError(err)
+		return nil, resolveError(ctx, err)
 	}
 
 	resp := schema.GetAvailablePetsResponse{}
@@ -47,7 +47,7 @@ func (h *petHandler) GetAvailablePets(
 func (h *petHandler) GetPetByID(ctx context.Context, request *schema.GetPetByIDRequest) (*schema.GetPetByIDResponse, error) {
 	pet, err := h.PetUseCase.GetPetByID(ctx, request.ID)
 	if err != nil {
-		return nil, resolveError(err)
+		return nil, resolveError(ctx, err)
 	}
 
 	resp := schema.GetPetByIDResponse{}

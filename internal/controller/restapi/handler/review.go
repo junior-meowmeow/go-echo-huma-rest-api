@@ -34,7 +34,7 @@ func (h *reviewHandler) CreateReview(ctx context.Context, request *schema.Create
 	}
 
 	if err := h.ReviewUseCase.PostReview(ctx, review); err != nil {
-		return nil, resolveError(err)
+		return nil, resolveError(ctx, err)
 	}
 
 	return &schema.CreateReviewResponse{}, nil
@@ -44,7 +44,7 @@ func (h *reviewHandler) GetReviews(ctx context.Context, _ *schema.GetReviewsRequ
 	const reviewsLimit = 100
 	reviews, err := h.ReviewUseCase.GetReviews(ctx, reviewsLimit)
 	if err != nil {
-		return nil, resolveError(err)
+		return nil, resolveError(ctx, err)
 	}
 
 	reviewOutputs := mapEntityReviewsToSchema(reviews)

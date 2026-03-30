@@ -39,7 +39,7 @@ func (h *fileHandler) UploadFile(ctx context.Context, input *schema.UploadFileRe
 		formData.ObjectBaseKey,
 	)
 	if err != nil {
-		return nil, resolveError(err)
+		return nil, resolveError(ctx, err)
 	}
 
 	resp := schema.UploadFileResponse{}
@@ -54,7 +54,7 @@ func (h *fileHandler) GetFileDownloadLink(
 ) (*schema.GetFileDownloadLinkResponse, error) {
 	fileDownloadInfo, err := h.FileUseCase.GetFileDownloadLink(ctx, request.ID)
 	if err != nil {
-		return nil, resolveError(err)
+		return nil, resolveError(ctx, err)
 	}
 
 	resp := schema.GetFileDownloadLinkResponse{
@@ -71,7 +71,7 @@ func (h *fileHandler) GetFileDownloadLink(
 func (h *fileHandler) GetS3FileList(ctx context.Context, _ *schema.GetS3FileListRequest) (*schema.GetS3FileListResponse, error) {
 	fileKeys, err := h.FileUseCase.GetS3FileList(ctx)
 	if err != nil {
-		return nil, resolveError(err)
+		return nil, resolveError(ctx, err)
 	}
 
 	resp := schema.GetS3FileListResponse{}
