@@ -2,7 +2,8 @@ package app
 
 import (
 	"context"
-	"log"
+	"fmt"
+	"log/slog"
 	"time"
 
 	"github.com/labstack/echo/v4"
@@ -27,24 +28,21 @@ func NewApplication(ctx context.Context, cfg config.Config) (*Application, error
 	// Initialize MongoDB
 	mongoClient, err := newMongoDBClient(ctx, cfg.Mongo)
 	if err != nil {
-		log.Printf("Failed to connect to MongoDB: %v\n", err)
-		return nil, err
+		return nil, fmt.Errorf("failed to initialize MongoDB client: %w", err)
 	}
 	mongoDB := mongoClient.Database(cfg.Mongo.DBName)
 
 	// Initialize S3
 	s3Client, err := newS3Client(ctx, cfg.S3)
 	if err != nil {
-		log.Printf("Failed to connect to S3: %v\n", err)
-		return nil, err
+		return nil, fmt.Errorf("failed to initialize S3 client: %w", err)
 	}
 
 	// Initialize External Service Clients
 	const clientTimeout = 5 * time.Second
 	petStoreClient, err := newPetStoreClient(cfg.Client.PetStoreURL, clientTimeout)
 	if err != nil {
-		log.Printf("Failed to initialize PetStore client: %v\n", err)
-		return nil, err
+		return nil, fmt.Errorf("failed to initialize PetStore client: %w", err)
 	}
 
 	// Initialize Infrastructures
@@ -76,6 +74,6 @@ func NewApplication(ctx context.Context, cfg config.Config) (*Application, error
 func (a *Application) GracefulShutdown(ctx context.Context) {
 	err := disconnectMongoDB(ctx, a.mongoClient)
 	if err != nil {
-		log.Printf("Error disconnecting MongoDB: %v\n", err)
+		slog.ErrorContext(ctx, "Error disconnecting MongoDB", slog.Any("error", err))
 	}
 }

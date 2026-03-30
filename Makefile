@@ -35,8 +35,9 @@ test-clean:
 	go clean -testcache && go test -v ./... -cover
 
 .PHONY: pre-commit
-pre-commit: tidy vulncheck fmt lint gen-docs test
-	@echo "✅ All pre-commit checks passed."
+pre-commit: tidy fmt lint gen-docs test-cover vulncheck
+	@echo. 
+	@echo All pre-commit checks passed.
 
 COMPOSE := docker compose
 ENV_FILE := --env-file ./config/.env

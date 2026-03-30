@@ -2,7 +2,7 @@ package config
 
 import (
 	"fmt"
-	"log"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"time"
@@ -62,10 +62,10 @@ func NewConfig() (Config, error) {
 		basePath := "./config"
 		// Load env files with precedence.
 		if err := godotenv.Load(filepath.Join(basePath, ".env.local")); err != nil {
-			log.Printf("Could not load .env.local: %v", err)
+			slog.Warn("Could not load .env.local", slog.Any("error", err))
 		}
 		if err := godotenv.Load(filepath.Join(basePath, ".env")); err != nil {
-			log.Printf("Could not load .env: %v", err)
+			slog.Warn("Could not load .env", slog.Any("error", err))
 		}
 	}
 

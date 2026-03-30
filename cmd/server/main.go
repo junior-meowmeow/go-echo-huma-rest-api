@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
+	"log/slog"
 	"net"
 	"net/http"
 	"os"
@@ -20,13 +20,27 @@ func main() {
 	// Load configurations
 	cfg, err := config.NewConfig()
 	if err != nil {
-		log.Fatalf("Failed to load configurations: %v", err)
+		slog.Error("Failed to load configurations", slog.Any("error", err))
+		os.Exit(1)
 	}
+
+	var logLevel slog.Level
+	if err := logLevel.UnmarshalText([]byte(cfg.Log.Level)); err != nil {
+		logLevel = slog.LevelInfo
+	}
+
+	logger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
+		Level: logLevel,
+	}))
+	slog.SetDefault(logger)
+
+	slog.Info("Starting application...")
 
 	// Initialize Application
 	application, err := app.NewApplication(context.Background(), cfg)
 	if err != nil {
-		log.Fatalf("Failed to initialize application: %v", err)
+		slog.Error("Failed to initialize application", slog.Any("error", err))
+		os.Exit(1)
 	}
 
 	notifyCtx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
@@ -43,16 +57,17 @@ func main() {
 
 	// Run the server
 	go func() {
-		log.Printf("Starting server on port %d...\n", cfg.App.Port)
-		log.Printf("API documentation is hosted at http://localhost:%d%s/docs\n", cfg.App.Port, cfg.App.APIBasePath)
+		slog.Info(fmt.Sprintf("Starting server on port %d...", cfg.App.Port))
+		slog.Debug(fmt.Sprintf("API documentation is hosted at http://localhost:%d%s/docs ", cfg.App.Port, cfg.App.APIBasePath))
 		err := server.ListenAndServe()
 		if err != nil && !errors.Is(err, http.ErrServerClosed) {
-			log.Fatalf("Server failed to start or crashed: %v\n", err)
+			slog.Error("Server failed to start or crashed", slog.Any("error", err))
+			os.Exit(1)
 		}
 	}()
 
 	<-notifyCtx.Done()
-	log.Println("Shutdown signal received, initiating graceful shutdown...")
+	slog.Info("Shutdown signal received, initiating graceful shutdown...")
 
 	const shutdownTimeout = 5 * time.Second
 	shutdownCtx, cancel := context.WithTimeout(context.Background(), shutdownTimeout)
@@ -60,8 +75,8 @@ func main() {
 
 	// Graceful shutdown
 	if err := server.Shutdown(shutdownCtx); err != nil {
-		log.Printf("Server shutdown with error: %v\n", err)
+		slog.Warn("Server shutdown with error", slog.Any("error", err))
 	}
 	application.GracefulShutdown(shutdownCtx)
-	log.Println("Server exited gracefully.")
+	slog.Info("Server exited gracefully.")
 }

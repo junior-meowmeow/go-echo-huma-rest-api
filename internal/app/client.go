@@ -2,7 +2,7 @@ package app
 
 import (
 	"fmt"
-	"log"
+	"log/slog"
 	"net/http"
 	"time"
 
@@ -21,7 +21,7 @@ func newPetStoreClient(serverURL string, timeout time.Duration) (*petStoreClient
 		return nil, fmt.Errorf("failed to create PetStore client: %w", err)
 	}
 
-	log.Printf("Created a new PetStore client connected to %s\n", serverURL)
+	slog.Info("Created a new PetStore client", slog.String("Petstore URL", serverURL))
 
 	return petStoreClient, nil
 }

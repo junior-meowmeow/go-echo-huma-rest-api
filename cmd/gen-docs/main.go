@@ -4,7 +4,8 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"log"
+	"fmt"
+	"log/slog"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -18,6 +19,12 @@ import (
 )
 
 func main() {
+	// Set Default Log Level to LevelWarn
+	logger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
+		Level: slog.LevelWarn,
+	}))
+	slog.SetDefault(logger)
+
 	// Initialize REST API Handlers without Use Cases
 	handlers := handler.NewHandlers(&usecase.UseCases{})
 
@@ -29,12 +36,12 @@ func main() {
 }
 
 func requestAndWriteDocs(router http.Handler) {
-	log.Println("Generating API Documentations...")
+	fmt.Println("Generating API Documentations...")
 
 	// Ensure docs directory exists
 	//gosec:disable G301 -- For docs directory, 0755 is intended
 	if err := os.MkdirAll("docs", 0755); err != nil {
-		log.Printf("❌ Failed to create docs directory: %v\n", err)
+		fmt.Printf("❌ Failed to create docs directory: %v\n", err)
 		os.Exit(1)
 	}
 
@@ -54,7 +61,7 @@ func requestAndWriteDocs(router http.Handler) {
 
 		// Check if the request was successful
 		if w.Code != http.StatusOK {
-			log.Printf("⚠️ Failed to request %s (Status: %d)\n", filename, w.Code)
+			fmt.Printf("⚠️ Failed to request %s (Status: %d)\n", filename, w.Code)
 			continue
 		}
 
@@ -63,22 +70,23 @@ func requestAndWriteDocs(router http.Handler) {
 		// Pretty print JSON file
 		if strings.HasSuffix(filename, ".json") {
 			var prettyJSON bytes.Buffer
-			if err := json.Indent(&prettyJSON, outBytes, "", "  "); err == nil {
+			err := json.Indent(&prettyJSON, outBytes, "", "  ")
+			if err == nil {
 				outBytes = prettyJSON.Bytes()
 			} else {
-				log.Printf("⚠️ Failed to format JSON for %s: %v\n", filename, err)
+				fmt.Printf("⚠️ Failed to format JSON for %s: %v\n", filename, err)
 			}
 		}
 
 		// Write the documentation file
 		//gosec:disable G306 -- Generated docs need to be globally readable, 0644 is intended
 		if err := os.WriteFile(filename, outBytes, 0644); err != nil {
-			log.Printf("❌ Failed to write %s: %v\n", filename, err)
+			fmt.Printf("❌ Failed to write %s: %v\n", filename, err)
 			os.Exit(1)
 		}
 
-		log.Printf("✅ Generated %s\n", filename)
+		fmt.Printf("✅ Generated %s\n", filename)
 	}
 
-	log.Println("Generated All API Documentations.")
+	fmt.Println("Generated All API Documentations.")
 }

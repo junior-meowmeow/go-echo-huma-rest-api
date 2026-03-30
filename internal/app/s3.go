@@ -3,7 +3,7 @@ package app
 import (
 	"context"
 	"fmt"
-	"log"
+	"log/slog"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	sdkConfig "github.com/aws/aws-sdk-go-v2/config"
@@ -22,7 +22,8 @@ func newS3Client(ctx context.Context, cfg config.S3Config) (*s3.Client, error) {
 		o.BaseEndpoint = aws.String(cfg.Endpoint)
 		o.UsePathStyle = true
 	})
-	log.Println("Created a new S3 clients and connected to", cfg.Endpoint)
+
+	slog.InfoContext(ctx, fmt.Sprintf("Created a new S3 clients and connected to %s", cfg.Endpoint))
 
 	return client, nil
 }
