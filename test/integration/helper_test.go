@@ -3,6 +3,7 @@ package integration_test
 import (
 	"context"
 	"testing"
+	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
@@ -12,8 +13,8 @@ import (
 	"github.com/docker/go-connections/nat"
 	"github.com/stretchr/testify/require"
 	"github.com/testcontainers/testcontainers-go"
-	"github.com/testcontainers/testcontainers-go/modules/localstack"
 	"github.com/testcontainers/testcontainers-go/modules/mongodb"
+	"github.com/testcontainers/testcontainers-go/wait"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 	"go.mongodb.org/mongo-driver/v2/mongo/options"
@@ -70,8 +71,8 @@ func (*resolverV2) ResolveEndpoint(ctx context.Context, params s3.EndpointParame
 	return s3.NewDefaultEndpointResolverV2().ResolveEndpoint(ctx, params)
 }
 
-func s3Client(ctx context.Context, l *localstack.LocalStackContainer) (*s3.Client, error) {
-	mappedPort, err := l.MappedPort(ctx, nat.Port("4566/tcp"))
+func s3Client(ctx context.Context, c testcontainers.Container) (*s3.Client, error) {
+	mappedPort, err := c.MappedPort(ctx, nat.Port("4566/tcp"))
 	if err != nil {
 		return nil, err
 	}
@@ -110,7 +111,16 @@ func setupS3Client(t *testing.T) *s3.Client {
 
 	ctx := context.Background()
 
-	ctr, err := localstack.Run(ctx, "localstack/localstack:s3-latest")
+	req := testcontainers.ContainerRequest{
+		Image:        "hectorvent/floci:latest",
+		ExposedPorts: []string{"4566/tcp"},
+		WaitingFor:   wait.ForLog("Ready").WithStartupTimeout(30 * time.Second),
+	}
+
+	ctr, err := testcontainers.GenericContainer(ctx, testcontainers.GenericContainerRequest{
+		ContainerRequest: req,
+		Started:          true,
+	})
 	require.NoError(t, err, "failed to start container")
 
 	t.Cleanup(func() {

@@ -48,13 +48,16 @@ jobs:
         with:
           go-version: '1.25'
       - name: Run tests
-        # run: go test ./... -json > TestResults.json
-        run: go test ./... -v -cover
-      # - name: Upload test results
-      #   uses: actions/upload-artifact@v6
-      #   with:
-      #     name: Go-test-results
-      #     path: TestResults.json
+        run: go test ./... -v -cover | tee raw_test_output.log
+      - name: Convert results to JSON
+        if: always() 
+        run: go tool test2json < raw_test_output.log > TestResults.json
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: Go-test-results
+          path: TestResults.json
 
   vulncheck:
     name: Run govulncheck

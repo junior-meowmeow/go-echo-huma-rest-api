@@ -9,19 +9,11 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/testcontainers/testcontainers-go"
-	"github.com/testcontainers/testcontainers-go/modules/localstack"
 )
 
 func TestS3(t *testing.T) {
+	s3Client := setupS3Client(t)
 	ctx := context.Background()
-
-	ctr, err := localstack.Run(ctx, "localstack/localstack:s3-latest")
-	testcontainers.CleanupContainer(t, ctr)
-	require.NoError(t, err)
-
-	s3Client, err := s3Client(ctx, ctr)
-	require.NoError(t, err)
 
 	t.Run("S3 operations", func(t *testing.T) {
 		bucketName := "localstack-bucket"
