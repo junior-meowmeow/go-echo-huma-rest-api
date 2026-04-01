@@ -1,0 +1,65 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  check-api-docs:
+    name: Check API documents
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-go@v6
+        with:
+          go-version: '1.25'
+      - name: Verify generated docs
+        run: |
+          go run ./cmd/gen-docs
+          git diff --exit-code || (echo "OpenAPI documents are outdated." && exit 1)
+
+  lint:
+    name: Run golangci-lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-go@v6
+        with:
+          go-version: '1.25'
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v9
+        with:
+          version: v2.11
+          args: --timeout=10m
+
+  test:
+    name: Run tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-go@v6
+        with:
+          go-version: '1.25'
+      - name: Run tests
+        run: go test -json > TestResults.json
+      - name: Upload test results
+        uses: actions/upload-artifact@v6
+        with:
+          name: Go-test-results
+          path: TestResults.json
+
+  vulncheck:
+    name: Run govulncheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: golang/govulncheck-action@v1
+        with:
+           go-version-input: 1.25.8
+           go-package: ./...
