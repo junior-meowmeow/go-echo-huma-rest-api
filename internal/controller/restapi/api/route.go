@@ -25,7 +25,7 @@ func RegisterRoutes(public huma.API, protected huma.API, h *handler.Handlers) {
 		OperationID: "get-greeting",
 		Method:      http.MethodGet,
 		Path:        "/greeting/{name}",
-		Summary:     "Get a greeting",
+		Summary:     "Get a greeting (temp change)",
 		Description: "Get a greeting for a person by name.",
 		Tags:        []string{"Miscellaneous"},
 	}, h.Greeting.GetGreeting)
