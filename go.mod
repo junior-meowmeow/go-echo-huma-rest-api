@@ -1,6 +1,6 @@
 module github.com/junior-meowmeow/go-echo-huma-rest-api
 
-go 1.25.8
+go 1.25.9
 
 require (
 	github.com/aws/aws-sdk-go-v2 v1.41.1
@@ -113,6 +113,7 @@ require (
 	github.com/speakeasy-api/openapi-overlay v0.10.2 // indirect
 	github.com/spf13/afero v1.14.0 // indirect
 	github.com/spf13/cast v1.8.0 // indirect
+	github.com/stretchr/objx v0.5.2 // indirect
 	github.com/tdewolff/parse/v2 v2.8.1 // indirect
 	github.com/tklauser/go-sysconf v0.3.13 // indirect
 	github.com/tklauser/numcpus v0.7.0 // indirect

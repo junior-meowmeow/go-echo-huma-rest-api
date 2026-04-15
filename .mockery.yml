@@ -1,0 +1,37 @@
+all: false
+dir: '{{.InterfaceDir}}/mocks'
+filename: '{{.InterfaceName}}.go'
+force-file-write: true
+formatter: goimports
+formatter-options:
+  goimports:
+    all-errors: false
+    comments: true
+    format-only: true
+    fragment: false
+    local-prefix: ""
+    tab-indent: true
+    tab-width: 8
+generate: true
+include-auto-generated: false
+log-level: info
+structname: '{{.Mock}}{{.InterfaceName}}'
+pkgname: 'mocks'
+recursive: false
+require-template-schema-exists: true
+template: testify
+template-schema: '{{.Template}}.schema.json'
+packages:
+  github.com/junior-meowmeow/go-echo-huma-rest-api/internal/domain/port:
+    config:
+      all: true
+  github.com/junior-meowmeow/go-echo-huma-rest-api/internal/utility/auth:
+    config:
+      all: true
+  github.com/junior-meowmeow/go-echo-huma-rest-api/internal/usecase:
+    config:
+      all: true
+  github.com/junior-meowmeow/go-echo-huma-rest-api/internal/controller/restapi/handler:
+    config:
+      all: true
+

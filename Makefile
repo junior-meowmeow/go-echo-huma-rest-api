@@ -39,6 +39,10 @@ pre-commit: tidy fmt lint gen-docs test-cover vulncheck
 	@echo. 
 	@echo All pre-commit checks passed.
 
+.PHONY: mockgen
+mockgen:
+	mockery
+
 COMPOSE := docker compose
 ENV_FILE := --env-file ./config/.env
 
