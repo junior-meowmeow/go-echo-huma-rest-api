@@ -31,7 +31,7 @@ func (s *petService) GetPetByID(ctx context.Context, id int64) (entity.Pet, erro
 
 	if resp.StatusCode() != http.StatusOK {
 		if resp.StatusCode() == http.StatusNotFound {
-			return entity.Pet{}, errors.New("pet not found")
+			return entity.Pet{}, fmt.Errorf("pet not found: %w", entity.ErrNotFound)
 		}
 		return entity.Pet{}, fmt.Errorf("unexpected status code from petstore client: %d", resp.StatusCode())
 	}

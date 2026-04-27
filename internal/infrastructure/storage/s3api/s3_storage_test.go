@@ -2,7 +2,7 @@ package s3api_test
 
 import (
 	"context"
-	"os"
+	"strings"
 	"testing"
 	"time"
 
@@ -14,65 +14,115 @@ import (
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/infrastructure/storage/s3api"
 )
 
-func TestS3Repository(t *testing.T) {
+func TestS3Storage(t *testing.T) {
 	s3Client := setupS3Client(t)
 	ctx := context.Background()
-
 	bucketName := "test-bucket"
+
 	_, err := s3Client.CreateBucket(ctx, &s3.CreateBucketInput{
 		Bucket: aws.String(bucketName),
 	})
 	require.NoError(t, err)
 
-	repo := s3api.NewS3Storage(s3Client, bucketName)
+	s3Storage := s3api.NewS3Storage(s3Client, bucketName)
 
 	t.Run("UploadFile", func(t *testing.T) {
-		tmpFile, err := os.CreateTemp(t.TempDir(), "test-file-*.txt")
-		require.NoError(t, err)
-		defer os.Remove(tmpFile.Name())
-		defer tmpFile.Close()
+		cleanBucket(t, ctx, s3Client, bucketName)
+		content := "Test content"
+		reader := strings.NewReader(content)
 
-		content := "Repository Integration Test Content"
-		_, err = tmpFile.WriteString(content)
-		require.NoError(t, err)
+		key := "test/data.txt"
 
-		// Reset cursor to start of file
-		_, err = tmpFile.Seek(0, 0)
-		require.NoError(t, err)
+		t.Run("Should upload file correctly", func(t *testing.T) {
+			err := s3Storage.UploadFile(ctx, key, reader, int64(len(content)), "text/plain")
 
-		key := "folder/test.txt"
+			require.NoError(t, err)
 
-		err = repo.UploadFile(ctx, key, tmpFile, int64(len(content)), "text/plain")
-		require.NoError(t, err)
+			// Verify content
+			headObject, err := s3Client.HeadObject(ctx, &s3.HeadObjectInput{
+				Bucket: aws.String(bucketName),
+				Key:    aws.String(key),
+			})
+			require.NoError(t, err)
+			assert.Equal(t, int64(len(content)), *headObject.ContentLength)
+		})
+	})
 
-		// Verification: Check if it really exists in S3
-		_, err = s3Client.HeadObject(ctx, &s3.HeadObjectInput{
+	t.Run("CheckFileExists", func(t *testing.T) {
+		cleanBucket(t, ctx, s3Client, bucketName)
+
+		key := "exists.txt"
+		_, err := s3Client.PutObject(ctx, &s3.PutObjectInput{
 			Bucket: aws.String(bucketName),
 			Key:    aws.String(key),
+			Body:   strings.NewReader("data"),
 		})
-		assert.NoError(t, err, "File should exist in S3")
+		require.NoError(t, err)
+
+		t.Run("Should return true when file exists", func(t *testing.T) {
+			// Reuse uploaded file from previous step
+			exists, err := s3Storage.CheckFileExists(ctx, key)
+
+			require.NoError(t, err)
+			assert.True(t, exists)
+		})
+
+		t.Run("Should return false when file not exists", func(t *testing.T) {
+			exists, err := s3Storage.CheckFileExists(ctx, "non-existent-file.png")
+
+			require.NoError(t, err)
+			assert.False(t, exists)
+		})
 	})
 
 	t.Run("ListFiles", func(t *testing.T) {
-		// We expect the file from the previous test ("folder/test.txt")
-		keys, err := repo.ListFiles(ctx, 10)
-		require.NoError(t, err)
+		cleanBucket(t, ctx, s3Client, bucketName)
 
-		require.Len(t, keys, 1)
-		assert.Equal(t, "folder/test.txt", keys[0])
+		keysToUpload := []string{"a.txt", "b.txt"}
+		for _, k := range keysToUpload {
+			_, err = s3Client.PutObject(ctx, &s3.PutObjectInput{
+				Bucket: aws.String(bucketName),
+				Key:    aws.String(k),
+				Body:   strings.NewReader("data"),
+			})
+			require.NoError(t, err)
+		}
+
+		t.Run("Should success", func(t *testing.T) {
+			keys, err := s3Storage.ListFiles(ctx, 10)
+
+			require.NoError(t, err)
+			assert.ElementsMatch(t, keys, keysToUpload)
+		})
+
+		t.Run("Should limit keys", func(t *testing.T) {
+			keys, err := s3Storage.ListFiles(ctx, 1)
+			require.NoError(t, err)
+			assert.Len(t, keys, 1)
+		})
 	})
 
 	t.Run("GetPresignedDownloadURL", func(t *testing.T) {
-		key := "folder/test.txt"
-		filename := "download-me.txt"
+		cleanBucket(t, ctx, s3Client, bucketName)
+		key := "privatefile.txt"
+		filename := "download.txt"
 
-		url, err := repo.GetPresignedDownloadURL(ctx, key, filename, 15*time.Minute)
-		require.NoError(t, err)
-		assert.NotEmpty(t, url)
+		_, _ = s3Client.PutObject(ctx, &s3.PutObjectInput{
+			Bucket: aws.String(bucketName),
+			Key:    aws.String(key),
+			Body:   strings.NewReader("data"),
+		})
 
-		t.Logf("Generated Presigned URL: %s", url)
-		assert.Contains(t, url, bucketName)
-		assert.Contains(t, url, "folder/test.txt")
-		assert.Contains(t, url, "response-content-disposition=attachment")
+		url, err := s3Storage.GetPresignedDownloadURL(ctx, key, filename, 10*time.Minute)
+
+		t.Run("Should generate URL correctly", func(t *testing.T) {
+			require.NoError(t, err)
+			assert.NotEmpty(t, url)
+			assert.Contains(t, url, bucketName)
+			assert.Contains(t, url, filename)
+			assert.Contains(t, url, "response-content-disposition=attachment")
+			assert.Contains(t, url, "X-Amz-Expires=600")
+			assert.Contains(t, url, "attachment%3B%20filename%3D%22download.txt%22")
+		})
 	})
 }

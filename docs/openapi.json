@@ -1500,7 +1500,7 @@
         ]
       }
     },
-    "/v1/files/download/{id}": {
+    "/v1/files/download": {
       "get": {
         "description": "Get a file from file storage.",
         "operationId": "get-file-download-link-v1",

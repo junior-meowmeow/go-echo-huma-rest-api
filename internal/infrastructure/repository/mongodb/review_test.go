@@ -7,90 +7,74 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"go.mongodb.org/mongo-driver/v2/bson"
 
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/domain/entity"
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/infrastructure/repository/mongodb"
+	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/infrastructure/repository/mongodb/document"
 )
 
 func TestReviewRepository(t *testing.T) {
 	db := setupMongoDatabase(t)
 	ctx := context.Background()
-
 	repo := mongodb.NewReviewRepository(db)
+	coll := repo.Collection
 
-	t.Run("Create and Get Single Review", func(t *testing.T) {
-		cleanCollection(t, repo.Collection)
+	mockTime := time.Date(2025, 10, 25, 12, 0, 0, 0, time.UTC)
 
-		mockTime := time.Date(2025, 10, 25, 12, 0, 0, 0, time.UTC)
-		inputRecord := &entity.Review{
-			Author:    "John Doe",
-			Rating:    5,
-			Message:   "Great service!",
-			CreatedAt: mockTime,
-		}
+	t.Run("CreateReview", func(t *testing.T) {
+		cleanCollection(t, coll)
 
-		// Test CreateReview
-		err := repo.CreateReview(ctx, inputRecord)
-		require.NoError(t, err, "CreateReview should succeed")
+		t.Run("Should create review successfully", func(t *testing.T) {
+			input := &entity.Review{
+				Author:    "Test User",
+				Rating:    4,
+				Message:   "Good Service!",
+				CreatedAt: mockTime,
+			}
 
-		// Test GetReviews
-		reviews, err := repo.GetReviews(ctx, 10)
-		require.NoError(t, err, "GetReviews should succeed")
+			err := repo.CreateReview(ctx, input)
+			require.NoError(t, err)
 
-		require.Len(t, reviews, 1)
-		fetchedRecord := reviews[0]
+			var doc document.ReviewDocument
+			err = coll.FindOne(ctx, bson.M{"author": "Test User"}).Decode(&doc)
 
-		// Assertions
-		assert.NotEmpty(t, fetchedRecord.ID, "ID should be generated")
-		assert.Equal(t, inputRecord.Author, fetchedRecord.Author)
-		assert.Equal(t, inputRecord.Rating, fetchedRecord.Rating)
-		assert.Equal(t, inputRecord.Message, fetchedRecord.Message)
-		assert.WithinDuration(t, inputRecord.CreatedAt, fetchedRecord.CreatedAt, time.Millisecond)
+			require.NoError(t, err, "Document should exist in MongoDB")
+			assert.Equal(t, input.Rating, doc.Rating)
+			assert.Equal(t, input.Message, doc.Message)
+			assert.Equal(t, input.CreatedAt, doc.CreatedAt)
+		})
 	})
 
-	t.Run("Get Reviews Sorting and Limiting", func(t *testing.T) {
-		cleanCollection(t, repo.Collection)
+	t.Run("GetReviews", func(t *testing.T) {
+		cleanCollection(t, coll)
 
-		mockTime1 := time.Date(2025, 10, 25, 11, 0, 0, 0, time.UTC)
-		mockTime2 := time.Date(2025, 10, 25, 12, 0, 0, 0, time.UTC)
-		mockTime3 := time.Date(2025, 10, 25, 13, 0, 0, 0, time.UTC)
-		r1 := &entity.Review{
-			Author:    "Oldest",
-			Rating:    1,
-			CreatedAt: mockTime1,
+		docs := []any{
+			document.ReviewDocument{Author: "Oldest", CreatedAt: mockTime.Add(-2 * time.Hour)},
+			document.ReviewDocument{Author: "Middle", CreatedAt: mockTime.Add(-1 * time.Hour)},
+			document.ReviewDocument{Author: "Newest", CreatedAt: mockTime},
 		}
-		r2 := &entity.Review{
-			Author:    "Middle",
-			Rating:    3,
-			CreatedAt: mockTime2,
-		}
-		r3 := &entity.Review{
-			Author:    "Newest",
-			Rating:    5,
-			CreatedAt: mockTime3,
-		}
-
-		require.NoError(t, repo.CreateReview(ctx, r1))
-		require.NoError(t, repo.CreateReview(ctx, r2))
-		require.NoError(t, repo.CreateReview(ctx, r3))
-
-		// Test Sorting (Should be Newest -> Middle -> Oldest)
-		reviews, err := repo.GetReviews(ctx, 10)
+		_, err := coll.InsertMany(ctx, docs)
 		require.NoError(t, err)
 
-		assert.Len(t, reviews, 3)
+		t.Run("Should return reviews sorted by CreatedAt descending", func(t *testing.T) {
+			reviews, err := repo.GetReviews(ctx, 10)
 
-		// Verify descending order logic manually for safety
-		for i := range len(reviews) - 1 {
-			// Current record should be newer (after) or equal to the next record
-			isNewerOrEqual := reviews[i].CreatedAt.After(reviews[i+1].CreatedAt) || reviews[i].CreatedAt.Equal(reviews[i+1].CreatedAt)
-			assert.True(t, isNewerOrEqual, "Reviews should be sorted by CreatedAt desc")
-		}
+			require.NoError(t, err)
+			require.Len(t, reviews, 3)
+			assert.Equal(t, "Newest", reviews[0].Author)
+			assert.Equal(t, "Middle", reviews[1].Author)
+			assert.Equal(t, "Oldest", reviews[2].Author)
+		})
 
-		// Test Limit
-		limit := int64(2)
-		limitedReviews, err := repo.GetReviews(ctx, limit)
-		require.NoError(t, err)
-		assert.Len(t, limitedReviews, int(limit), "Should respect the limit")
+		t.Run("Should limit number of reviews", func(t *testing.T) {
+			limit := int64(2)
+			reviews, err := repo.GetReviews(ctx, limit)
+
+			require.NoError(t, err)
+			assert.Len(t, reviews, int(limit))
+			assert.Equal(t, "Newest", reviews[0].Author)
+			assert.Equal(t, "Middle", reviews[1].Author)
+		})
 	})
 }

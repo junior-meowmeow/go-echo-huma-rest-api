@@ -6,8 +6,6 @@ import (
 	"fmt"
 	"time"
 
-	"golang.org/x/crypto/bcrypt"
-
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/domain/entity"
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/domain/port"
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/utility/auth"
@@ -42,11 +40,11 @@ func (u *userUseCase) RegisterUser(ctx context.Context, user *entity.User, passw
 		return "", fmt.Errorf("failed to check username: %w", err)
 	}
 
-	hashedBytes, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	hashedPassword, err := auth.HashPassword(password)
 	if err != nil {
 		return "", fmt.Errorf("failed to encrypt password: %w", err)
 	}
-	user.Password = string(hashedBytes)
+	user.Password = hashedPassword
 
 	if user.Role == "" {
 		user.Role = "user"
@@ -70,8 +68,7 @@ func (u *userUseCase) LoginUser(ctx context.Context, username string, password s
 		return "", err
 	}
 
-	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
-	if err != nil {
+	if !auth.CheckPasswordHash(password, user.Password) {
 		return "", fmt.Errorf("invalid credentials: %w", entity.ErrInvalidCredentials)
 	}
 

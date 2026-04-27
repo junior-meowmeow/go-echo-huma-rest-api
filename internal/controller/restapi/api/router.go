@@ -9,6 +9,7 @@ import (
 	"github.com/labstack/echo-contrib/echoprometheus"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"golang.org/x/time/rate"
 
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/config"
 	v1 "github.com/junior-meowmeow/go-echo-huma-rest-api/internal/controller/restapi/api/v1"
@@ -19,8 +20,8 @@ import (
 
 func NewRouter(handlers *handler.Handlers, utilities *utility.Utilities, appConfig config.AppConfig) *echo.Echo {
 	router := echo.New()
-	AddEchoMiddlewares(router)
-	AddEchoPrometheus(router)
+	AddEchoMiddlewares(router, appConfig)
+	AddEchoPrometheus(router, appConfig)
 	RegisterDocumentations(router, appConfig.APIBasePath)
 
 	humaConfig := CreateHumaConfig(appConfig.APIBasePath)
@@ -45,7 +46,7 @@ func NewRouter(handlers *handler.Handlers, utilities *utility.Utilities, appConf
 	return router
 }
 
-func AddEchoMiddlewares(router *echo.Echo) {
+func AddEchoMiddlewares(router *echo.Echo, appConfig config.AppConfig) {
 	router.Use(middleware.Recover())
 	router.Use(customRequestID())
 	router.Use(customRequestLogger())
@@ -54,11 +55,15 @@ func AddEchoMiddlewares(router *echo.Echo) {
 		AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
 	}))
 	router.Use(middleware.Secure())
-	const maxReqPerSec = 20
-	router.Use(middleware.RateLimiter(middleware.NewRateLimiterMemoryStore(maxReqPerSec)))
+	if appConfig.RequestPerSecLimit != 0 {
+		router.Use(middleware.RateLimiter(middleware.NewRateLimiterMemoryStore(rate.Limit(appConfig.RequestPerSecLimit))))
+	}
 }
 
-func AddEchoPrometheus(router *echo.Echo) {
+func AddEchoPrometheus(router *echo.Echo, appConfig config.AppConfig) {
+	if !appConfig.EnablePrometheus {
+		return
+	}
 	router.Use(echoprometheus.NewMiddleware("myapp"))
 	router.GET("/metrics", echoprometheus.NewHandler())
 }

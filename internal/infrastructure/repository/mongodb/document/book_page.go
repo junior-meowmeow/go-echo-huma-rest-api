@@ -16,7 +16,7 @@ type BookPageDocument struct {
 	PageNumber          int64            `bson:"pageNumber"`
 	Content             string           `bson:"content"`
 	Metadata            BookPageMetadata `bson:"metadata"`
-	AttachedImageFileID string           `bson:"attachedImageFileID,omitempty"`
+	AttachedImageFileID string           `bson:"attachedImageFileId,omitempty"`
 
 	CreatedAt time.Time `bson:"createdAt"`
 	UpdatedAt time.Time `bson:"updatedAt"`

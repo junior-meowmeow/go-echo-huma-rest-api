@@ -15,7 +15,7 @@ type BookDocument struct {
 	Name             string       `bson:"name"`
 	Description      string       `bson:"description"`
 	Metadata         BookMetadata `bson:"metadata"`
-	CoverImageFileID string       `bson:"coverImageFileID"`
+	CoverImageFileID string       `bson:"coverImageFileId"`
 
 	CreatedAt time.Time `bson:"createdAt"`
 	UpdatedAt time.Time `bson:"updatedAt"`

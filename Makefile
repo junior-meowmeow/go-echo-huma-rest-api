@@ -28,11 +28,13 @@ test:
 
 .PHONY: test-cover
 test-cover:
-	go test ./... -cover
+	go test ./... -coverprofile=coverage.out
+	grep -vE "mocks/|\.gen\.go" coverage.out > coverage.nomocks.out
+	go tool cover -func=coverage.nomocks.out
 
 .PHONY: test-clean
 test-clean:
-	go clean -testcache && go test -v ./... -cover
+	go clean -testcache && go test ./... -v -cover
 
 .PHONY: pre-commit
 pre-commit: tidy fmt lint gen-docs test-cover vulncheck

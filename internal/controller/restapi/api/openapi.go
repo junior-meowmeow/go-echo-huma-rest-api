@@ -5,7 +5,7 @@ import (
 )
 
 func CreateHumaConfig(apiBasePath string) huma.Config {
-	humaConfig := huma.DefaultConfig("API Reference Documentation", "1.0.2")
+	humaConfig := huma.DefaultConfig("API Reference Documentation", "1.0.3")
 	humaConfig.DocsPath = ""
 	humaConfig.OpenAPI.Servers = []*huma.Server{
 		{

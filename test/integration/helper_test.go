@@ -134,3 +134,25 @@ func setupS3Client(t *testing.T) *s3.Client {
 
 	return s3Client
 }
+
+//revive:disable-next-line:context-as-argument // Let testing.T be the first argument.
+func cleanBucket(t *testing.T, ctx context.Context, client *s3.Client, bucket string) {
+	t.Helper()
+
+	out, err := client.ListObjectsV2(ctx, &s3.ListObjectsV2Input{
+		Bucket: aws.String(bucket),
+	})
+	require.NoError(t, err)
+
+	if len(out.Contents) == 0 {
+		return
+	}
+
+	for _, obj := range out.Contents {
+		_, err := client.DeleteObject(ctx, &s3.DeleteObjectInput{
+			Bucket: aws.String(bucket),
+			Key:    obj.Key,
+		})
+		require.NoError(t, err)
+	}
+}

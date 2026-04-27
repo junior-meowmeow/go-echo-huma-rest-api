@@ -29,7 +29,7 @@ func RegisterFileRoutes(public huma.API, protected huma.API, h *handler.Handlers
 	huma.Register(public, huma.Operation{
 		OperationID: "get-file-download-link",
 		Method:      http.MethodGet,
-		Path:        "/download/{id}",
+		Path:        "/download",
 		Summary:     "Get file from file storage",
 		Description: "Get a file from file storage.",
 		Tags:        []string{"Files"},

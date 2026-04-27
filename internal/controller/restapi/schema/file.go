@@ -12,11 +12,13 @@ type FileDownloadInfo struct {
 	ExpiresAt   time.Time `json:"expiresAt" doc:"Timestamp when download URL expires"`
 }
 
+type UploadFileData struct {
+	File          huma.FormFile `form:"file" required:"true" doc:"File content to upload"`
+	ObjectBaseKey string        `form:"objectBaseKey" default:"" doc:"Base object key in file storage"`
+}
+
 type UploadFileRequest struct {
-	RawBody huma.MultipartFormFiles[struct {
-		File          huma.FormFile `form:"file" required:"true" doc:"File content to upload"`
-		ObjectBaseKey string        `form:"objectBaseKey" default:"" doc:"Base object key in file storage"`
-	}]
+	RawBody huma.MultipartFormFiles[UploadFileData]
 }
 
 type UploadFileResponse struct {

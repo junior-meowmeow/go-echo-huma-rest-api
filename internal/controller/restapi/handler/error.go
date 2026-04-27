@@ -13,8 +13,8 @@ import (
 // This is for local debugging only.
 const isDebug = false
 
-// Default error handler.
-func resolveError(ctx context.Context, err error) error {
+// ResolveError is default error handler.
+func ResolveError(ctx context.Context, err error) error {
 	if err == nil {
 		return nil
 	}

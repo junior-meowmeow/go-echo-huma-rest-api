@@ -21,8 +21,10 @@ type Config struct {
 }
 
 type AppConfig struct {
-	Port        int    `env:"PORT" envDefault:"8000"`
-	APIBasePath string `env:"API_BASE_PATH"`
+	Port               int    `env:"PORT" envDefault:"8000"`
+	APIBasePath        string `env:"API_BASE_PATH"`
+	RequestPerSecLimit int    `env:"REQ_PER_SEC_LIMIT" envDefault:"20"`
+	EnablePrometheus   bool   `env:"ENABLE_PROMETHEUS" envDefault:"true"`
 }
 
 type AuthConfig struct {
