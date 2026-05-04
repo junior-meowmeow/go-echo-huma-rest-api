@@ -25,6 +25,27 @@ jobs:
           go run ./cmd/gen-docs
           git diff --exit-code || (echo "OpenAPI documents are outdated." && exit 1)
 
+  check-gen-codes:
+    name: Check generated codes
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.25'
+      - name: Setup sqlc
+        uses: sqlc-dev/setup-sqlc@v4
+        with:
+          sqlc-version: '1.31.1'
+      - name: Verify sqlc generated code
+        run: sqlc diff
+      - name: Install mockery
+        run: go install github.com/vektra/mockery/v3@v3.7.0
+      - name: Verify generated mocks
+        run: |
+          make mock-gen
+          git diff --exit-code || (echo "Generated mocks are outdated." && exit 1)
+
   lint:
     name: Run golangci-lint
     runs-on: ubuntu-latest
