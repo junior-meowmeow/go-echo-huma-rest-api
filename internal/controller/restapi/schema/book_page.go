@@ -2,7 +2,7 @@ package schema
 
 type BookPage struct {
 	ID                  string           `json:"id" doc:"Book Page ID" readOnly:"true"`
-	BookID              string           `json:"bookId" pattern:"^[a-fA-F0-9]{24}$" patternDescription:"BSON ObjectID" doc:"Parent Book ID"`
+	BookID              string           `json:"bookId" format:"uuid" doc:"Parent Book ID"`
 	PageNumber          int64            `json:"pageNumber" doc:"Page number within the book"`
 	Content             string           `json:"content" doc:"Text content of the page"`
 	Metadata            BookPageMetadata `json:"metadata" doc:"Metadata of the book page"`
@@ -15,7 +15,7 @@ type BookPageMetadata struct {
 }
 
 type ParentBookIDQuery struct {
-	BookID string `query:"bookId" required:"true" pattern:"^[a-fA-F0-9]{24}$" patternDescription:"BSON ObjectID" doc:"Parent Book ID"`
+	BookID string `query:"bookId" required:"true" format:"uuid" doc:"Parent Book ID"`
 }
 
 type CreateBookPageRequest struct {
@@ -54,7 +54,7 @@ type GetBookPagesOffsetRequest struct {
 }
 
 type GetBookPageByIDRequest struct {
-	ID string `path:"id" pattern:"^[a-fA-F0-9]{24}$" patternDescription:"BSON ObjectID" doc:"Book Page ID"`
+	ID string `path:"id" format:"uuid" doc:"Book Page ID"`
 }
 
 type GetBookPageByIDResponse struct {

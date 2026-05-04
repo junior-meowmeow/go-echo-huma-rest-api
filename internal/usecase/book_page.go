@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/google/uuid"
+
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/domain/entity"
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/domain/port"
 )
@@ -42,6 +44,12 @@ func (u *bookPageUseCase) CreateBookPage(ctx context.Context, bookPage *entity.B
 	currentTime := time.Now()
 	bookPage.CreatedAt = currentTime
 	bookPage.UpdatedAt = currentTime
+
+	newID, err := uuid.NewV7()
+	if err != nil {
+		return "", fmt.Errorf("failed to generate book page ID: %w", err)
+	}
+	bookPage.ID = newID.String()
 
 	id, err := u.BookPageRepository.CreateBookPage(ctx, bookPage)
 	if err != nil {

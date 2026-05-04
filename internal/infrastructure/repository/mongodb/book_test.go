@@ -5,6 +5,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.mongodb.org/mongo-driver/v2/bson"
@@ -31,6 +32,7 @@ func TestBookRepository(t *testing.T) {
 			}
 
 			input := &entity.Book{
+				ID:          uuid.NewString(),
 				Name:        "New Book",
 				Description: "This is a book.",
 				Metadata:    metadata,
@@ -41,8 +43,8 @@ func TestBookRepository(t *testing.T) {
 			assert.NotEmpty(t, insertedID)
 
 			var doc document.BookDocument
-			oid, _ := document.StringToObjectID(insertedID)
-			err = coll.FindOne(ctx, bson.M{"_id": oid}).Decode(&doc)
+			bookUUID, _ := document.StringToUUID(insertedID)
+			err = coll.FindOne(ctx, bson.M{"_id": bookUUID}).Decode(&doc)
 			require.NoError(t, err)
 			assert.Equal(t, input.Name, doc.Name)
 			assert.Equal(t, input.Description, doc.Description)
@@ -53,13 +55,13 @@ func TestBookRepository(t *testing.T) {
 	t.Run("GetBookByID", func(t *testing.T) {
 		t.Run("Should return book when exists", func(t *testing.T) {
 			cleanCollection(t, coll)
-			oid := bson.NewObjectID()
-			seed := document.BookDocument{ID: oid, Name: "Test Book"}
-			_, err := coll.InsertOne(ctx, seed)
+			bookUUID, err := uuid.NewV7()
+			require.NoError(t, err)
+			seed := document.BookDocument{ID: bookUUID, Name: "Test Book"}
+			_, err = coll.InsertOne(ctx, seed)
 			require.NoError(t, err)
 
-			idStr, _ := document.IDToString(oid)
-			book, err := repo.GetBookByID(ctx, idStr)
+			book, err := repo.GetBookByID(ctx, bookUUID.String())
 
 			require.NoError(t, err)
 			assert.Equal(t, "Test Book", book.Name)
@@ -67,10 +69,10 @@ func TestBookRepository(t *testing.T) {
 
 		t.Run("Should return ErrNotFound when book does not exist", func(t *testing.T) {
 			cleanCollection(t, coll)
-			oid := bson.NewObjectID()
-			idStr, _ := document.IDToString(oid)
+			bookUUID, err := uuid.NewV7()
+			require.NoError(t, err)
 
-			_, err := repo.GetBookByID(ctx, idStr)
+			_, err = repo.GetBookByID(ctx, bookUUID.String())
 			require.ErrorIs(t, err, entity.ErrNotFound)
 		})
 	})
@@ -79,9 +81,9 @@ func TestBookRepository(t *testing.T) {
 		cleanCollection(t, coll)
 
 		docs := []any{
-			document.BookDocument{Name: "Book 1", CreatedAt: mockTime.Add(-2 * time.Hour)},
-			document.BookDocument{Name: "Book 2", CreatedAt: mockTime.Add(-1 * time.Hour)},
-			document.BookDocument{Name: "Book 3", CreatedAt: mockTime},
+			document.BookDocument{ID: uuid.New(), Name: "Book 1", CreatedAt: mockTime.Add(-2 * time.Hour)},
+			document.BookDocument{ID: uuid.New(), Name: "Book 2", CreatedAt: mockTime.Add(-1 * time.Hour)},
+			document.BookDocument{ID: uuid.New(), Name: "Book 3", CreatedAt: mockTime},
 		}
 		_, err := coll.InsertMany(ctx, docs)
 		require.NoError(t, err)
@@ -99,11 +101,11 @@ func TestBookRepository(t *testing.T) {
 		cleanCollection(t, coll)
 
 		docs := []any{
-			document.BookDocument{Name: "Book 1", CreatedAt: mockTime.Add(-4 * time.Hour)},
-			document.BookDocument{Name: "Book 2", CreatedAt: mockTime.Add(-3 * time.Hour)},
-			document.BookDocument{Name: "Book 3", CreatedAt: mockTime.Add(-2 * time.Hour)},
-			document.BookDocument{Name: "Book 4", CreatedAt: mockTime.Add(-1 * time.Hour)},
-			document.BookDocument{Name: "Book 5", CreatedAt: mockTime},
+			document.BookDocument{ID: uuid.New(), Name: "Book 1", CreatedAt: mockTime.Add(-4 * time.Hour)},
+			document.BookDocument{ID: uuid.New(), Name: "Book 2", CreatedAt: mockTime.Add(-3 * time.Hour)},
+			document.BookDocument{ID: uuid.New(), Name: "Book 3", CreatedAt: mockTime.Add(-2 * time.Hour)},
+			document.BookDocument{ID: uuid.New(), Name: "Book 4", CreatedAt: mockTime.Add(-1 * time.Hour)},
+			document.BookDocument{ID: uuid.New(), Name: "Book 5", CreatedAt: mockTime},
 		}
 		_, err := coll.InsertMany(ctx, docs)
 		require.NoError(t, err)

@@ -70,8 +70,7 @@ components:
           type: string
         bookId:
           description: Parent Book ID
-          pattern: ^[a-fA-F0-9]{24}$
-          patternDescription: BSON ObjectID
+          format: uuid
           type: string
         content:
           description: Text content of the page
@@ -702,8 +701,7 @@ paths:
           required: true
           schema:
             description: Parent Book ID
-            pattern: ^[a-fA-F0-9]{24}$
-            patternDescription: BSON ObjectID
+            format: uuid
             type: string
         - description: If true, returns all items ignoring pagination
           explode: false
@@ -788,8 +786,7 @@ paths:
           required: true
           schema:
             description: Parent Book ID
-            pattern: ^[a-fA-F0-9]{24}$
-            patternDescription: BSON ObjectID
+            format: uuid
             type: string
         - description: Center page used as the reference point
           explode: false
@@ -838,8 +835,7 @@ paths:
           required: true
           schema:
             description: Parent Book ID
-            pattern: ^[a-fA-F0-9]{24}$
-            patternDescription: BSON ObjectID
+            format: uuid
             type: string
         - description: Start page number (inclusive)
           explode: false
@@ -886,8 +882,7 @@ paths:
           required: true
           schema:
             description: Book Page ID
-            pattern: ^[a-fA-F0-9]{24}$
-            patternDescription: BSON ObjectID
+            format: uuid
             type: string
       responses:
         "200":
@@ -992,8 +987,7 @@ paths:
           required: true
           schema:
             description: Book ID
-            pattern: ^[a-fA-F0-9]{24}$
-            patternDescription: BSON ObjectID
+            format: uuid
             type: string
       responses:
         "200":

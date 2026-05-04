@@ -10,6 +10,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/suite"
 	"go.mongodb.org/mongo-driver/v2/bson"
 )
@@ -161,7 +162,8 @@ func (s *BookSuite) TestPostBook_ReturnsCreatedID() {
 	s.Require().NoError(err)
 
 	s.NotEmpty(resp.ID, "response body must include the created book's ID")
-	s.Regexp(`^[a-fA-F0-9]{24}$`, resp.ID, "ID must be a valid BSON ObjectID")
+	err = uuid.Validate(resp.ID)
+	s.Require().NoError(err, "ID must be a valid UUID")
 }
 
 func (s *BookSuite) TestPostBook_PersistsToMongoDB() {
@@ -338,9 +340,9 @@ func (s *BookSuite) TestGetBooks_ReturnsMostRecentFirst() {
 	coll := s.MongoDB.Collection("books")
 
 	_, err := coll.InsertMany(context.Background(), []any{
-		bson.M{"name": "Oldest", "description": "", "metadata": bson.M{}, "createdAt": now.Add(-2 * time.Hour)},
-		bson.M{"name": "Middle", "description": "", "metadata": bson.M{}, "createdAt": now.Add(-1 * time.Hour)},
-		bson.M{"name": "Newest", "description": "", "metadata": bson.M{}, "createdAt": now},
+		bson.M{"_id": uuid.New(), "name": "Oldest", "description": "", "metadata": bson.M{}, "createdAt": now.Add(-2 * time.Hour)},
+		bson.M{"_id": uuid.New(), "name": "Middle", "description": "", "metadata": bson.M{}, "createdAt": now.Add(-1 * time.Hour)},
+		bson.M{"_id": uuid.New(), "name": "Newest", "description": "", "metadata": bson.M{}, "createdAt": now},
 	})
 	s.Require().NoError(err)
 
@@ -358,6 +360,7 @@ func (s *BookSuite) TestGetBooks_Pagination_DefaultPage() {
 	docs := make([]any, 25)
 	for i := range docs {
 		docs[i] = bson.M{
+			"_id":       uuid.New(),
 			"name":      fmt.Sprintf("Book %02d", i),
 			"metadata":  bson.M{},
 			"createdAt": time.Now().UTC(),
@@ -377,6 +380,7 @@ func (s *BookSuite) TestGetBooks_Pagination_SecondPage() {
 	docs := make([]any, 25)
 	for i := range docs {
 		docs[i] = bson.M{
+			"_id":       uuid.New(),
 			"name":      fmt.Sprintf("Book %02d", i),
 			"metadata":  bson.M{},
 			"createdAt": time.Now().UTC(),
@@ -395,7 +399,7 @@ func (s *BookSuite) TestGetBooks_Pagination_SecondPage() {
 func (s *BookSuite) TestGetBooks_Pagination_CustomPageSize() {
 	docs := make([]any, 10)
 	for i := range docs {
-		docs[i] = bson.M{"name": fmt.Sprintf("Book %02d", i), "metadata": bson.M{}, "createdAt": time.Now().UTC()}
+		docs[i] = bson.M{"_id": uuid.New(), "name": fmt.Sprintf("Book %02d", i), "metadata": bson.M{}, "createdAt": time.Now().UTC()}
 	}
 	_, err := s.MongoDB.Collection("books").InsertMany(context.Background(), docs)
 	s.Require().NoError(err)
@@ -410,7 +414,7 @@ func (s *BookSuite) TestGetBooks_Pagination_CustomPageSize() {
 func (s *BookSuite) TestGetBooks_Pagination_GetAll_IgnoresPagination() {
 	docs := make([]any, 25)
 	for i := range docs {
-		docs[i] = bson.M{"name": fmt.Sprintf("Book %02d", i), "metadata": bson.M{}, "createdAt": time.Now().UTC()}
+		docs[i] = bson.M{"_id": uuid.New(), "name": fmt.Sprintf("Book %02d", i), "metadata": bson.M{}, "createdAt": time.Now().UTC()}
 	}
 	_, err := s.MongoDB.Collection("books").InsertMany(context.Background(), docs)
 	s.Require().NoError(err)
@@ -471,7 +475,7 @@ func (s *BookSuite) TestGetBookByID_ReturnsCorrectBook() {
 }
 
 func (s *BookSuite) TestGetBookByID_NotFound_Returns404() {
-	nonExistentID := "507f1f77bcf86cd799439011"
+	nonExistentID := uuid.NewString()
 
 	w := s.getBookByID(nonExistentID)
 

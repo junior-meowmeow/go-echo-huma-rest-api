@@ -32,29 +32,24 @@ func (r *bookRepository) CreateBook(ctx context.Context, book *entity.Book) (str
 		return "", fmt.Errorf("failed to convert book to document: %w", err)
 	}
 
-	result, err := r.Collection.InsertOne(ctx, doc)
+	_, err = r.Collection.InsertOne(ctx, doc)
 	if err != nil {
 		return "", fmt.Errorf("failed to insert book document: %w", err)
 	}
 
-	insertedID, err := document.IDToString(result.InsertedID)
-	if err != nil {
-		return "", fmt.Errorf("failed to convert inserted id to string: %w", err)
-	}
-
-	return insertedID, nil
+	return book.ID, nil
 }
 
 func (r *bookRepository) GetBookByID(ctx context.Context, id string) (entity.Book, error) {
 	var book entity.Book
 
-	oid, err := document.StringToObjectID(id)
+	bookUUID, err := document.StringToUUID(id)
 	if err != nil {
 		return book, fmt.Errorf("invalid book ID format: %w", err)
 	}
 
 	var doc document.BookDocument
-	err = r.Collection.FindOne(ctx, bson.D{{Key: "_id", Value: oid}}).Decode(&doc)
+	err = r.Collection.FindOne(ctx, bson.D{{Key: "_id", Value: bookUUID}}).Decode(&doc)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
 			return book, fmt.Errorf("failed to get book: %w: %w", entity.ErrNotFound, err)

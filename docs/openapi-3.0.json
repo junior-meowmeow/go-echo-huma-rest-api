@@ -89,8 +89,7 @@
           },
           "bookId": {
             "description": "Parent Book ID",
-            "pattern": "^[a-fA-F0-9]{24}$",
-            "patternDescription": "BSON ObjectID",
+            "format": "uuid",
             "type": "string"
           },
           "content": {
@@ -947,8 +946,7 @@
             "required": true,
             "schema": {
               "description": "Parent Book ID",
-              "pattern": "^[a-fA-F0-9]{24}$",
-              "patternDescription": "BSON ObjectID",
+              "format": "uuid",
               "type": "string"
             }
           },
@@ -1073,8 +1071,7 @@
             "required": true,
             "schema": {
               "description": "Parent Book ID",
-              "pattern": "^[a-fA-F0-9]{24}$",
-              "patternDescription": "BSON ObjectID",
+              "format": "uuid",
               "type": "string"
             }
           },
@@ -1145,8 +1142,7 @@
             "required": true,
             "schema": {
               "description": "Parent Book ID",
-              "pattern": "^[a-fA-F0-9]{24}$",
-              "patternDescription": "BSON ObjectID",
+              "format": "uuid",
               "type": "string"
             }
           },
@@ -1215,8 +1211,7 @@
             "required": true,
             "schema": {
               "description": "Book Page ID",
-              "pattern": "^[a-fA-F0-9]{24}$",
-              "patternDescription": "BSON ObjectID",
+              "format": "uuid",
               "type": "string"
             }
           }
@@ -1374,8 +1369,7 @@
             "required": true,
             "schema": {
               "description": "Book ID",
-              "pattern": "^[a-fA-F0-9]{24}$",
-              "patternDescription": "BSON ObjectID",
+              "format": "uuid",
               "type": "string"
             }
           }

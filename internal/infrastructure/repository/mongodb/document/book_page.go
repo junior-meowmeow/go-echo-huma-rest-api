@@ -4,14 +4,14 @@ import (
 	"fmt"
 	"time"
 
-	"go.mongodb.org/mongo-driver/v2/bson"
+	"github.com/google/uuid"
 
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/domain/entity"
 )
 
 type BookPageDocument struct {
-	ID     bson.ObjectID `bson:"_id,omitempty"`
-	BookID bson.ObjectID `bson:"book_id,omitempty"`
+	ID     uuid.UUID `bson:"_id"`
+	BookID uuid.UUID `bson:"book_id,omitempty"`
 
 	PageNumber          int64            `bson:"pageNumber"`
 	Content             string           `bson:"content"`
@@ -30,19 +30,19 @@ type BookPageMetadata struct {
 func NewBookPageDocument(bookPage *entity.BookPage) (BookPageDocument, error) {
 	var bookPageDocument BookPageDocument
 
-	bookOID, err := StringToObjectID(bookPage.BookID)
+	bookUUID, err := StringToUUID(bookPage.BookID)
 	if err != nil {
 		return bookPageDocument, fmt.Errorf("invalid book ID format: %w", err)
 	}
 
-	oid, err := StringToObjectID(bookPage.ID)
+	bookPageUUID, err := StringToUUID(bookPage.ID)
 	if err != nil {
 		return bookPageDocument, fmt.Errorf("invalid book page ID format: %w", err)
 	}
 
 	bookPageDocument = BookPageDocument{
-		ID:         oid,
-		BookID:     bookOID,
+		ID:         bookPageUUID,
+		BookID:     bookUUID,
 		PageNumber: bookPage.PageNumber,
 		Content:    bookPage.Content,
 		Metadata: BookPageMetadata{
@@ -59,8 +59,8 @@ func NewBookPageDocument(bookPage *entity.BookPage) (BookPageDocument, error) {
 
 func (doc *BookPageDocument) ToEntity() entity.BookPage {
 	return entity.BookPage{
-		ID:         doc.ID.Hex(),
-		BookID:     doc.BookID.Hex(),
+		ID:         doc.ID.String(),
+		BookID:     doc.BookID.String(),
 		PageNumber: doc.PageNumber,
 		Content:    doc.Content,
 		Metadata: entity.BookPageMetadata{

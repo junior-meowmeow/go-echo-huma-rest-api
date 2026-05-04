@@ -42,7 +42,7 @@ type GetBooksResponse struct {
 }
 
 type GetBookByIDRequest struct {
-	ID string `path:"id" required:"true" pattern:"^[a-fA-F0-9]{24}$" patternDescription:"BSON ObjectID" doc:"Book ID"`
+	ID string `path:"id" required:"true" format:"uuid" doc:"Book ID"`
 }
 
 type GetBookByIDResponse struct {

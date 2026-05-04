@@ -4,13 +4,13 @@ import (
 	"fmt"
 	"time"
 
-	"go.mongodb.org/mongo-driver/v2/bson"
+	"github.com/google/uuid"
 
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/domain/entity"
 )
 
 type BookDocument struct {
-	ID bson.ObjectID `bson:"_id,omitempty"`
+	ID uuid.UUID `bson:"_id"`
 
 	Name             string       `bson:"name"`
 	Description      string       `bson:"description"`
@@ -29,15 +29,14 @@ type BookMetadata struct {
 
 func NewBookDocument(book *entity.Book) (BookDocument, error) {
 	var bookDocument BookDocument
-	var err error
 
-	oid, err := StringToObjectID(book.ID)
+	bookUUID, err := StringToUUID(book.ID)
 	if err != nil {
 		return bookDocument, fmt.Errorf("invalid book ID format: %w", err)
 	}
 
 	bookDocument = BookDocument{
-		ID:          oid,
+		ID:          bookUUID,
 		Name:        book.Name,
 		Description: book.Description,
 		Metadata: BookMetadata{
@@ -55,7 +54,7 @@ func NewBookDocument(book *entity.Book) (BookDocument, error) {
 
 func (doc *BookDocument) ToEntity() entity.Book {
 	return entity.Book{
-		ID:          doc.ID.Hex(),
+		ID:          doc.ID.String(),
 		Name:        doc.Name,
 		Description: doc.Description,
 		Metadata: entity.BookMetadata{

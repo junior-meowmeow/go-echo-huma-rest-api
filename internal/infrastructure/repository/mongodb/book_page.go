@@ -32,29 +32,24 @@ func (r *bookPageRepository) CreateBookPage(ctx context.Context, bookPage *entit
 		return "", fmt.Errorf("failed to convert book page to document: %w", err)
 	}
 
-	result, err := r.Collection.InsertOne(ctx, doc)
+	_, err = r.Collection.InsertOne(ctx, doc)
 	if err != nil {
 		return "", fmt.Errorf("failed to insert book page document: %w", err)
 	}
 
-	insertedID, err := document.IDToString(result.InsertedID)
-	if err != nil {
-		return "", fmt.Errorf("failed to convert inserted id to string: %w", err)
-	}
-
-	return insertedID, nil
+	return bookPage.ID, nil
 }
 
 func (r *bookPageRepository) GetBookPageByID(ctx context.Context, id string) (entity.BookPage, error) {
 	var bookPage entity.BookPage
 
-	oid, err := document.StringToObjectID(id)
+	bookPageUUID, err := document.StringToUUID(id)
 	if err != nil {
 		return bookPage, fmt.Errorf("invalid book page ID format: %w", err)
 	}
 
 	var doc document.BookPageDocument
-	err = r.Collection.FindOne(ctx, bson.D{{Key: "_id", Value: oid}}).Decode(&doc)
+	err = r.Collection.FindOne(ctx, bson.D{{Key: "_id", Value: bookPageUUID}}).Decode(&doc)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
 			return bookPage, fmt.Errorf("failed to get book page: %w: %w", entity.ErrNotFound, err)
@@ -68,14 +63,14 @@ func (r *bookPageRepository) GetBookPageByID(ctx context.Context, id string) (en
 }
 
 func (r *bookPageRepository) GetBookPagesByBookID(ctx context.Context, bookID string) ([]entity.BookPage, error) {
-	bookOID, err := document.StringToObjectID(bookID)
+	bookUUID, err := document.StringToUUID(bookID)
 	if err != nil {
-		return nil, fmt.Errorf("invalid book page ID format: %w", err)
+		return nil, fmt.Errorf("invalid book ID format: %w", err)
 	}
 
 	var docs []document.BookPageDocument
 
-	filter := bson.D{{Key: "book_id", Value: bookOID}}
+	filter := bson.D{{Key: "book_id", Value: bookUUID}}
 
 	opts := options.Find().
 		SetSort(bson.D{{Key: "pageNumber", Value: 1}})
@@ -104,13 +99,13 @@ func (r *bookPageRepository) GetBookpagesByBookIDWithPagination(
 	pageSize int64,
 	pageNumber int64,
 ) ([]entity.BookPage, error) {
-	bookOID, err := document.StringToObjectID(bookID)
+	bookUUID, err := document.StringToUUID(bookID)
 	if err != nil {
-		return nil, fmt.Errorf("invalid book page ID format: %w", err)
+		return nil, fmt.Errorf("invalid book ID format: %w", err)
 	}
 
 	skip := max((pageNumber-1)*pageSize, 0)
-	filter := bson.D{{Key: "book_id", Value: bookOID}}
+	filter := bson.D{{Key: "book_id", Value: bookUUID}}
 
 	opts := options.Find().
 		SetSort(bson.D{{Key: "pageNumber", Value: 1}}).
@@ -136,13 +131,13 @@ func (r *bookPageRepository) GetBookpagesByPageRange(
 	startPage int64,
 	endPage int64,
 ) ([]entity.BookPage, error) {
-	bookOID, err := document.StringToObjectID(bookID)
+	bookUUID, err := document.StringToUUID(bookID)
 	if err != nil {
-		return nil, fmt.Errorf("invalid book page ID format: %w", err)
+		return nil, fmt.Errorf("invalid book ID format: %w", err)
 	}
 
 	filter := bson.D{
-		{Key: "book_id", Value: bookOID},
+		{Key: "book_id", Value: bookUUID},
 		{Key: "pageNumber", Value: bson.D{
 			{Key: "$gte", Value: startPage},
 			{Key: "$lte", Value: endPage},
@@ -170,14 +165,14 @@ func (r *bookPageRepository) GetBookpagesAroundPageNumber(
 	centerPage int64,
 	offset int64,
 ) ([]entity.BookPage, error) {
-	bookOID, err := document.StringToObjectID(bookID)
+	bookUUID, err := document.StringToUUID(bookID)
 	if err != nil {
 		return nil, fmt.Errorf("invalid book ID format: %w", err)
 	}
 
 	// Fetch "Past + Center" (<= page number)
 	filterPast := bson.D{
-		{Key: "book_id", Value: bookOID},
+		{Key: "book_id", Value: bookUUID},
 		{Key: "pageNumber", Value: bson.D{{Key: "$lte", Value: centerPage}}},
 	}
 	optsPast := options.Find().
@@ -197,7 +192,7 @@ func (r *bookPageRepository) GetBookpagesAroundPageNumber(
 	var future []entity.BookPage
 	if offset > 0 {
 		filterFuture := bson.D{
-			{Key: "book_id", Value: bookOID},
+			{Key: "book_id", Value: bookUUID},
 			{Key: "pageNumber", Value: bson.D{{Key: "$gt", Value: centerPage}}},
 		}
 		optsFuture := options.Find().

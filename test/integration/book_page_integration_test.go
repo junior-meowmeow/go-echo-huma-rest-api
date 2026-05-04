@@ -10,6 +10,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/suite"
 	"go.mongodb.org/mongo-driver/v2/bson"
 )
@@ -30,8 +31,11 @@ func (s *BookPageSuite) SetupTest() {
 	cleanCollection(s.T(), s.MongoDB.Collection("book_pages"))
 	cleanCollection(s.T(), s.MongoDB.Collection("books"))
 
+	bookUUID, err := uuid.NewV7()
+	s.Require().NoError(err)
 	now := time.Now().UTC()
-	result, err := s.MongoDB.Collection("books").InsertOne(context.Background(), bson.M{
+	_, err = s.MongoDB.Collection("books").InsertOne(context.Background(), bson.M{
+		"_id":         bookUUID,
 		"name":        "Test Book",
 		"description": "Parent book for book page tests.",
 		"metadata":    bson.M{"author": "Junior MeowMeow", "isbn": "978-0132350884", "genre": "Test"},
@@ -39,7 +43,7 @@ func (s *BookPageSuite) SetupTest() {
 		"updatedAt":   now,
 	})
 	s.Require().NoError(err)
-	s.bookID = result.InsertedID.(bson.ObjectID).Hex()
+	s.bookID = bookUUID.String()
 }
 
 type bookPageMetadataBody struct {
@@ -186,12 +190,13 @@ func (s *BookPageSuite) seedPages(count int) {
 
 	now := time.Now().UTC()
 	docs := make([]any, count)
-	bookOID, err := bson.ObjectIDFromHex(s.bookID)
+	bookUUID, err := uuid.Parse(s.bookID)
 	s.Require().NoError(err)
 
 	for i := range docs {
 		docs[i] = bson.M{
-			"book_id":    bookOID,
+			"_id":        uuid.New(),
+			"book_id":    bookUUID,
 			"pageNumber": int64(i + 1),
 			"content":    fmt.Sprintf("Page %d content", i+1),
 			"metadata":   bson.M{"isBookmarked": false, "highlight": ""},
@@ -219,7 +224,8 @@ func (s *BookPageSuite) TestPostBookPage_ReturnsCreatedID() {
 	s.Require().NoError(err)
 
 	s.NotEmpty(resp.ID, "response body must include the created book page's ID")
-	s.Regexp(`^[a-fA-F0-9]{24}$`, resp.ID, "ID must be a valid BSON ObjectID")
+	err = uuid.Validate(resp.ID)
+	s.Require().NoError(err, "ID must be a valid UUID")
 }
 
 func (s *BookPageSuite) TestPostBookPage_PersistsToMongoDB() {
@@ -238,9 +244,11 @@ func (s *BookPageSuite) TestPostBookPage_PersistsToMongoDB() {
 	s.NotEmpty(doc["createdAt"])
 	s.NotEmpty(doc["updatedAt"])
 
-	bookOID, err := bson.ObjectIDFromHex(s.bookID)
+	bookUUID, err := uuid.Parse(s.bookID)
 	s.Require().NoError(err)
-	s.Equal(bookOID, doc["book_id"], "book_id must reference the parent book")
+	docBookUUID, err := uuid.FromBytes(doc["book_id"].(bson.Binary).Data)
+	s.Require().NoError(err)
+	s.Equal(bookUUID, docBookUUID, "book_id must reference the parent book")
 
 	meta, ok := doc["metadata"].(bson.D)
 	s.Require().True(ok, "metadata should be stored as a nested document")
@@ -369,15 +377,18 @@ func (s *BookPageSuite) TestGetBookPages_ReturnsPageNumberAscending() {
 
 func (s *BookPageSuite) TestGetBookPages_IsolatedByBookID_OnlyReturnsOwnPages() {
 	// Insert a second book.
+	otherBookUUID, err := uuid.NewV7()
+	s.Require().NoError(err)
 	now := time.Now().UTC()
-	result, err := s.MongoDB.Collection("books").InsertOne(context.Background(), bson.M{
+	_, err = s.MongoDB.Collection("books").InsertOne(context.Background(), bson.M{
+		"_id":       otherBookUUID,
 		"name":      "Other Book",
 		"metadata":  bson.M{},
 		"createdAt": now,
 		"updatedAt": now,
 	})
 	s.Require().NoError(err)
-	otherBookID := result.InsertedID.(bson.ObjectID).Hex()
+	otherBookID := otherBookUUID.String()
 
 	s.mustPostBookPage(s.validBookPage(1)) // belongs to s.bookID
 
@@ -643,7 +654,7 @@ func (s *BookPageSuite) TestGetBookPageByID_ReturnsCorrectPage() {
 }
 
 func (s *BookPageSuite) TestGetBookPageByID_NotFound_Returns404() {
-	nonExistentID := "507f1f77bcf86cd799439011"
+	nonExistentID := uuid.NewString()
 
 	w := s.getBookPageByID(nonExistentID)
 
