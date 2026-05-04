@@ -12,12 +12,13 @@ import (
 )
 
 type Config struct {
-	App    AppConfig
-	Auth   AuthConfig
-	Log    LogConfig
-	Mongo  MongoConfig
-	S3     S3Config
-	Client ClientConfig
+	App      AppConfig
+	Auth     AuthConfig
+	Log      LogConfig
+	Mongo    MongoConfig
+	Postgres PostgresConfig
+	S3       S3Config
+	Client   ClientConfig
 }
 
 type AppConfig struct {
@@ -39,9 +40,17 @@ type LogConfig struct {
 type MongoConfig struct {
 	Host   string `env:"MONGO_HOST" envDefault:"mongo"`
 	Port   string `env:"MONGO_PORT" envDefault:"27017"`
-	DBName string `env:"DB_NAME" envDefault:"testdb"`
-	DBUser string `env:"DB_USER" envDefault:"user"`
-	DBPass string `env:"DB_PASS" envDefault:"pass"`
+	DBName string `env:"MONGO_DB_NAME" envDefault:"testdb"`
+	DBUser string `env:"MONGO_DB_USER" envDefault:"user"`
+	DBPass string `env:"MONGO_DB_PASS" envDefault:"pass"`
+}
+
+type PostgresConfig struct {
+	Host   string `env:"POSTGRES_HOST" envDefault:"postgres"`
+	Port   string `env:"POSTGRES_PORT" envDefault:"5432"`
+	DBName string `env:"POSTGRES_DB" envDefault:"testdb"`
+	DBUser string `env:"POSTGRES_USER" envDefault:"user"`
+	DBPass string `env:"POSTGRES_PASS" envDefault:"pass"`
 }
 
 type S3Config struct {

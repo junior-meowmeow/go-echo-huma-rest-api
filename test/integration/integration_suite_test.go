@@ -15,6 +15,7 @@ import (
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/infrastructure/external"
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/infrastructure/external/petstore/client"
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/infrastructure/repository"
+	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/infrastructure/repository/mongodb"
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/infrastructure/storage"
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/usecase"
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/utility"
@@ -43,7 +44,10 @@ func (s *IntegrationTestSuite) SetupSuite() {
 	}))
 	petClient, _ := client.NewClientWithResponses(s.MockPetServer.URL)
 
-	s.Repositories = repository.NewRepositories(s.MongoDB)
+	s.Repositories = repository.NewRepositories(s.MongoDB, nil)
+	s.Repositories.Book = mongodb.NewBookRepository(s.MongoDB)
+	s.Repositories.BookPage = mongodb.NewBookPageRepository(s.MongoDB)
+
 	s.Storages = storage.NewStorages(s.S3Client, "test-bucket")
 	s.ExternalServices = external.NewExternalServices(petClient)
 	s.Utilities = utility.NewUtilities("test-secret", 72*time.Hour)

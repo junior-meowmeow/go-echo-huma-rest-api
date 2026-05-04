@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"time"
 
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/labstack/echo/v4"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 
@@ -22,6 +23,7 @@ import (
 type Application struct {
 	Router      *echo.Echo
 	mongoClient *mongo.Client
+	pgxPool     *pgxpool.Pool
 }
 
 func NewApplication(ctx context.Context, cfg config.Config) (*Application, error) {
@@ -31,6 +33,12 @@ func NewApplication(ctx context.Context, cfg config.Config) (*Application, error
 		return nil, fmt.Errorf("failed to initialize MongoDB client: %w", err)
 	}
 	mongoDB := mongoClient.Database(cfg.Mongo.DBName)
+
+	// Initialize PostgreSQL
+	pgxPool, err := newPostgresClient(ctx, cfg.Postgres)
+	if err != nil {
+		return nil, fmt.Errorf("failed to initialize PostgreSQL client: %w", err)
+	}
 
 	// Initialize S3
 	s3Client, err := newS3Client(ctx, cfg.S3)
@@ -46,7 +54,7 @@ func NewApplication(ctx context.Context, cfg config.Config) (*Application, error
 	}
 
 	// Initialize Infrastructures
-	repositories := repository.NewRepositories(mongoDB)
+	repositories := repository.NewRepositories(mongoDB, pgxPool)
 	storages := storage.NewStorages(s3Client, cfg.S3.Bucket)
 	externalServices := external.NewExternalServices(petStoreClient)
 
@@ -75,5 +83,10 @@ func (a *Application) GracefulShutdown(ctx context.Context) {
 	err := disconnectMongoDB(ctx, a.mongoClient)
 	if err != nil {
 		slog.ErrorContext(ctx, "Error disconnecting MongoDB", slog.Any("error", err))
+	}
+
+	if a.pgxPool != nil {
+		a.pgxPool.Close()
+		slog.InfoContext(ctx, "PostgreSQL Client disconnected.")
 	}
 }

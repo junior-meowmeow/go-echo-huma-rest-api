@@ -14,12 +14,19 @@ services:
       API_BASE_PATH:
       JWT_SECRET:
       TOKEN_EXPIRATION:
+      REQ_PER_SEC_LIMIT:
+      ENABLE_PROMETHEUS:
       LOG_LEVEL:
       MONGO_HOST:
       MONGO_PORT:
-      DB_NAME:
-      DB_USER:
-      DB_PASS:
+      MONGO_DB_NAME:
+      MONGO_DB_USER:
+      MONGO_DB_PASS:
+      POSTGRES_HOST:
+      POSTGRES_PORT:
+      POSTGRES_DB:
+      POSTGRES_USER:
+      POSTGRES_PASS:
       S3_ENDPOINT:
       S3_BUCKET:
       AWS_REGION:
