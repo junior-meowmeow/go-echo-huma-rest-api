@@ -7,7 +7,7 @@ import (
 
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/domain/port"
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/infrastructure/repository/mongodb"
-	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/infrastructure/repository/sqlc"
+	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/infrastructure/repository/postgres"
 )
 
 type Repositories struct {
@@ -23,7 +23,7 @@ func NewRepositories(mongoDB *mongo.Database, pgxPool *pgxpool.Pool) *Repositori
 		Review:     mongodb.NewReviewRepository(mongoDB),
 		FileRecord: mongodb.NewFileRecordRepository(mongoDB),
 		User:       mongodb.NewUserRepository(mongoDB),
-		Book:       sqlc.NewBookRepository(pgxPool),
-		BookPage:   sqlc.NewBookPageRepository(pgxPool),
+		Book:       postgres.NewBookRepository(pgxPool),
+		BookPage:   postgres.NewBookPageRepository(pgxPool),
 	}
 }

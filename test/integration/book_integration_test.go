@@ -13,6 +13,8 @@ import (
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/suite"
 	"go.mongodb.org/mongo-driver/v2/bson"
+
+	"github.com/junior-meowmeow/go-echo-huma-rest-api/test/testhelper"
 )
 
 type BookSuite struct {
@@ -24,7 +26,7 @@ func TestBookSuite(t *testing.T) {
 }
 
 func (s *BookSuite) SetupTest() {
-	cleanCollection(s.T(), s.MongoDB.Collection("books"))
+	testhelper.CleanMongoCollection(s.T(), s.MongoDB.Collection("books"))
 }
 
 type bookMetadataBody struct {
@@ -264,7 +266,7 @@ func (s *BookSuite) TestPostBook_ValidationErrors() {
 
 	for _, tc := range cases {
 		s.Run(tc.name, func() {
-			cleanCollection(s.T(), s.MongoDB.Collection("books"))
+			testhelper.CleanMongoCollection(s.T(), s.MongoDB.Collection("books"))
 
 			w := s.postBook(tc.body)
 
@@ -295,7 +297,7 @@ func (s *BookSuite) TestPostBook_BoundaryValues() {
 
 	for _, tc := range cases {
 		s.Run(tc.name, func() {
-			cleanCollection(s.T(), s.MongoDB.Collection("books"))
+			testhelper.CleanMongoCollection(s.T(), s.MongoDB.Collection("books"))
 
 			w := s.postBook(tc.body)
 

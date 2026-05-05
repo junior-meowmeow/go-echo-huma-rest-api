@@ -12,10 +12,11 @@ import (
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/domain/entity"
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/infrastructure/repository/mongodb"
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/infrastructure/repository/mongodb/document"
+	"github.com/junior-meowmeow/go-echo-huma-rest-api/test/testhelper"
 )
 
-func TestReviewRepository(t *testing.T) {
-	db := setupMongoDatabase(t)
+func TestMongoReviewRepository(t *testing.T) {
+	db := testhelper.SetupMongoDatabase(t)
 	ctx := context.Background()
 	repo := mongodb.NewReviewRepository(db)
 	coll := repo.Collection
@@ -23,7 +24,7 @@ func TestReviewRepository(t *testing.T) {
 	mockTime := time.Date(2025, 10, 25, 12, 0, 0, 0, time.UTC)
 
 	t.Run("CreateReview", func(t *testing.T) {
-		cleanCollection(t, coll)
+		testhelper.CleanMongoCollection(t, coll)
 
 		t.Run("Should create review successfully", func(t *testing.T) {
 			input := &entity.Review{
@@ -47,7 +48,7 @@ func TestReviewRepository(t *testing.T) {
 	})
 
 	t.Run("GetReviews", func(t *testing.T) {
-		cleanCollection(t, coll)
+		testhelper.CleanMongoCollection(t, coll)
 
 		docs := []any{
 			document.ReviewDocument{Author: "Oldest", CreatedAt: mockTime.Add(-2 * time.Hour)},

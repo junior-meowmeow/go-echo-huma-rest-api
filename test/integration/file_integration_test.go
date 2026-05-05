@@ -17,6 +17,8 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/stretchr/testify/suite"
 	"go.mongodb.org/mongo-driver/v2/bson"
+
+	"github.com/junior-meowmeow/go-echo-huma-rest-api/test/testhelper"
 )
 
 type FileSuite struct {
@@ -33,8 +35,8 @@ func (s *FileSuite) SetupSuite() {
 }
 
 func (s *FileSuite) SetupTest() {
-	cleanCollection(s.T(), s.MongoDB.Collection("filerecords"))
-	cleanBucket(s.T(), context.Background(), s.S3Client, "test-bucket")
+	testhelper.CleanMongoCollection(s.T(), s.MongoDB.Collection("filerecords"))
+	testhelper.CleanS3Bucket(s.T(), context.Background(), s.S3Client, "test-bucket")
 }
 
 func (s *FileSuite) ensureBucketExists() {
@@ -240,8 +242,8 @@ func (s *FileSuite) TestUploadFile_DifferentContentTypes() {
 
 	for _, tc := range cases {
 		s.Run(tc.name, func() {
-			cleanCollection(s.T(), s.MongoDB.Collection("filerecords"))
-			cleanBucket(s.T(), context.Background(), s.S3Client, "test-bucket")
+			testhelper.CleanMongoCollection(s.T(), s.MongoDB.Collection("filerecords"))
+			testhelper.CleanS3Bucket(s.T(), context.Background(), s.S3Client, "test-bucket")
 
 			w := s.uploadFile(tc.content, tc.fileName, tc.contentType, "")
 			s.Equal(http.StatusOK, w.Code, "case: %q", tc.name)

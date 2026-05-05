@@ -11,6 +11,8 @@ import (
 
 	"github.com/stretchr/testify/suite"
 	"go.mongodb.org/mongo-driver/v2/bson"
+
+	"github.com/junior-meowmeow/go-echo-huma-rest-api/test/testhelper"
 )
 
 type ReviewSuite struct {
@@ -22,7 +24,7 @@ func TestReviewSuite(t *testing.T) {
 }
 
 func (s *ReviewSuite) SetupTest() {
-	cleanCollection(s.T(), s.MongoDB.Collection("reviews"))
+	testhelper.CleanMongoCollection(s.T(), s.MongoDB.Collection("reviews"))
 }
 
 type createReviewBody struct {
@@ -179,7 +181,7 @@ func (s *ReviewSuite) TestPostReview_ValidationErrors() {
 
 	for _, tc := range cases {
 		s.Run(tc.name, func() {
-			cleanCollection(s.T(), s.MongoDB.Collection("reviews"))
+			testhelper.CleanMongoCollection(s.T(), s.MongoDB.Collection("reviews"))
 
 			w := s.postReview(tc.body)
 
@@ -219,7 +221,7 @@ func (s *ReviewSuite) TestPostReview_BoundaryValues() {
 
 	for _, tc := range cases {
 		s.Run(tc.name, func() {
-			cleanCollection(s.T(), s.MongoDB.Collection("reviews"))
+			testhelper.CleanMongoCollection(s.T(), s.MongoDB.Collection("reviews"))
 
 			w := s.postReview(tc.body)
 

@@ -12,10 +12,11 @@ import (
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/domain/entity"
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/infrastructure/repository/mongodb"
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/infrastructure/repository/mongodb/document"
+	"github.com/junior-meowmeow/go-echo-huma-rest-api/test/testhelper"
 )
 
-func TestFileRecordRepository(t *testing.T) {
-	db := setupMongoDatabase(t)
+func TestMongoFileRecordRepository(t *testing.T) {
+	db := testhelper.SetupMongoDatabase(t)
 	ctx := context.Background()
 	repo := mongodb.NewFileRecordRepository(db)
 	coll := repo.Collection
@@ -23,7 +24,7 @@ func TestFileRecordRepository(t *testing.T) {
 	mockTime := time.Date(2025, 10, 25, 12, 0, 0, 0, time.UTC)
 
 	t.Run("CreateFileRecord", func(t *testing.T) {
-		cleanCollection(t, coll)
+		testhelper.CleanMongoCollection(t, coll)
 
 		t.Run("Should create file record successfully", func(t *testing.T) {
 			input := &entity.FileRecord{
@@ -52,7 +53,7 @@ func TestFileRecordRepository(t *testing.T) {
 
 	t.Run("GetFileRecordByID", func(t *testing.T) {
 		t.Run("Should return record when exists", func(t *testing.T) {
-			cleanCollection(t, coll)
+			testhelper.CleanMongoCollection(t, coll)
 
 			rawOID := bson.NewObjectID()
 			testDoc := document.FileRecordDocument{
@@ -83,7 +84,7 @@ func TestFileRecordRepository(t *testing.T) {
 		})
 
 		t.Run("Should return ErrNotFound when file record does not exist", func(t *testing.T) {
-			cleanCollection(t, coll)
+			testhelper.CleanMongoCollection(t, coll)
 
 			randomID := bson.NewObjectID()
 			idStr, _ := document.IDToString(randomID)

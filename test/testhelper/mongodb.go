@@ -1,4 +1,4 @@
-package mongodb_test
+package testhelper
 
 import (
 	"context"
@@ -11,7 +11,7 @@ import (
 	"go.mongodb.org/mongo-driver/v2/mongo/options"
 )
 
-func setupMongoDatabase(t *testing.T) *mongo.Database {
+func SetupMongoDatabase(t *testing.T) *mongo.Database {
 	t.Helper()
 
 	ctx := context.Background()
@@ -38,7 +38,7 @@ func setupMongoDatabase(t *testing.T) *mongo.Database {
 	return client.Database("test_db_" + t.Name())
 }
 
-func cleanCollection(t *testing.T, coll *mongo.Collection) {
+func CleanMongoCollection(t *testing.T, coll *mongo.Collection) {
 	t.Helper()
 	_, err := coll.DeleteMany(context.Background(), bson.D{})
 	require.NoError(t, err, "failed to clear collection")

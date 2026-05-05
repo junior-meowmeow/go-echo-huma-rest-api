@@ -19,6 +19,7 @@ import (
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/infrastructure/storage"
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/usecase"
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/utility"
+	"github.com/junior-meowmeow/go-echo-huma-rest-api/test/testhelper"
 )
 
 type IntegrationTestSuite struct {
@@ -36,8 +37,8 @@ type IntegrationTestSuite struct {
 }
 
 func (s *IntegrationTestSuite) SetupSuite() {
-	s.MongoDB = setupMongoDB(s.T())
-	s.S3Client = setupS3Client(s.T())
+	s.MongoDB = testhelper.SetupMongoDatabase(s.T())
+	s.S3Client = testhelper.SetupS3Client(s.T())
 
 	s.MockPetServer = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusNotImplemented)

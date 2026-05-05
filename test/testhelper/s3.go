@@ -1,4 +1,4 @@
-package s3api_test
+package testhelper
 
 import (
 	"context"
@@ -10,7 +10,6 @@ import (
 	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	smithyendpoints "github.com/aws/smithy-go/endpoints"
-	"github.com/docker/go-connections/nat"
 	"github.com/stretchr/testify/require"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/wait"
@@ -35,7 +34,7 @@ func (*resolverV2) ResolveEndpoint(ctx context.Context, params s3.EndpointParame
 }
 
 func s3Client(ctx context.Context, c testcontainers.Container) (*s3.Client, error) {
-	mappedPort, err := c.MappedPort(ctx, nat.Port("4566/tcp"))
+	mappedPort, err := c.MappedPort(ctx, "4566/tcp")
 	if err != nil {
 		return nil, err
 	}
@@ -69,15 +68,16 @@ func s3Client(ctx context.Context, c testcontainers.Container) (*s3.Client, erro
 	return client, nil
 }
 
-func setupS3Client(t *testing.T) *s3.Client {
+func SetupS3Client(t *testing.T) *s3.Client {
 	t.Helper()
 
 	ctx := context.Background()
 
+	const waitTime = 30 * time.Second
 	req := testcontainers.ContainerRequest{
 		Image:        "hectorvent/floci:latest",
 		ExposedPorts: []string{"4566/tcp"},
-		WaitingFor:   wait.ForLog("Ready").WithStartupTimeout(30 * time.Second),
+		WaitingFor:   wait.ForLog("Ready").WithStartupTimeout(waitTime),
 	}
 
 	ctr, err := testcontainers.GenericContainer(ctx, testcontainers.GenericContainerRequest{
@@ -99,7 +99,7 @@ func setupS3Client(t *testing.T) *s3.Client {
 }
 
 //revive:disable-next-line:context-as-argument // Let testing.T be the first argument.
-func cleanBucket(t *testing.T, ctx context.Context, client *s3.Client, bucket string) {
+func CleanS3Bucket(t *testing.T, ctx context.Context, client *s3.Client, bucket string) {
 	t.Helper()
 
 	out, err := client.ListObjectsV2(ctx, &s3.ListObjectsV2Input{

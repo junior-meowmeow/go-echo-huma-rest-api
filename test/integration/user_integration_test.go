@@ -12,6 +12,8 @@ import (
 
 	"github.com/stretchr/testify/suite"
 	"go.mongodb.org/mongo-driver/v2/bson"
+
+	"github.com/junior-meowmeow/go-echo-huma-rest-api/test/testhelper"
 )
 
 type UserSuite struct {
@@ -23,7 +25,7 @@ func TestUserSuite(t *testing.T) {
 }
 
 func (s *UserSuite) SetupTest() {
-	cleanCollection(s.T(), s.MongoDB.Collection("users"))
+	testhelper.CleanMongoCollection(s.T(), s.MongoDB.Collection("users"))
 }
 
 type registerUserResponse struct {
@@ -252,7 +254,7 @@ func (s *UserSuite) TestRegisterUser_ValidationErrors() {
 
 	for _, tc := range cases {
 		s.Run(tc.name, func() {
-			cleanCollection(s.T(), s.MongoDB.Collection("users"))
+			testhelper.CleanMongoCollection(s.T(), s.MongoDB.Collection("users"))
 
 			w := s.registerUser(tc.body)
 
@@ -292,7 +294,7 @@ func (s *UserSuite) TestRegisterUser_BoundaryValues() {
 
 	for _, tc := range cases {
 		s.Run(tc.name, func() {
-			cleanCollection(s.T(), s.MongoDB.Collection("users"))
+			testhelper.CleanMongoCollection(s.T(), s.MongoDB.Collection("users"))
 
 			w := s.registerUser(tc.body)
 

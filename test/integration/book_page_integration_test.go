@@ -13,6 +13,8 @@ import (
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/suite"
 	"go.mongodb.org/mongo-driver/v2/bson"
+
+	"github.com/junior-meowmeow/go-echo-huma-rest-api/test/testhelper"
 )
 
 type BookPageSuite struct {
@@ -28,8 +30,8 @@ func TestBookPageSuite(t *testing.T) {
 }
 
 func (s *BookPageSuite) SetupTest() {
-	cleanCollection(s.T(), s.MongoDB.Collection("book_pages"))
-	cleanCollection(s.T(), s.MongoDB.Collection("books"))
+	testhelper.CleanMongoCollection(s.T(), s.MongoDB.Collection("book_pages"))
+	testhelper.CleanMongoCollection(s.T(), s.MongoDB.Collection("books"))
 
 	bookUUID, err := uuid.NewV7()
 	s.Require().NoError(err)
@@ -316,7 +318,7 @@ func (s *BookPageSuite) TestPostBookPage_InvalidBookID_Returns422() {
 
 	for _, tc := range cases {
 		s.Run(tc.name, func() {
-			cleanCollection(s.T(), s.MongoDB.Collection("book_pages"))
+			testhelper.CleanMongoCollection(s.T(), s.MongoDB.Collection("book_pages"))
 
 			body := s.validBookPage(1)
 			body.BookID = tc.bookID

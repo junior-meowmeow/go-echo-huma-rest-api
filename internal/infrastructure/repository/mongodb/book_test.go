@@ -13,10 +13,11 @@ import (
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/domain/entity"
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/infrastructure/repository/mongodb"
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/infrastructure/repository/mongodb/document"
+	"github.com/junior-meowmeow/go-echo-huma-rest-api/test/testhelper"
 )
 
-func TestBookRepository(t *testing.T) {
-	db := setupMongoDatabase(t)
+func TestMongoBookRepository(t *testing.T) {
+	db := testhelper.SetupMongoDatabase(t)
 	ctx := context.Background()
 	repo := mongodb.NewBookRepository(db)
 	coll := repo.Collection
@@ -24,7 +25,7 @@ func TestBookRepository(t *testing.T) {
 	mockTime := time.Date(2025, 10, 25, 12, 0, 0, 0, time.UTC)
 
 	t.Run("CreateBook", func(t *testing.T) {
-		cleanCollection(t, coll)
+		testhelper.CleanMongoCollection(t, coll)
 
 		t.Run("Should create book successfully", func(t *testing.T) {
 			metadata := entity.BookMetadata{
@@ -54,7 +55,7 @@ func TestBookRepository(t *testing.T) {
 
 	t.Run("GetBookByID", func(t *testing.T) {
 		t.Run("Should return book when exists", func(t *testing.T) {
-			cleanCollection(t, coll)
+			testhelper.CleanMongoCollection(t, coll)
 			bookUUID, err := uuid.NewV7()
 			require.NoError(t, err)
 			seed := document.BookDocument{ID: bookUUID, Name: "Test Book"}
@@ -68,7 +69,7 @@ func TestBookRepository(t *testing.T) {
 		})
 
 		t.Run("Should return ErrNotFound when book does not exist", func(t *testing.T) {
-			cleanCollection(t, coll)
+			testhelper.CleanMongoCollection(t, coll)
 			bookUUID, err := uuid.NewV7()
 			require.NoError(t, err)
 
@@ -78,7 +79,7 @@ func TestBookRepository(t *testing.T) {
 	})
 
 	t.Run("GetAllBooks", func(t *testing.T) {
-		cleanCollection(t, coll)
+		testhelper.CleanMongoCollection(t, coll)
 
 		docs := []any{
 			document.BookDocument{ID: uuid.New(), Name: "Book 1", CreatedAt: mockTime.Add(-2 * time.Hour)},
@@ -98,7 +99,7 @@ func TestBookRepository(t *testing.T) {
 	})
 
 	t.Run("GetBooksWithPagination", func(t *testing.T) {
-		cleanCollection(t, coll)
+		testhelper.CleanMongoCollection(t, coll)
 
 		docs := []any{
 			document.BookDocument{ID: uuid.New(), Name: "Book 1", CreatedAt: mockTime.Add(-4 * time.Hour)},
