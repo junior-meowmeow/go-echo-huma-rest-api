@@ -1,4 +1,4 @@
-package sqlc
+package postgres
 
 import "math"
 

@@ -1,4 +1,4 @@
-package sqlc
+package postgres
 
 import (
 	"context"
@@ -10,7 +10,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/domain/entity"
-	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/infrastructure/repository/sqlc/sqlcgen"
+	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/infrastructure/repository/postgres/sqlcgen"
 )
 
 type bookRepository struct {
