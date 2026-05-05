@@ -2,7 +2,6 @@ package integration_test
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -11,9 +10,6 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/suite"
-	"go.mongodb.org/mongo-driver/v2/bson"
-
-	"github.com/junior-meowmeow/go-echo-huma-rest-api/test/testhelper"
 )
 
 type UserSuite struct {
@@ -24,8 +20,12 @@ func TestUserSuite(t *testing.T) {
 	suite.Run(t, new(UserSuite))
 }
 
+func (s *UserSuite) SetupSuite() {
+	s.SetupMongo()
+}
+
 func (s *UserSuite) SetupTest() {
-	testhelper.CleanMongoCollection(s.T(), s.MongoDB.Collection("users"))
+	s.Database.CleanUsers(s.T())
 }
 
 type registerUserResponse struct {
@@ -121,14 +121,6 @@ func (s *UserSuite) decodeLoginUserResponse(w *httptest.ResponseRecorder) loginU
 	return resp
 }
 
-func (s *UserSuite) dbUserCount() int64 {
-	s.T().Helper()
-
-	count, err := s.MongoDB.Collection("users").CountDocuments(context.Background(), bson.D{})
-	s.Require().NoError(err)
-	return count
-}
-
 func validUser() registerUserBody {
 	return registerUserBody{
 		Username: "testuser",
@@ -152,33 +144,28 @@ func (s *UserSuite) TestRegisterUser_ReturnsCreatedID() {
 	s.Regexp(`^[a-fA-F0-9]{24}$`, resp.ID, "ID must be a valid BSON ObjectID")
 }
 
-func (s *UserSuite) TestRegisterUser_PersistsToMongoDB() {
+func (s *UserSuite) TestRegisterUser_PersistsToDatabase() {
 	body := validUser()
 	s.mustRegisterUser(body)
 
-	s.Equal(int64(1), s.dbUserCount())
+	s.Equal(int64(1), s.Database.CountUsers(s.T()))
 
-	var doc bson.M
-	err := s.MongoDB.Collection("users").FindOne(context.Background(), bson.D{}).Decode(&doc)
-	s.Require().NoError(err)
+	doc := s.Database.GetUserByUsername(s.T(), body.Username)
 
-	s.Equal(body.Username, doc["username"])
-	s.NotEmpty(doc["_id"])
-	s.NotEmpty(doc["createdAt"])
+	s.Equal(body.Username, doc.Username)
+	s.Equal(body.Role, doc.Role)
+	s.NotEmpty(doc.ID)
+	s.NotNil(doc.CreatedAt)
 }
 
 func (s *UserSuite) TestRegisterUser_PasswordIsHashed() {
 	body := validUser()
 	s.mustRegisterUser(body)
 
-	var doc bson.M
-	err := s.MongoDB.Collection("users").FindOne(context.Background(), bson.D{}).Decode(&doc)
-	s.Require().NoError(err)
+	doc := s.Database.GetUserByUsername(s.T(), body.Username)
 
-	storedPassword, ok := doc["password"].(string)
-	s.Require().True(ok, "password field should be a string")
-	s.NotEqual(body.Password, storedPassword, "password must be stored as a hash, not plain text")
-	s.NotEmpty(storedPassword)
+	s.NotEqual(body.Password, doc.Password, "password must be stored as a hash, not plain text")
+	s.NotEmpty(doc.Password)
 }
 
 func (s *UserSuite) TestRegisterUser_WithRoleAdmin() {
@@ -190,10 +177,8 @@ func (s *UserSuite) TestRegisterUser_WithRoleAdmin() {
 
 	s.mustRegisterUser(body)
 
-	var doc bson.M
-	err := s.MongoDB.Collection("users").FindOne(context.Background(), bson.D{}).Decode(&doc)
-	s.Require().NoError(err)
-	s.Equal("admin", doc["role"])
+	doc := s.Database.GetUserByUsername(s.T(), body.Username)
+	s.Equal("admin", doc.Role)
 }
 
 func (s *UserSuite) TestRegisterUser_WithoutRole_UsesDefault() {
@@ -205,7 +190,7 @@ func (s *UserSuite) TestRegisterUser_WithoutRole_UsesDefault() {
 
 	w := s.registerUser(body)
 	s.Equal(http.StatusCreated, w.Code)
-	s.Equal(int64(1), s.dbUserCount())
+	s.Equal(int64(1), s.Database.CountUsers(s.T()))
 }
 
 func (s *UserSuite) TestRegisterUser_DuplicateUsername_Returns409() {
@@ -216,7 +201,7 @@ func (s *UserSuite) TestRegisterUser_DuplicateUsername_Returns409() {
 	w := s.registerUser(body)
 
 	s.Equal(http.StatusConflict, w.Code)
-	s.Equal(int64(1), s.dbUserCount(), "duplicate registration must not create a second user")
+	s.Equal(int64(1), s.Database.CountUsers(s.T()), "duplicate registration must not create a second user")
 }
 
 func (s *UserSuite) TestRegisterUser_ValidationErrors() {
@@ -254,12 +239,12 @@ func (s *UserSuite) TestRegisterUser_ValidationErrors() {
 
 	for _, tc := range cases {
 		s.Run(tc.name, func() {
-			testhelper.CleanMongoCollection(s.T(), s.MongoDB.Collection("users"))
+			s.Database.CleanUsers(s.T())
 
 			w := s.registerUser(tc.body)
 
 			s.Equal(tc.wantStatus, w.Code, "case: %q", tc.name)
-			s.Equal(int64(0), s.dbUserCount(), "no user should be persisted for invalid input in case %q", tc.name)
+			s.Equal(int64(0), s.Database.CountUsers(s.T()), "no user should be persisted for invalid input in case %q", tc.name)
 		})
 	}
 }
@@ -294,12 +279,12 @@ func (s *UserSuite) TestRegisterUser_BoundaryValues() {
 
 	for _, tc := range cases {
 		s.Run(tc.name, func() {
-			testhelper.CleanMongoCollection(s.T(), s.MongoDB.Collection("users"))
+			s.Database.CleanUsers(s.T())
 
 			w := s.registerUser(tc.body)
 
 			s.Equal(http.StatusCreated, w.Code, "boundary value should be accepted for case %q", tc.name)
-			s.Equal(int64(1), s.dbUserCount(), "one document should be persisted for case %q", tc.name)
+			s.Equal(int64(1), s.Database.CountUsers(s.T()), "one document should be persisted for case %q", tc.name)
 		})
 	}
 }
@@ -316,7 +301,7 @@ func (s *UserSuite) TestRegisterUser_MultipleUsers_AllPersisted() {
 		ids[s.mustRegisterUser(u)] = true
 	}
 
-	s.Equal(int64(len(users)), s.dbUserCount())
+	s.Equal(int64(len(users)), s.Database.CountUsers(s.T()))
 	s.Len(ids, len(users), "every registered user must have a unique ID")
 }
 

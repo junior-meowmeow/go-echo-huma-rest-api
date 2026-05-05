@@ -11,17 +11,17 @@ import (
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/domain/entity"
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/infrastructure/repository/mongodb"
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/infrastructure/repository/mongodb/document"
-	"github.com/junior-meowmeow/go-echo-huma-rest-api/test/testhelper"
+	"github.com/junior-meowmeow/go-echo-huma-rest-api/test/helper/testenv"
 )
 
 func TestMongoUserRepository(t *testing.T) {
-	db := testhelper.SetupMongoDatabase(t)
+	db := testenv.SetupMongoDatabase(t)
 	ctx := context.Background()
 	repo := mongodb.NewUserRepository(db)
 	coll := repo.Collection
 
 	t.Run("CreateUser", func(t *testing.T) {
-		testhelper.CleanMongoCollection(t, coll)
+		testenv.CleanMongoCollection(t, coll)
 
 		t.Run("Should create user successfully", func(t *testing.T) {
 			input := &entity.User{
@@ -47,7 +47,7 @@ func TestMongoUserRepository(t *testing.T) {
 
 	t.Run("GetUserByUsername", func(t *testing.T) {
 		t.Run("Should return user when exists", func(t *testing.T) {
-			testhelper.CleanMongoCollection(t, coll)
+			testenv.CleanMongoCollection(t, coll)
 
 			testDoc := document.UserDocument{
 				Username: "test_user",
@@ -65,7 +65,7 @@ func TestMongoUserRepository(t *testing.T) {
 		})
 
 		t.Run("Should return ErrNotFound when user does not exist", func(t *testing.T) {
-			testhelper.CleanMongoCollection(t, coll)
+			testenv.CleanMongoCollection(t, coll)
 
 			_, err := repo.GetUserByUsername(ctx, "non_existent_user")
 

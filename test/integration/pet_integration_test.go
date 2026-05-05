@@ -18,6 +18,10 @@ func TestPetSuite(t *testing.T) {
 	suite.Run(t, new(PetSuite))
 }
 
+func (s *PetSuite) SetupSuite() {
+	s.SetupMongo()
+}
+
 type petCategorySchema struct {
 	ID   int64  `json:"id"`
 	Name string `json:"name"`

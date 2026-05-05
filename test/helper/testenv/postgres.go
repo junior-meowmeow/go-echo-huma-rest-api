@@ -1,4 +1,4 @@
-package testhelper
+package testenv
 
 import (
 	"context"
@@ -44,7 +44,8 @@ func SetupPostgresDatabase(t *testing.T) *pgxpool.Pool {
 	require.NoError(t, err, "failed to open sql db for migrations")
 	defer sqlDB.Close()
 
-	migrationDir := filepath.Join("..", "..", "..", "..", "db", "migrations")
+	rootDir := getProjectRoot()
+	migrationDir := filepath.Join(rootDir, "db", "migrations")
 	err = goose.Up(sqlDB, migrationDir)
 	require.NoError(t, err, "failed to run goose migrations")
 

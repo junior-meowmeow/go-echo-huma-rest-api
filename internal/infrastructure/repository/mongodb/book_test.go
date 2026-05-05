@@ -13,11 +13,11 @@ import (
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/domain/entity"
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/infrastructure/repository/mongodb"
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/infrastructure/repository/mongodb/document"
-	"github.com/junior-meowmeow/go-echo-huma-rest-api/test/testhelper"
+	"github.com/junior-meowmeow/go-echo-huma-rest-api/test/helper/testenv"
 )
 
 func TestMongoBookRepository(t *testing.T) {
-	db := testhelper.SetupMongoDatabase(t)
+	db := testenv.SetupMongoDatabase(t)
 	ctx := context.Background()
 	repo := mongodb.NewBookRepository(db)
 	coll := repo.Collection
@@ -25,7 +25,7 @@ func TestMongoBookRepository(t *testing.T) {
 	mockTime := time.Date(2025, 10, 25, 12, 0, 0, 0, time.UTC)
 
 	t.Run("CreateBook", func(t *testing.T) {
-		testhelper.CleanMongoCollection(t, coll)
+		testenv.CleanMongoCollection(t, coll)
 
 		t.Run("Should create book successfully", func(t *testing.T) {
 			metadata := entity.BookMetadata{
@@ -55,7 +55,7 @@ func TestMongoBookRepository(t *testing.T) {
 
 	t.Run("GetBookByID", func(t *testing.T) {
 		t.Run("Should return book when exists", func(t *testing.T) {
-			testhelper.CleanMongoCollection(t, coll)
+			testenv.CleanMongoCollection(t, coll)
 			bookUUID, err := uuid.NewV7()
 			require.NoError(t, err)
 			seed := document.BookDocument{ID: bookUUID, Name: "Test Book"}
@@ -69,7 +69,7 @@ func TestMongoBookRepository(t *testing.T) {
 		})
 
 		t.Run("Should return ErrNotFound when book does not exist", func(t *testing.T) {
-			testhelper.CleanMongoCollection(t, coll)
+			testenv.CleanMongoCollection(t, coll)
 			bookUUID, err := uuid.NewV7()
 			require.NoError(t, err)
 
@@ -79,7 +79,7 @@ func TestMongoBookRepository(t *testing.T) {
 	})
 
 	t.Run("GetAllBooks", func(t *testing.T) {
-		testhelper.CleanMongoCollection(t, coll)
+		testenv.CleanMongoCollection(t, coll)
 
 		docs := []any{
 			document.BookDocument{ID: uuid.New(), Name: "Book 1", CreatedAt: mockTime.Add(-2 * time.Hour)},
@@ -99,7 +99,7 @@ func TestMongoBookRepository(t *testing.T) {
 	})
 
 	t.Run("GetBooksWithPagination", func(t *testing.T) {
-		testhelper.CleanMongoCollection(t, coll)
+		testenv.CleanMongoCollection(t, coll)
 
 		docs := []any{
 			document.BookDocument{ID: uuid.New(), Name: "Book 1", CreatedAt: mockTime.Add(-4 * time.Hour)},

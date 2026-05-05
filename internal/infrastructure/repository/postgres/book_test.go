@@ -11,18 +11,18 @@ import (
 
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/domain/entity"
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/infrastructure/repository/postgres"
-	"github.com/junior-meowmeow/go-echo-huma-rest-api/test/testhelper"
+	"github.com/junior-meowmeow/go-echo-huma-rest-api/test/helper/testenv"
 )
 
 func TestPostgresBookRepository(t *testing.T) {
-	dbPool := testhelper.SetupPostgresDatabase(t)
+	dbPool := testenv.SetupPostgresDatabase(t)
 	ctx := context.Background()
 	repo := postgres.NewBookRepository(dbPool)
 
 	mockTime := time.Date(2025, 10, 25, 12, 0, 0, 0, time.UTC)
 
 	t.Run("CreateBook", func(t *testing.T) {
-		testhelper.CleanPostgresTable(t, dbPool, "books")
+		testenv.CleanPostgresTable(t, dbPool, "books")
 
 		t.Run("Should create book successfully", func(t *testing.T) {
 			input := &entity.Book{
@@ -69,7 +69,7 @@ func TestPostgresBookRepository(t *testing.T) {
 
 	t.Run("GetBookByID", func(t *testing.T) {
 		t.Run("Should return book when exists", func(t *testing.T) {
-			testhelper.CleanPostgresTable(t, dbPool, "books")
+			testenv.CleanPostgresTable(t, dbPool, "books")
 
 			expectedID := uuid.NewString()
 			expectedName := "Test Book"
@@ -85,7 +85,7 @@ func TestPostgresBookRepository(t *testing.T) {
 		})
 
 		t.Run("Should return ErrNotFound when book does not exist", func(t *testing.T) {
-			testhelper.CleanPostgresTable(t, dbPool, "books")
+			testenv.CleanPostgresTable(t, dbPool, "books")
 
 			_, err := repo.GetBookByID(ctx, uuid.NewString())
 			require.ErrorIs(t, err, entity.ErrNotFound)
@@ -93,7 +93,7 @@ func TestPostgresBookRepository(t *testing.T) {
 	})
 
 	t.Run("GetAllBooks", func(t *testing.T) {
-		testhelper.CleanPostgresTable(t, dbPool, "books")
+		testenv.CleanPostgresTable(t, dbPool, "books")
 
 		seeds := []*entity.Book{
 			{ID: uuid.NewString(), Name: "Book 1", CreatedAt: mockTime.Add(-2 * time.Hour)},
@@ -118,7 +118,7 @@ func TestPostgresBookRepository(t *testing.T) {
 	})
 
 	t.Run("GetBooksWithPagination", func(t *testing.T) {
-		testhelper.CleanPostgresTable(t, dbPool, "books")
+		testenv.CleanPostgresTable(t, dbPool, "books")
 
 		seeds := []*entity.Book{
 			{ID: uuid.NewString(), Name: "Book 1", CreatedAt: mockTime.Add(-4 * time.Hour)},

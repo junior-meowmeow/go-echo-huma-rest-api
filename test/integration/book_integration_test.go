@@ -2,31 +2,46 @@ package integration_test
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 	"time"
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/suite"
-	"go.mongodb.org/mongo-driver/v2/bson"
 
-	"github.com/junior-meowmeow/go-echo-huma-rest-api/test/testhelper"
+	"github.com/junior-meowmeow/go-echo-huma-rest-api/test/helper/adaptor/database"
 )
 
 type BookSuite struct {
 	IntegrationTestSuite
 }
 
-func TestBookSuite(t *testing.T) {
-	suite.Run(t, new(BookSuite))
+func (s *BookSuite) SetupTest() {
+	s.Database.CleanBooks(s.T())
 }
 
-func (s *BookSuite) SetupTest() {
-	testhelper.CleanMongoCollection(s.T(), s.MongoDB.Collection("books"))
+type MongoBookSuite struct{ BookSuite }
+
+func (s *MongoBookSuite) SetupSuite() {
+	s.SetupMongo()
+}
+
+func TestMongoBookSuite(t *testing.T) {
+	suite.Run(t, new(MongoBookSuite))
+}
+
+type PostgresBookSuite struct{ BookSuite }
+
+func (s *PostgresBookSuite) SetupSuite() {
+	s.SetupPostgres()
+}
+
+func TestPostgresBookSuite(t *testing.T) {
+	suite.Run(t, new(PostgresBookSuite))
 }
 
 type bookMetadataBody struct {
@@ -129,14 +144,6 @@ func (s *BookSuite) decodeGetBookByIDResponse(w *httptest.ResponseRecorder) book
 	return resp
 }
 
-func (s *BookSuite) dbBookCount() int64 {
-	s.T().Helper()
-
-	count, err := s.MongoDB.Collection("books").CountDocuments(context.Background(), bson.D{})
-	s.Require().NoError(err)
-	return count
-}
-
 func validBook() createBookBody {
 	return createBookBody{
 		Name:        "Test Book",
@@ -168,32 +175,20 @@ func (s *BookSuite) TestPostBook_ReturnsCreatedID() {
 	s.Require().NoError(err, "ID must be a valid UUID")
 }
 
-func (s *BookSuite) TestPostBook_PersistsToMongoDB() {
+func (s *BookSuite) TestPostBook_PersistsToDatabase() {
 	body := validBook()
-	s.mustPostBook(body)
+	id := s.mustPostBook(body)
 
-	s.Equal(int64(1), s.dbBookCount())
+	s.Equal(int64(1), s.Database.CountBooks(s.T()))
 
-	var doc bson.M
-	err := s.MongoDB.Collection("books").FindOne(context.Background(), bson.D{}).Decode(&doc)
-	s.Require().NoError(err)
+	doc := s.Database.GetBookByID(s.T(), id)
 
-	s.Equal(body.Name, doc["name"])
-	s.Equal(body.Description, doc["description"])
-	s.NotEmpty(doc["_id"])
-	s.NotEmpty(doc["createdAt"])
-
-	meta, ok := doc["metadata"].(bson.D)
-	s.Require().True(ok, "metadata should be stored as a nested document")
-
-	metaMap := make(map[string]any)
-	for _, elem := range meta {
-		metaMap[elem.Key] = elem.Value
-	}
-
-	s.Equal(body.Metadata.Author, metaMap["author"])
-	s.Equal(body.Metadata.ISBN, metaMap["isbn"])
-	s.Equal(body.Metadata.Genre, metaMap["genre"])
+	s.Equal(body.Name, doc.Name)
+	s.Equal(body.Description, doc.Description)
+	s.Equal(id, doc.ID)
+	s.Equal(body.Metadata.Author, doc.Author)
+	s.Equal(body.Metadata.ISBN, doc.ISBN)
+	s.Equal(body.Metadata.Genre, doc.Genre)
 }
 
 func (s *BookSuite) TestPostBook_WithOptionalCoverImage() {
@@ -203,10 +198,8 @@ func (s *BookSuite) TestPostBook_WithOptionalCoverImage() {
 	id := s.mustPostBook(body)
 	s.NotEmpty(id)
 
-	var doc bson.M
-	err := s.MongoDB.Collection("books").FindOne(context.Background(), bson.D{}).Decode(&doc)
-	s.Require().NoError(err)
-	s.Equal(body.CoverImageFileID, doc["coverImageFileId"])
+	doc := s.Database.GetBookByID(s.T(), id)
+	s.Equal(body.CoverImageFileID, doc.CoverImageFileID)
 }
 
 func (s *BookSuite) TestPostBook_WithoutOptionalFields() {
@@ -223,7 +216,7 @@ func (s *BookSuite) TestPostBook_WithoutOptionalFields() {
 
 	w := s.postBook(body)
 	s.Equal(http.StatusCreated, w.Code)
-	s.Equal(int64(1), s.dbBookCount())
+	s.Equal(int64(1), s.Database.CountBooks(s.T()))
 }
 
 func (s *BookSuite) TestPostBook_MultipleBooks_AllPersisted() {
@@ -239,13 +232,13 @@ func (s *BookSuite) TestPostBook_MultipleBooks_AllPersisted() {
 		ids[id] = true
 	}
 
-	s.Equal(int64(len(books)), s.dbBookCount())
+	s.Equal(int64(len(books)), s.Database.CountBooks(s.T()))
 	s.Len(ids, len(books), "every created book must have a unique ID")
 }
 
 func (s *BookSuite) TestPostBook_ValidationErrors() {
-	longName := string(make([]byte, 101))
-	longDescription := string(make([]byte, 501))
+	longName := strings.Repeat("a", 101)
+	longDescription := strings.Repeat("a", 501)
 
 	cases := []struct {
 		name       string
@@ -266,20 +259,20 @@ func (s *BookSuite) TestPostBook_ValidationErrors() {
 
 	for _, tc := range cases {
 		s.Run(tc.name, func() {
-			testhelper.CleanMongoCollection(s.T(), s.MongoDB.Collection("books"))
+			s.Database.CleanBooks(s.T())
 
 			w := s.postBook(tc.body)
 
 			s.Equal(tc.wantStatus, w.Code, "case: %q", tc.name)
 			s.NotEqual(http.StatusCreated, w.Code, "invalid payload must not create a resource")
-			s.Equal(int64(0), s.dbBookCount(), "DB must stay empty after failed POST for case %q", tc.name)
+			s.Equal(int64(0), s.Database.CountBooks(s.T()), "DB must stay empty after failed POST for case %q", tc.name)
 		})
 	}
 }
 
 func (s *BookSuite) TestPostBook_BoundaryValues() {
-	exactly100Chars := string(make([]byte, 100))
-	exactly500Chars := string(make([]byte, 500))
+	exactly100Chars := strings.Repeat("a", 100)
+	exactly500Chars := strings.Repeat("a", 500)
 
 	cases := []struct {
 		name string
@@ -297,12 +290,12 @@ func (s *BookSuite) TestPostBook_BoundaryValues() {
 
 	for _, tc := range cases {
 		s.Run(tc.name, func() {
-			testhelper.CleanMongoCollection(s.T(), s.MongoDB.Collection("books"))
+			s.Database.CleanBooks(s.T())
 
 			w := s.postBook(tc.body)
 
 			s.Equal(http.StatusCreated, w.Code, "boundary value should be accepted for case %q", tc.name)
-			s.Equal(int64(1), s.dbBookCount(), "one document should be persisted for case %q", tc.name)
+			s.Equal(int64(1), s.Database.CountBooks(s.T()), "one document should be persisted for case %q", tc.name)
 		})
 	}
 }
@@ -339,14 +332,13 @@ func (s *BookSuite) TestGetBooks_ReturnsCorrectFields() {
 
 func (s *BookSuite) TestGetBooks_ReturnsMostRecentFirst() {
 	now := time.Now().UTC()
-	coll := s.MongoDB.Collection("books")
 
-	_, err := coll.InsertMany(context.Background(), []any{
-		bson.M{"_id": uuid.New(), "name": "Oldest", "description": "", "metadata": bson.M{}, "createdAt": now.Add(-2 * time.Hour)},
-		bson.M{"_id": uuid.New(), "name": "Middle", "description": "", "metadata": bson.M{}, "createdAt": now.Add(-1 * time.Hour)},
-		bson.M{"_id": uuid.New(), "name": "Newest", "description": "", "metadata": bson.M{}, "createdAt": now},
-	})
-	s.Require().NoError(err)
+	books := []database.TestBookRecord{
+		{ID: uuid.NewString(), Name: "Oldest", CreatedAt: now.Add(-2 * time.Hour)},
+		{ID: uuid.NewString(), Name: "Middle", CreatedAt: now.Add(-1 * time.Hour)},
+		{ID: uuid.NewString(), Name: "Newest", CreatedAt: now},
+	}
+	s.Database.SeedBooks(s.T(), books)
 
 	w := s.getBooks("all=true")
 	s.Require().Equal(http.StatusOK, w.Code)
@@ -359,17 +351,15 @@ func (s *BookSuite) TestGetBooks_ReturnsMostRecentFirst() {
 }
 
 func (s *BookSuite) TestGetBooks_Pagination_DefaultPage() {
-	docs := make([]any, 25)
+	docs := make([]database.TestBookRecord, 25)
 	for i := range docs {
-		docs[i] = bson.M{
-			"_id":       uuid.New(),
-			"name":      fmt.Sprintf("Book %02d", i),
-			"metadata":  bson.M{},
-			"createdAt": time.Now().UTC(),
+		docs[i] = database.TestBookRecord{
+			ID:        uuid.NewString(),
+			Name:      fmt.Sprintf("Book %02d", i),
+			CreatedAt: time.Now().UTC(),
 		}
 	}
-	_, err := s.MongoDB.Collection("books").InsertMany(context.Background(), docs)
-	s.Require().NoError(err)
+	s.Database.SeedBooks(s.T(), docs)
 
 	w := s.getBooks("")
 	s.Require().Equal(http.StatusOK, w.Code)
@@ -379,17 +369,15 @@ func (s *BookSuite) TestGetBooks_Pagination_DefaultPage() {
 }
 
 func (s *BookSuite) TestGetBooks_Pagination_SecondPage() {
-	docs := make([]any, 25)
+	docs := make([]database.TestBookRecord, 25)
 	for i := range docs {
-		docs[i] = bson.M{
-			"_id":       uuid.New(),
-			"name":      fmt.Sprintf("Book %02d", i),
-			"metadata":  bson.M{},
-			"createdAt": time.Now().UTC(),
+		docs[i] = database.TestBookRecord{
+			ID:        uuid.NewString(),
+			Name:      fmt.Sprintf("Book %02d", i),
+			CreatedAt: time.Now().UTC(),
 		}
 	}
-	_, err := s.MongoDB.Collection("books").InsertMany(context.Background(), docs)
-	s.Require().NoError(err)
+	s.Database.SeedBooks(s.T(), docs)
 
 	w := s.getBooks("pageNumber=2&pageSize=20")
 	s.Require().Equal(http.StatusOK, w.Code)
@@ -399,12 +387,15 @@ func (s *BookSuite) TestGetBooks_Pagination_SecondPage() {
 }
 
 func (s *BookSuite) TestGetBooks_Pagination_CustomPageSize() {
-	docs := make([]any, 10)
+	docs := make([]database.TestBookRecord, 10)
 	for i := range docs {
-		docs[i] = bson.M{"_id": uuid.New(), "name": fmt.Sprintf("Book %02d", i), "metadata": bson.M{}, "createdAt": time.Now().UTC()}
+		docs[i] = database.TestBookRecord{
+			ID:        uuid.NewString(),
+			Name:      fmt.Sprintf("Book %02d", i),
+			CreatedAt: time.Now().UTC(),
+		}
 	}
-	_, err := s.MongoDB.Collection("books").InsertMany(context.Background(), docs)
-	s.Require().NoError(err)
+	s.Database.SeedBooks(s.T(), docs)
 
 	w := s.getBooks("pageSize=3&pageNumber=1")
 	s.Require().Equal(http.StatusOK, w.Code)
@@ -414,12 +405,15 @@ func (s *BookSuite) TestGetBooks_Pagination_CustomPageSize() {
 }
 
 func (s *BookSuite) TestGetBooks_Pagination_GetAll_IgnoresPagination() {
-	docs := make([]any, 25)
+	docs := make([]database.TestBookRecord, 25)
 	for i := range docs {
-		docs[i] = bson.M{"_id": uuid.New(), "name": fmt.Sprintf("Book %02d", i), "metadata": bson.M{}, "createdAt": time.Now().UTC()}
+		docs[i] = database.TestBookRecord{
+			ID:        uuid.NewString(),
+			Name:      fmt.Sprintf("Book %02d", i),
+			CreatedAt: time.Now().UTC(),
+		}
 	}
-	_, err := s.MongoDB.Collection("books").InsertMany(context.Background(), docs)
-	s.Require().NoError(err)
+	s.Database.SeedBooks(s.T(), docs)
 
 	w := s.getBooks("all=true&pageSize=3")
 	s.Require().Equal(http.StatusOK, w.Code)

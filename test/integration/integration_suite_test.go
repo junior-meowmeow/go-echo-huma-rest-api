@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/aws/aws-sdk-go-v2/service/s3"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/stretchr/testify/suite"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 
@@ -16,16 +17,20 @@ import (
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/infrastructure/external/petstore/client"
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/infrastructure/repository"
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/infrastructure/repository/mongodb"
+	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/infrastructure/repository/postgres"
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/infrastructure/storage"
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/usecase"
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/utility"
-	"github.com/junior-meowmeow/go-echo-huma-rest-api/test/testhelper"
+	"github.com/junior-meowmeow/go-echo-huma-rest-api/test/helper/adaptor/database"
+	"github.com/junior-meowmeow/go-echo-huma-rest-api/test/helper/testenv"
 )
 
 type IntegrationTestSuite struct {
 	suite.Suite
 
+	Database      database.Adapter
 	MongoDB       *mongo.Database
+	PgxPool       *pgxpool.Pool
 	S3Client      *s3.Client
 	MockPetServer *httptest.Server
 
@@ -36,18 +41,39 @@ type IntegrationTestSuite struct {
 	Router           http.Handler
 }
 
-func (s *IntegrationTestSuite) SetupSuite() {
-	s.MongoDB = testhelper.SetupMongoDatabase(s.T())
-	s.S3Client = testhelper.SetupS3Client(s.T())
+func (s *IntegrationTestSuite) SetupMongo() {
+	s.MongoDB = testenv.SetupMongoDatabase(s.T())
+	s.Database = database.NewMongoAdapter(s.MongoDB)
+
+	repos := repository.Repositories{
+		Review:     mongodb.NewReviewRepository(s.MongoDB),
+		FileRecord: mongodb.NewFileRecordRepository(s.MongoDB),
+		User:       mongodb.NewUserRepository(s.MongoDB),
+		Book:       mongodb.NewBookRepository(s.MongoDB),
+		BookPage:   mongodb.NewBookPageRepository(s.MongoDB),
+	}
+	s.setupApp(&repos)
+}
+
+func (s *IntegrationTestSuite) SetupPostgres() {
+	s.PgxPool = testenv.SetupPostgresDatabase(s.T())
+	s.Database = database.NewPostgresAdapter(s.PgxPool)
+
+	repos := repository.Repositories{
+		Book:     postgres.NewBookRepository(s.PgxPool),
+		BookPage: postgres.NewBookPageRepository(s.PgxPool),
+	}
+	s.setupApp(&repos)
+}
+
+func (s *IntegrationTestSuite) setupApp(repos *repository.Repositories) {
+	s.Repositories = repos
+	s.S3Client = testenv.SetupS3Client(s.T())
 
 	s.MockPetServer = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusNotImplemented)
 	}))
 	petClient, _ := client.NewClientWithResponses(s.MockPetServer.URL)
-
-	s.Repositories = repository.NewRepositories(s.MongoDB, nil)
-	s.Repositories.Book = mongodb.NewBookRepository(s.MongoDB)
-	s.Repositories.BookPage = mongodb.NewBookPageRepository(s.MongoDB)
 
 	s.Storages = storage.NewStorages(s.S3Client, "test-bucket")
 	s.ExternalServices = external.NewExternalServices(petClient)

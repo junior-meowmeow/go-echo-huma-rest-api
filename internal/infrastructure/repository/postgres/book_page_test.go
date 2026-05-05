@@ -11,11 +11,11 @@ import (
 
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/domain/entity"
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/infrastructure/repository/postgres"
-	"github.com/junior-meowmeow/go-echo-huma-rest-api/test/testhelper"
+	"github.com/junior-meowmeow/go-echo-huma-rest-api/test/helper/testenv"
 )
 
 func TestPostgresBookPageRepository(t *testing.T) {
-	dbPool := testhelper.SetupPostgresDatabase(t)
+	dbPool := testenv.SetupPostgresDatabase(t)
 	ctx := context.Background()
 	repo := postgres.NewBookPageRepository(dbPool)
 
@@ -30,7 +30,7 @@ func TestPostgresBookPageRepository(t *testing.T) {
 	}
 
 	t.Run("CreateBookPage", func(t *testing.T) {
-		testhelper.CleanPostgresTable(t, dbPool, "book_pages", "books")
+		testenv.CleanPostgresTable(t, dbPool, "book_pages", "books")
 
 		t.Run("Should create book page successfully", func(t *testing.T) {
 			bookID := uuid.NewString()
@@ -83,7 +83,7 @@ func TestPostgresBookPageRepository(t *testing.T) {
 
 	t.Run("GetBookPageByID", func(t *testing.T) {
 		t.Run("Should return book page when exists", func(t *testing.T) {
-			testhelper.CleanPostgresTable(t, dbPool, "book_pages", "books")
+			testenv.CleanPostgresTable(t, dbPool, "book_pages", "books")
 
 			bookID := uuid.NewString()
 			seedDummyBook(t, bookID)
@@ -103,7 +103,7 @@ func TestPostgresBookPageRepository(t *testing.T) {
 		})
 
 		t.Run("Should return ErrNotFound when not exists", func(t *testing.T) {
-			testhelper.CleanPostgresTable(t, dbPool, "book_pages", "books")
+			testenv.CleanPostgresTable(t, dbPool, "book_pages", "books")
 
 			_, err := repo.GetBookPageByID(ctx, uuid.NewString())
 			require.ErrorIs(t, err, entity.ErrNotFound)
@@ -111,7 +111,7 @@ func TestPostgresBookPageRepository(t *testing.T) {
 	})
 
 	t.Run("GetBookPagesByBookID", func(t *testing.T) {
-		testhelper.CleanPostgresTable(t, dbPool, "book_pages", "books")
+		testenv.CleanPostgresTable(t, dbPool, "book_pages", "books")
 
 		bookID := uuid.NewString()
 		seedDummyBook(t, bookID)
@@ -143,7 +143,7 @@ func TestPostgresBookPageRepository(t *testing.T) {
 	})
 
 	t.Run("GetBookpagesByBookIDWithPagination", func(t *testing.T) {
-		testhelper.CleanPostgresTable(t, dbPool, "book_pages", "books")
+		testenv.CleanPostgresTable(t, dbPool, "book_pages", "books")
 
 		bookID := uuid.NewString()
 		seedDummyBook(t, bookID)
@@ -184,7 +184,7 @@ func TestPostgresBookPageRepository(t *testing.T) {
 	})
 
 	t.Run("GetBookpagesByPageRange", func(t *testing.T) {
-		testhelper.CleanPostgresTable(t, dbPool, "book_pages", "books")
+		testenv.CleanPostgresTable(t, dbPool, "book_pages", "books")
 
 		bookID := uuid.NewString()
 		seedDummyBook(t, bookID)
@@ -216,7 +216,7 @@ func TestPostgresBookPageRepository(t *testing.T) {
 	})
 
 	t.Run("GetBookpagesAroundPageNumber", func(t *testing.T) {
-		testhelper.CleanPostgresTable(t, dbPool, "book_pages", "books")
+		testenv.CleanPostgresTable(t, dbPool, "book_pages", "books")
 
 		bookID := uuid.NewString()
 		seedDummyBook(t, bookID)

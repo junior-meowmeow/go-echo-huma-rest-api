@@ -12,11 +12,11 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/infrastructure/storage/s3api"
-	"github.com/junior-meowmeow/go-echo-huma-rest-api/test/testhelper"
+	"github.com/junior-meowmeow/go-echo-huma-rest-api/test/helper/testenv"
 )
 
 func TestS3Storage(t *testing.T) {
-	s3Client := testhelper.SetupS3Client(t)
+	s3Client := testenv.SetupS3Client(t)
 	ctx := context.Background()
 	bucketName := "test-bucket"
 
@@ -28,7 +28,7 @@ func TestS3Storage(t *testing.T) {
 	s3Storage := s3api.NewS3Storage(s3Client, bucketName)
 
 	t.Run("UploadFile", func(t *testing.T) {
-		testhelper.CleanS3Bucket(t, ctx, s3Client, bucketName)
+		testenv.CleanS3Bucket(t, ctx, s3Client, bucketName)
 		content := "Test content"
 		reader := strings.NewReader(content)
 
@@ -50,7 +50,7 @@ func TestS3Storage(t *testing.T) {
 	})
 
 	t.Run("CheckFileExists", func(t *testing.T) {
-		testhelper.CleanS3Bucket(t, ctx, s3Client, bucketName)
+		testenv.CleanS3Bucket(t, ctx, s3Client, bucketName)
 
 		key := "exists.txt"
 		_, err := s3Client.PutObject(ctx, &s3.PutObjectInput{
@@ -77,7 +77,7 @@ func TestS3Storage(t *testing.T) {
 	})
 
 	t.Run("ListFiles", func(t *testing.T) {
-		testhelper.CleanS3Bucket(t, ctx, s3Client, bucketName)
+		testenv.CleanS3Bucket(t, ctx, s3Client, bucketName)
 
 		keysToUpload := []string{"a.txt", "b.txt"}
 		for _, k := range keysToUpload {
@@ -104,7 +104,7 @@ func TestS3Storage(t *testing.T) {
 	})
 
 	t.Run("GetPresignedDownloadURL", func(t *testing.T) {
-		testhelper.CleanS3Bucket(t, ctx, s3Client, bucketName)
+		testenv.CleanS3Bucket(t, ctx, s3Client, bucketName)
 		key := "privatefile.txt"
 		filename := "download.txt"
 

@@ -2,7 +2,6 @@ package integration_test
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -12,9 +11,8 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/suite"
-	"go.mongodb.org/mongo-driver/v2/bson"
 
-	"github.com/junior-meowmeow/go-echo-huma-rest-api/test/testhelper"
+	"github.com/junior-meowmeow/go-echo-huma-rest-api/test/helper/adaptor/database"
 )
 
 type BookPageSuite struct {
@@ -25,27 +23,41 @@ type BookPageSuite struct {
 	bookID string
 }
 
-func TestBookPageSuite(t *testing.T) {
-	suite.Run(t, new(BookPageSuite))
+func (s *BookPageSuite) SetupTest() {
+	s.Database.CleanBookPages(s.T())
+	s.Database.CleanBooks(s.T())
+
+	s.bookID = uuid.NewString()
+	parentBook := database.TestBookRecord{
+		ID:          s.bookID,
+		Name:        "Test Book",
+		Description: "Parent book for book page tests.",
+		Author:      "Junior MeowMeow",
+		ISBN:        "978-0132350884",
+		Genre:       "Test",
+		CreatedAt:   time.Now().UTC(),
+	}
+	s.Database.SeedBooks(s.T(), []database.TestBookRecord{parentBook})
 }
 
-func (s *BookPageSuite) SetupTest() {
-	testhelper.CleanMongoCollection(s.T(), s.MongoDB.Collection("book_pages"))
-	testhelper.CleanMongoCollection(s.T(), s.MongoDB.Collection("books"))
+type MongoBookPageSuite struct{ BookPageSuite }
 
-	bookUUID, err := uuid.NewV7()
-	s.Require().NoError(err)
-	now := time.Now().UTC()
-	_, err = s.MongoDB.Collection("books").InsertOne(context.Background(), bson.M{
-		"_id":         bookUUID,
-		"name":        "Test Book",
-		"description": "Parent book for book page tests.",
-		"metadata":    bson.M{"author": "Junior MeowMeow", "isbn": "978-0132350884", "genre": "Test"},
-		"createdAt":   now,
-		"updatedAt":   now,
-	})
-	s.Require().NoError(err)
-	s.bookID = bookUUID.String()
+func (s *MongoBookPageSuite) SetupSuite() {
+	s.SetupMongo()
+}
+
+func TestMongoBookPageSuite(t *testing.T) {
+	suite.Run(t, new(MongoBookPageSuite))
+}
+
+type PostgresBookPageSuite struct{ BookPageSuite }
+
+func (s *PostgresBookPageSuite) SetupSuite() {
+	s.SetupPostgres()
+}
+
+func TestPostgresBookPageSuite(t *testing.T) {
+	suite.Run(t, new(PostgresBookPageSuite))
 }
 
 type bookPageMetadataBody struct {
@@ -168,14 +180,6 @@ func (s *BookPageSuite) decodeGetBookPageByIDResponse(w *httptest.ResponseRecord
 	return resp
 }
 
-func (s *BookPageSuite) dbBookPageCount() int64 {
-	s.T().Helper()
-
-	count, err := s.MongoDB.Collection("book_pages").CountDocuments(context.Background(), bson.D{})
-	s.Require().NoError(err)
-	return count
-}
-
 func (s *BookPageSuite) validBookPage(bookPageNumber int64) createBookPageBody {
 	return createBookPageBody{
 		BookID:     s.bookID,
@@ -190,25 +194,19 @@ func (s *BookPageSuite) validBookPage(bookPageNumber int64) createBookPageBody {
 func (s *BookPageSuite) seedPages(count int) {
 	s.T().Helper()
 
-	now := time.Now().UTC()
-	docs := make([]any, count)
-	bookUUID, err := uuid.Parse(s.bookID)
-	s.Require().NoError(err)
-
-	for i := range docs {
-		docs[i] = bson.M{
-			"_id":        uuid.New(),
-			"book_id":    bookUUID,
-			"pageNumber": int64(i + 1),
-			"content":    fmt.Sprintf("Page %d content", i+1),
-			"metadata":   bson.M{"isBookmarked": false, "highlight": ""},
-			"createdAt":  now,
-			"updatedAt":  now,
+	pages := make([]database.TestBookPageRecord, count)
+	for i := range pages {
+		pages[i] = database.TestBookPageRecord{
+			ID:           uuid.NewString(),
+			BookID:       s.bookID,
+			PageNumber:   int64(i + 1),
+			Content:      fmt.Sprintf("Page %d content", i+1),
+			IsBookmarked: false,
+			Highlight:    "",
 		}
 	}
 
-	_, err = s.MongoDB.Collection("book_pages").InsertMany(context.Background(), docs)
-	s.Require().NoError(err)
+	s.Database.SeedBookPages(s.T(), pages)
 }
 
 func (s *BookPageSuite) TestPostBookPage_ReturnsHTTP201() {
@@ -230,35 +228,18 @@ func (s *BookPageSuite) TestPostBookPage_ReturnsCreatedID() {
 	s.Require().NoError(err, "ID must be a valid UUID")
 }
 
-func (s *BookPageSuite) TestPostBookPage_PersistsToMongoDB() {
+func (s *BookPageSuite) TestPostBookPage_PersistsToDatabase() {
 	body := s.validBookPage(1)
-	s.mustPostBookPage(body)
+	id := s.mustPostBookPage(body)
 
-	s.Equal(int64(1), s.dbBookPageCount())
+	s.Equal(int64(1), s.Database.CountBookPages(s.T()))
 
-	var doc bson.M
-	err := s.MongoDB.Collection("book_pages").FindOne(context.Background(), bson.D{}).Decode(&doc)
-	s.Require().NoError(err)
+	doc := s.Database.GetBookPageByID(s.T(), id)
 
-	s.Equal(body.PageNumber, doc["pageNumber"])
-	s.Equal(body.Content, doc["content"])
-	s.NotEmpty(doc["_id"])
-	s.NotEmpty(doc["createdAt"])
-	s.NotEmpty(doc["updatedAt"])
-
-	bookUUID, err := uuid.Parse(s.bookID)
-	s.Require().NoError(err)
-	docBookUUID, err := uuid.FromBytes(doc["book_id"].(bson.Binary).Data)
-	s.Require().NoError(err)
-	s.Equal(bookUUID, docBookUUID, "book_id must reference the parent book")
-
-	meta, ok := doc["metadata"].(bson.D)
-	s.Require().True(ok, "metadata should be stored as a nested document")
-	metaMap := make(map[string]any)
-	for _, elem := range meta {
-		metaMap[elem.Key] = elem.Value
-	}
-	s.Equal(body.Metadata.IsBookmarked, metaMap["isBookmarked"])
+	s.Equal(body.PageNumber, doc.PageNumber)
+	s.Equal(body.Content, doc.Content)
+	s.Equal(s.bookID, doc.BookID)
+	s.Equal(body.Metadata.IsBookmarked, doc.IsBookmarked)
 }
 
 func (s *BookPageSuite) TestPostBookPage_WithOptionalAttachedImage() {
@@ -268,10 +249,8 @@ func (s *BookPageSuite) TestPostBookPage_WithOptionalAttachedImage() {
 	id := s.mustPostBookPage(body)
 	s.NotEmpty(id)
 
-	var doc bson.M
-	err := s.MongoDB.Collection("book_pages").FindOne(context.Background(), bson.D{}).Decode(&doc)
-	s.Require().NoError(err)
-	s.Equal(body.AttachedImageFileID, doc["attachedImageFileId"])
+	doc := s.Database.GetBookPageByID(s.T(), id)
+	s.Equal(body.AttachedImageFileID, doc.AttachedImageFileID)
 }
 
 func (s *BookPageSuite) TestPostBookPage_WithBookmark() {
@@ -279,20 +258,11 @@ func (s *BookPageSuite) TestPostBookPage_WithBookmark() {
 	body.Metadata.IsBookmarked = true
 	body.Metadata.Highlight = "Important passage"
 
-	s.mustPostBookPage(body)
+	id := s.mustPostBookPage(body)
 
-	var doc bson.M
-	err := s.MongoDB.Collection("book_pages").FindOne(context.Background(), bson.D{}).Decode(&doc)
-	s.Require().NoError(err)
-
-	meta, ok := doc["metadata"].(bson.D)
-	s.Require().True(ok)
-	metaMap := make(map[string]any)
-	for _, elem := range meta {
-		metaMap[elem.Key] = elem.Value
-	}
-	s.Equal(true, metaMap["isBookmarked"])
-	s.Equal("Important passage", metaMap["highlight"])
+	doc := s.Database.GetBookPageByID(s.T(), id)
+	s.True(doc.IsBookmarked)
+	s.Equal("Important passage", doc.Highlight)
 }
 
 func (s *BookPageSuite) TestPostBookPage_MultiplePages_AllPersisted() {
@@ -302,7 +272,7 @@ func (s *BookPageSuite) TestPostBookPage_MultiplePages_AllPersisted() {
 		ids[id] = true
 	}
 
-	s.Equal(int64(5), s.dbBookPageCount())
+	s.Equal(int64(5), s.Database.CountBookPages(s.T()))
 	s.Len(ids, 5, "every created page must have a unique ID")
 }
 
@@ -318,14 +288,14 @@ func (s *BookPageSuite) TestPostBookPage_InvalidBookID_Returns422() {
 
 	for _, tc := range cases {
 		s.Run(tc.name, func() {
-			testhelper.CleanMongoCollection(s.T(), s.MongoDB.Collection("book_pages"))
+			s.Database.CleanBookPages(s.T())
 
 			body := s.validBookPage(1)
 			body.BookID = tc.bookID
 			w := s.postBookPage(body)
 
 			s.Equal(http.StatusUnprocessableEntity, w.Code, "case: %q", tc.name)
-			s.Equal(int64(0), s.dbBookPageCount())
+			s.Equal(int64(0), s.Database.CountBookPages(s.T()))
 		})
 	}
 }
@@ -379,18 +349,13 @@ func (s *BookPageSuite) TestGetBookPages_ReturnsPageNumberAscending() {
 
 func (s *BookPageSuite) TestGetBookPages_IsolatedByBookID_OnlyReturnsOwnPages() {
 	// Insert a second book.
-	otherBookUUID, err := uuid.NewV7()
-	s.Require().NoError(err)
-	now := time.Now().UTC()
-	_, err = s.MongoDB.Collection("books").InsertOne(context.Background(), bson.M{
-		"_id":       otherBookUUID,
-		"name":      "Other Book",
-		"metadata":  bson.M{},
-		"createdAt": now,
-		"updatedAt": now,
-	})
-	s.Require().NoError(err)
-	otherBookID := otherBookUUID.String()
+	otherBookID := uuid.NewString()
+	otherBook := database.TestBookRecord{
+		ID:        otherBookID,
+		Name:      "Other Book",
+		CreatedAt: time.Now().UTC(),
+	}
+	s.Database.SeedBooks(s.T(), []database.TestBookRecord{otherBook})
 
 	s.mustPostBookPage(s.validBookPage(1)) // belongs to s.bookID
 

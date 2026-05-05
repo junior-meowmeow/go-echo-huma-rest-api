@@ -12,17 +12,17 @@ import (
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/domain/entity"
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/infrastructure/repository/mongodb"
 	"github.com/junior-meowmeow/go-echo-huma-rest-api/internal/infrastructure/repository/mongodb/document"
-	"github.com/junior-meowmeow/go-echo-huma-rest-api/test/testhelper"
+	"github.com/junior-meowmeow/go-echo-huma-rest-api/test/helper/testenv"
 )
 
 func TestMongoBookPageRepository(t *testing.T) {
-	db := testhelper.SetupMongoDatabase(t)
+	db := testenv.SetupMongoDatabase(t)
 	ctx := context.Background()
 	repo := mongodb.NewBookPageRepository(db)
 	coll := repo.Collection
 
 	t.Run("CreateBookPage", func(t *testing.T) {
-		testhelper.CleanMongoCollection(t, coll)
+		testenv.CleanMongoCollection(t, coll)
 
 		t.Run("Should create book page successfully", func(t *testing.T) {
 			input := &entity.BookPage{
@@ -48,7 +48,7 @@ func TestMongoBookPageRepository(t *testing.T) {
 
 	t.Run("GetBookPageByID", func(t *testing.T) {
 		t.Run("Should return book page when exists", func(t *testing.T) {
-			testhelper.CleanMongoCollection(t, coll)
+			testenv.CleanMongoCollection(t, coll)
 
 			bookPageUUID, err := uuid.NewV7()
 			require.NoError(t, err)
@@ -69,7 +69,7 @@ func TestMongoBookPageRepository(t *testing.T) {
 		})
 
 		t.Run("Should return ErrNotFound when not exists", func(t *testing.T) {
-			testhelper.CleanMongoCollection(t, coll)
+			testenv.CleanMongoCollection(t, coll)
 
 			bookPageUUID, err := uuid.NewV7()
 			require.NoError(t, err)
@@ -80,7 +80,7 @@ func TestMongoBookPageRepository(t *testing.T) {
 	})
 
 	t.Run("GetBookPagesByBookID", func(t *testing.T) {
-		testhelper.CleanMongoCollection(t, coll)
+		testenv.CleanMongoCollection(t, coll)
 
 		bookID, err := uuid.NewV7()
 		require.NoError(t, err)
@@ -105,7 +105,7 @@ func TestMongoBookPageRepository(t *testing.T) {
 	})
 
 	t.Run("GetBookpagesByBookIDWithPagination", func(t *testing.T) {
-		testhelper.CleanMongoCollection(t, coll)
+		testenv.CleanMongoCollection(t, coll)
 
 		bookID, err := uuid.NewV7()
 		require.NoError(t, err)
@@ -140,7 +140,7 @@ func TestMongoBookPageRepository(t *testing.T) {
 	})
 
 	t.Run("GetBookpagesByPageRange", func(t *testing.T) {
-		testhelper.CleanMongoCollection(t, coll)
+		testenv.CleanMongoCollection(t, coll)
 
 		bookID, err := uuid.NewV7()
 		require.NoError(t, err)
@@ -166,7 +166,7 @@ func TestMongoBookPageRepository(t *testing.T) {
 	})
 
 	t.Run("GetBookpagesAroundPageNumber", func(t *testing.T) {
-		testhelper.CleanMongoCollection(t, coll)
+		testenv.CleanMongoCollection(t, coll)
 
 		bookID, err := uuid.NewV7()
 		require.NoError(t, err)

@@ -16,9 +16,8 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/stretchr/testify/suite"
-	"go.mongodb.org/mongo-driver/v2/bson"
 
-	"github.com/junior-meowmeow/go-echo-huma-rest-api/test/testhelper"
+	"github.com/junior-meowmeow/go-echo-huma-rest-api/test/helper/testenv"
 )
 
 type FileSuite struct {
@@ -30,13 +29,13 @@ func TestFileSuite(t *testing.T) {
 }
 
 func (s *FileSuite) SetupSuite() {
-	s.IntegrationTestSuite.SetupSuite()
+	s.SetupMongo()
 	s.ensureBucketExists()
 }
 
 func (s *FileSuite) SetupTest() {
-	testhelper.CleanMongoCollection(s.T(), s.MongoDB.Collection("filerecords"))
-	testhelper.CleanS3Bucket(s.T(), context.Background(), s.S3Client, "test-bucket")
+	s.Database.CleanFiles(s.T())
+	testenv.CleanS3Bucket(s.T(), context.Background(), s.S3Client, "test-bucket")
 }
 
 func (s *FileSuite) ensureBucketExists() {
@@ -128,14 +127,6 @@ func (s *FileSuite) decodeFileDownloadLinkResponse(w *httptest.ResponseRecorder)
 	return resp
 }
 
-func (s *FileSuite) dbFileRecordCount() int64 {
-	s.T().Helper()
-
-	count, err := s.MongoDB.Collection("filerecords").CountDocuments(context.Background(), bson.D{})
-	s.Require().NoError(err)
-	return count
-}
-
 func (s *FileSuite) listS3Objects() []string {
 	s.T().Helper()
 
@@ -169,7 +160,7 @@ func (s *FileSuite) TestUploadFile_ReturnsCreatedID() {
 func (s *FileSuite) TestUploadFile_PersistsFileRecordToMongoDB() {
 	s.mustUploadFile([]byte("persist test"), "persist.txt", "text/plain", "")
 
-	s.Equal(int64(1), s.dbFileRecordCount())
+	s.Equal(int64(1), s.Database.CountFiles(s.T()))
 }
 
 func (s *FileSuite) TestUploadFile_PersistsObjectToS3() {
@@ -223,7 +214,7 @@ func (s *FileSuite) TestUploadFile_MultipleFiles_AllPersistedWithUniqueIDs() {
 		ids[id] = true
 	}
 
-	s.Equal(int64(len(files)), s.dbFileRecordCount(), "all file records should be persisted")
+	s.Equal(int64(len(files)), s.Database.CountFiles(s.T()), "all file records should be persisted")
 	s.Len(ids, len(files), "every uploaded file must have a unique ID")
 	s.Len(s.listS3Objects(), len(files), "all files should exist in S3")
 }
@@ -242,12 +233,12 @@ func (s *FileSuite) TestUploadFile_DifferentContentTypes() {
 
 	for _, tc := range cases {
 		s.Run(tc.name, func() {
-			testhelper.CleanMongoCollection(s.T(), s.MongoDB.Collection("filerecords"))
-			testhelper.CleanS3Bucket(s.T(), context.Background(), s.S3Client, "test-bucket")
+			s.Database.CleanFiles(s.T())
+			testenv.CleanS3Bucket(s.T(), context.Background(), s.S3Client, "test-bucket")
 
 			w := s.uploadFile(tc.content, tc.fileName, tc.contentType, "")
 			s.Equal(http.StatusOK, w.Code, "case: %q", tc.name)
-			s.Equal(int64(1), s.dbFileRecordCount(), "case: %q", tc.name)
+			s.Equal(int64(1), s.Database.CountFiles(s.T()), "case: %q", tc.name)
 		})
 	}
 }
@@ -263,7 +254,7 @@ func (s *FileSuite) TestUploadFile_NoFilePart_Returns422() {
 	s.Router.ServeHTTP(w, req)
 
 	s.Equal(http.StatusUnprocessableEntity, w.Code)
-	s.Equal(int64(0), s.dbFileRecordCount(), "no file record should be created on a failed upload")
+	s.Equal(int64(0), s.Database.CountFiles(s.T()), "no file record should be created on a failed upload")
 }
 
 func (s *FileSuite) TestGetFileDownloadLink_ReturnsHTTP200() {

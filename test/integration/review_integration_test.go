@@ -2,17 +2,16 @@ package integration_test
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 	"time"
 
 	"github.com/stretchr/testify/suite"
-	"go.mongodb.org/mongo-driver/v2/bson"
 
-	"github.com/junior-meowmeow/go-echo-huma-rest-api/test/testhelper"
+	"github.com/junior-meowmeow/go-echo-huma-rest-api/test/helper/adaptor/database"
 )
 
 type ReviewSuite struct {
@@ -23,8 +22,12 @@ func TestReviewSuite(t *testing.T) {
 	suite.Run(t, new(ReviewSuite))
 }
 
+func (s *ReviewSuite) SetupSuite() {
+	s.SetupMongo()
+}
+
 func (s *ReviewSuite) SetupTest() {
-	testhelper.CleanMongoCollection(s.T(), s.MongoDB.Collection("reviews"))
+	s.Database.CleanReviews(s.T())
 }
 
 type createReviewBody struct {
@@ -86,14 +89,6 @@ func (s *ReviewSuite) decodeGetReviewsResponse(w *httptest.ResponseRecorder) get
 	return resp
 }
 
-func (s *ReviewSuite) dbReviewCount() int64 {
-	s.T().Helper()
-
-	count, err := s.MongoDB.Collection("reviews").CountDocuments(context.Background(), bson.D{})
-	s.Require().NoError(err)
-	return count
-}
-
 func validReview() createReviewBody {
 	return createReviewBody{
 		Author:  "Alice",
@@ -108,21 +103,22 @@ func (s *ReviewSuite) TestPostReview_CreatesReview_ReturnsHTTP201() {
 	s.Equal(http.StatusCreated, w.Code)
 }
 
-func (s *ReviewSuite) TestPostReview_CreatesReview_PersistsToMongoDB() {
+func (s *ReviewSuite) TestPostReview_CreatesReview_PersistsToDatabase() {
 	body := validReview()
 	s.mustPostReview(body)
 
-	s.Equal(int64(1), s.dbReviewCount())
+	s.Equal(int64(1), s.Database.CountReviews(s.T()))
 
-	var doc bson.M
-	err := s.MongoDB.Collection("reviews").FindOne(context.Background(), bson.D{}).Decode(&doc)
-	s.Require().NoError(err)
+	records := s.Database.GetAllReviews(s.T())
+	s.Require().Len(records, 1)
+	doc := records[0]
 
-	s.Equal(body.Author, doc["author"])
-	s.Equal(int32(body.Rating), doc["rating"])
-	s.Equal(body.Message, doc["message"])
-	s.NotEmpty(doc["_id"], "document should have a MongoDB _id")
-	s.NotEmpty(doc["createdAt"], "document should have a createdAt timestamp")
+	s.Equal(body.Author, doc.Author)
+	s.Equal(body.Rating, doc.Rating)
+	s.Equal(body.Message, doc.Message)
+	s.NotEmpty(doc.ID)
+	s.NotNil(doc.CreatedAt)
+	s.NotNil(doc.UpdatedAt)
 }
 
 func (s *ReviewSuite) TestPostReview_MultipleReviews_AllPersisted() {
@@ -136,11 +132,11 @@ func (s *ReviewSuite) TestPostReview_MultipleReviews_AllPersisted() {
 		s.mustPostReview(r)
 	}
 
-	s.Equal(int64(len(reviews)), s.dbReviewCount())
+	s.Equal(int64(len(reviews)), s.Database.CountReviews(s.T()))
 }
 
 func (s *ReviewSuite) TestPostReview_ValidationErrors() {
-	longMessage := string(make([]byte, 101))
+	longMessage := strings.Repeat("a", 101)
 
 	cases := []struct {
 		name       string
@@ -181,21 +177,21 @@ func (s *ReviewSuite) TestPostReview_ValidationErrors() {
 
 	for _, tc := range cases {
 		s.Run(tc.name, func() {
-			testhelper.CleanMongoCollection(s.T(), s.MongoDB.Collection("reviews"))
+			s.Database.CleanReviews(s.T())
 
 			w := s.postReview(tc.body)
 
 			s.Equal(tc.wantStatus, w.Code, "unexpected status for case %q", tc.name)
 			s.NotEqual(http.StatusCreated, w.Code, "invalid payload must not create a resource")
 
-			s.Equal(int64(0), s.dbReviewCount(), "DB must stay empty after failed POST for case %q", tc.name)
+			s.Equal(int64(0), s.Database.CountReviews(s.T()), "DB must stay empty after failed POST for case %q", tc.name)
 		})
 	}
 }
 
 func (s *ReviewSuite) TestPostReview_BoundaryValues() {
 	exactlyTenChars := "1234567890"
-	exactly100Chars := string(make([]byte, 100))
+	exactly100Chars := strings.Repeat("a", 100)
 
 	cases := []struct {
 		name string
@@ -221,12 +217,12 @@ func (s *ReviewSuite) TestPostReview_BoundaryValues() {
 
 	for _, tc := range cases {
 		s.Run(tc.name, func() {
-			testhelper.CleanMongoCollection(s.T(), s.MongoDB.Collection("reviews"))
+			s.Database.CleanReviews(s.T())
 
 			w := s.postReview(tc.body)
 
 			s.Equal(http.StatusCreated, w.Code, "boundary value should be accepted for case %q", tc.name)
-			s.Equal(int64(1), s.dbReviewCount(), "one document should be persisted for case %q", tc.name)
+			s.Equal(int64(1), s.Database.CountReviews(s.T()), "one document should be persisted for case %q", tc.name)
 		})
 	}
 }
@@ -243,15 +239,12 @@ func (s *ReviewSuite) TestGetReviews_EmptyDatabase_ReturnsEmptyList() {
 
 func (s *ReviewSuite) TestGetReviews_ReturnsCorrectFields() {
 	now := time.Now().UTC()
-	coll := s.MongoDB.Collection("reviews")
 
 	body := validReview()
 
-	_, err := coll.InsertOne(
-		context.Background(),
-		bson.M{"author": body.Author, "rating": body.Rating, "message": body.Message, "createdAt": now},
-	)
-	s.Require().NoError(err)
+	s.Database.SeedReviews(s.T(), []database.TestReviewRecord{
+		{Author: body.Author, Rating: body.Rating, Message: body.Message, CreatedAt: now, UpdatedAt: now},
+	})
 
 	w := s.getReviews()
 	s.Equal(http.StatusOK, w.Code)
@@ -263,20 +256,18 @@ func (s *ReviewSuite) TestGetReviews_ReturnsCorrectFields() {
 	s.Equal(body.Author, r.Author)
 	s.Equal(body.Rating, r.Rating)
 	s.Equal(body.Message, r.Message)
-	s.NotEmpty(r.ID, "id should be populated (readOnly field)")
-	s.False(r.CreatedAt.IsZero(), "createdAt should be populated (readOnly field)")
+	s.NotEmpty(r.ID)
+	s.False(r.CreatedAt.IsZero())
 }
 
 func (s *ReviewSuite) TestGetReviews_ReturnsMostRecentFirst() {
 	now := time.Now().UTC()
-	coll := s.MongoDB.Collection("reviews")
 
-	_, err := coll.InsertMany(context.Background(), []any{
-		bson.M{"author": "Oldest", "rating": 3, "message": "", "createdAt": now.Add(-2 * time.Hour)},
-		bson.M{"author": "Middle", "rating": 3, "message": "", "createdAt": now.Add(-1 * time.Hour)},
-		bson.M{"author": "Newest", "rating": 3, "message": "", "createdAt": now},
+	s.Database.SeedReviews(s.T(), []database.TestReviewRecord{
+		{Author: "Oldest", Rating: 3, Message: "", CreatedAt: now.Add(-2 * time.Hour)},
+		{Author: "Middle", Rating: 3, Message: "", CreatedAt: now.Add(-1 * time.Hour)},
+		{Author: "Newest", Rating: 3, Message: "", CreatedAt: now},
 	})
-	s.Require().NoError(err)
 
 	w := s.getReviews()
 	s.Require().Equal(http.StatusOK, w.Code)
