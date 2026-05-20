@@ -137,8 +137,7 @@ make sqlc-gen         # Generate Go code from SQL queries
 make migrate-status   # Show database migration status
 make migrate-up       # Apply all pending migrations
 make migrate-down     # Roll back the latest migration
-make migrate-create name=migration_name
-# Create a new migration file
+make migrate-create name=migration_name # Create a new migration file
 ```
 
 ## TODO
